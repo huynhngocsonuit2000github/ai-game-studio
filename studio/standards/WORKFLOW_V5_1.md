@@ -26,6 +26,8 @@ Payload destinations may use `assets/`, `design/`, `production/`, `public/`, `re
 
 ## Receive, validate and review
 
+Before accepting a baseline, sync and reconcile the request with current main using the [V5.2 context protocol](CONTEXT_V5_2.md). The version 1 ZIP schema and validation rules below still apply.
+
 1. Check that the actual attachment bytes are readable in the execution workspace. If Codex exposes only the prompt or attachment metadata, use the prompt for work that can proceed. For file-dependent work, use an authorized manual transfer of the original ZIP to a private working directory outside the checkout, or run the validator in a local checkout with the ZIP. Record attachment access as unverified and the import as blocked until bytes are available. Keep ZIP and approval files outside the repository. No external upload service is needed.
 2. Save a local approval JSON from the external prompt or recorded decisions. Its exact keys are `packId`, `kind`, `gameId`, `baseCommit`, `approvedScope`, `requestedStages`, `deferredGates`, `publicationApproval`, `firstTask`, `archiveSha256` (SHA-256 of the supplied ZIP, provided or verified against trusted approval) and `evidence` (Producer authorization reference). Check scope and digest against the external approval, independently of archive contents.
 3. Run the validator with Python 3.11 or newer, Git, a clean target and a writable staging parent outside the checkout.

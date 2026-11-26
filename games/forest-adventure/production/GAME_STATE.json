@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "gameId": "forest-adventure",
+  "baselineCommit": "199fce3866c18d7b8267be10268ed9906079ca75",
+  "records": [
+    {
+      "id": "fernlight-trail",
+      "kind": "level",
+      "intendedBehavior": "Clear Fernlight Trail and unlock Willow Run through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "willow-run",
+      "kind": "level",
+      "intendedBehavior": "Clear Willow Run and unlock Lantern Oak through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "lantern-oak",
+      "kind": "level",
+      "intendedBehavior": "Clear Lantern Oak to trigger the campaign finale.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-progression",
+      "kind": "feature",
+      "intendedBehavior": "Save unlocked trails and best records, continue after reload, and replay unlocked trails.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "unknown",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+          "tests/trail.spec.ts"
+        ]
+      }
+    }
+  ],
+  "knownGaps": [
+    "D13 accepts campaign gameplay. The exact Producer-tested build and URL are unverified.",
+    "Live SHA and live gameplay could not be verified from this workspace because the Pages connection was blocked.",
+    "Formal release gates remain open in the QA report and S06 checkpoint."
+  ],
+  "save": {
+    "schema": "forest-adventure:save:v1",
+    "version": 1,
+    "evidence": [
+      "src/save.ts",
+      "tests/save.test.mjs"
+    ]
+  },
+  "publication": {
+    "rights": "cleared",
+    "preview": "approved",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md#d14",
+      "production/PUBLIC_PREVIEW_MEDIA.json",
+      "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27"
+    ]
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27"
+        ]
+      },
+      "http": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27"
+        ]
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  }
+}

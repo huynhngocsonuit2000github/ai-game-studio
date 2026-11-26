@@ -1,5 +1,23 @@
 # Studio progress
 
+## Studio V5.2 — Context-aware production
+
+- Baseline `199fce3866c18d7b8267be10268ed9906079ca75` includes V5.1 (PR #18) and the Forest Adventure public campaign preview (PR #19). Approved scope is Studio infrastructure and one Forest Adventure production state file. The V5.1 pack format, independent approval, rights checks, delivery loop and manual merge remain in force.
+- Version notes. Root instructions, standards and templates now require scoped main and deployment reconciliation. State v1 distinguishes merged source, normal public packaging, Producer acceptance and observed deployment. Feature briefs trace each approved requirement to its tested behavior. Pages CI checks adopted state, exercises public game browser suites and summarizes SHA/reachability evidence after deployment.
+- Changed areas are root instructions and README, Studio standards/templates/checkpoint, Pages workflow/runbook, state validator and regression fixtures, and `games/forest-adventure/production/GAME_STATE.json`. The registry and gameplay tree have no runtime changes.
+
+| Approved requirement | Expected result | Actual implementation and local evidence | Result | Deviations |
+| --- | --- | --- | --- | --- |
+| Request §1 and §6 | Sync existing-game work to main and preserve the pack and resume contracts | Context protocol and templates. All 12 pack fixture tests passed, including a stale ancestral replacement baseline. | PASS | Text upload was readable. Live ZIP attachment and import NOT_RUN. |
+| Request §2 and §3 | Versioned, evidence-backed state with truthful publication and acceptance | State validator and eight fixtures. Forest Adventure has three authored and three playable levels in the canonical Pages artifact. D13 accepts campaign gameplay with exact build identity unknown. D14 authorizes the public preview. | PASS | Live state is unverified. Existing formal release gates apply. |
+| Request §4 | Trace requirements and prove affected behavior on the normal public build | Updated feature brief and canonical assembly. Seven game browser cases passed, including fresh three-trail progression, Next Trail, v1 save/reload and older save compatibility, the finale, runtime assets and return to the library. Six Studio browser cases passed. | PASS | The campaign suite controls frame time with real keyboard input. |
+| Request §5 | Record deployed revision, URL and results without changing deploy authority | Existing Pages workflow writes a SHA-linked summary of revision and HTTP checks. Workflow YAML and multiline shell syntax passed locally. | BLOCKED | Live marker and site requests hit a proxy 403. Live browser gameplay NOT_RUN. No post-merge evidence exists for this batch. |
+| Acceptance | Preserve trusted base scope | Trusted checker and policy stay as on main. Seven existing Pages/scope regression fixtures passed. | BLOCKED | The unchanged trusted checker rejects the mixed Studio plus game-state batch unless main grants the exact candidate SHA and changed paths under the existing exception mechanism. |
+
+Local verification also passed frozen installation, ESLint, Studio and Forest Adventure typechecks, 35 Vitest tests, 19 game unit/registry tests, normal production build and Pages assembly/verification, and the read-only asset validation (58 files, three layouts). Chromium evidence was generated under `test-results/` and the game's `test-results/pages-browser/`. See [Forest Adventure QA](../../games/forest-adventure/reports/QA_REPORT.md) for existing stage and rights evidence.
+
+Resume from `studio/context-aware-production-v5-2` and its draft PR. Recover its exact candidate SHA and paths from the PR, reconcile with current main, and use the existing trusted scope process before review. Verify hosted checks when accessible. After any authorized manual merge, record the workflow's observed revision and run the public checklist against that SHA.
+
 ## Studio V5.1 — Workflow upgrade
 
 - Base: `ea96679a42732a3a260fa4d77b35c6a2ac8bd115`. Workflow-only scope covers exact-ID handoffs, pack validation, feature and import templates, autonomous delivery, and trusted scope regression. The game trees, canonical registry and published Pages route remain as recorded at the base. Forest Adventure is a public In Development preview.

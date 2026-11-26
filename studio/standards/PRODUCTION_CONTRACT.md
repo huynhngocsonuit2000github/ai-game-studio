@@ -1,4 +1,4 @@
-# Production contract — V5.1
+# Production contract — V5.2
 ## Repository and runtime
 Use strict TypeScript, reproducible lockfile, pinned toolchain, explicit scripts, independent game entry points and game-specific builds. Registry IDs are lowercase kebab-case and immutable; routes are derived from IDs, not arbitrary URLs. The portal and every 2D and 3D game must support GitHub Pages project-subpath hosting. Each game ships an independent static HTML entry point and loads only on navigation. Use relative URLs for scripts, styles, images, audio, models, textures, workers, WASM and decoder files. Provide a relative link back to the portal. Avoid server rewrites, backend dependencies and required custom response headers. Namespace localStorage by game ID and save schema. No backend or accounts unless approved. Shared packages are optional, versioned and tested. Do not commit node_modules, dist, caches, secrets or unlicensed assets. Large source assets need an approved storage strategy; do not assume unlimited GitHub storage or Pages capacity.
 
@@ -8,6 +8,8 @@ Every game includes design/GDD.md, ART_DIRECTION.md, TECH_DESIGN.md, AUDIO_PLAN.
 Execute an authorized batch through one scoped PR. Named stage batches can defer expressly identified intermediate Producer reviews and must validate every included stage in order. G0 design and G4 release require actual Producer decisions. G2 review can be deferred only when explicitly authorized for the named batch. Keep technical evidence, Producer playtest acceptance, and publication decisions distinct in the checkpoint.
 
 ## Handoff and feature lifecycle
+
+Follow the [V5.2 context and evidence protocol](CONTEXT_V5_2.md) before existing-game changes, import, resume or review. Use versioned game state on adoption and trace approved requirements to evidence from the canonical assembled Pages artifact.
 
 Scope prompt-only and ZIP tasks to the exact game ID. Follow the [V5.1 handoff](WORKFLOW_V5_1.md) for pack validation, provenance and rights. Use the [feature brief](../templates/FEATURE.md) to capture ID, baseline, version, save compatibility, regression, rollback and acceptance for features and expansions. Extend the existing checkpoint while preserving its previously accepted stage and release evidence.
 

@@ -37,6 +37,10 @@ jobs:
           STUDIO_PAGES_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
         run: pnpm assemble:pages
       - run: pnpm verify:pages
+      - name: Validate adopted game state against the production artifact
+        env:
+          STUDIO_PAGES_BASE_SHA: ${{ github.event.pull_request.base.sha || github.sha }}
+        run: node scripts/game-state.mjs
       - name: Build Forest Adventure for the local development catalog smoke test
         run: pnpm --filter @studio/forest-adventure build
       - name: Smoke-test the assembled site under the Pages project subpath
@@ -44,12 +48,23 @@ jobs:
           STUDIO_PAGES_BASE_PATH: /ai-game-studio/
           STUDIO_TEST_ASSEMBLED_PAGES: '1'
         run: pnpm exec playwright test
+      - name: Run public game browser suites against the assembled artifact
+        run: |
+          jq -r '.games[].id' deployment/dist/release-manifest.json > "$RUNNER_TEMP/public-game-ids"
+          while IFS= read -r game_id; do
+            config="games/${game_id}/playwright.config.ts"
+            if [[ -f "$config" ]]; then
+              STUDIO_TEST_ASSEMBLED_PAGES=1 pnpm exec playwright test --config "$config"
+            fi
+          done < "$RUNNER_TEMP/public-game-ids"
       - name: Upload browser evidence
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: browser-evidence
-          path: test-results/
+          path: |
+            test-results/
+            games/*/test-results/pages-browser/
           if-no-files-found: ignore
       - name: Stamp the verified commit
         if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -101,6 +116,12 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           url="${PAGE_URL%/}/"
+          {
+            printf '## Published Pages verification\n\n'
+            printf -- '- Expected commit: `%s`\n- URL: %s\n- Started (UTC): %s\n' "$GITHUB_SHA" "$url" "$(date -u +%FT%TZ)"
+            printf -- '- Live gameplay: NOT_RUN. Use the deployed checklist in deployment/README.md.\n'
+          } >> "$GITHUB_STEP_SUMMARY"
+          trap 'result=$?; if [[ $result != 0 ]]; then printf -- "- Published revision / HTTP checks: FAIL or incomplete. See job logs.\n" >> "$GITHUB_STEP_SUMMARY"; fi' EXIT
           status="$(curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors \
             --output /tmp/studio-pages-index.html --write-out '%{http_code}' "$url")"
           [[ "$status" == '200' ]]
@@ -109,6 +130,8 @@ jobs:
             if published_sha="$(curl --fail --silent --show-error --location --max-time 10 "${url}build-sha.txt?sha=${GITHUB_SHA}")" &&
               [[ "$published_sha" == "$GITHUB_SHA" ]]; then
               printf 'Verified %s returned HTTP %s and published commit %s.\n' "$url" "$status" "$published_sha"
+              printf -- '- Published revision: PASS (`%s`)\n- Portal HTTP: PASS (%s)\n' \
+                "$published_sha" "$status" >> "$GITHUB_STEP_SUMMARY"
               manifest="$(curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors "${url}release-manifest.json?sha=${GITHUB_SHA}")"
               entries="$(jq -er '.games | map(.entry) | join("\n")' <<< "$manifest")"
               while IFS= read -r entry; do
@@ -118,7 +141,9 @@ jobs:
                   --output /dev/null --write-out '%{http_code}' "${game_url}?sha=${GITHUB_SHA}")"
                 [[ "$game_status" == '200' ]]
                 printf 'Verified published game URL %s returned HTTP %s.\n' "$game_url" "$game_status"
+                printf -- '- Game HTTP: PASS (%s) %s\n' "$game_status" "$game_url" >> "$GITHUB_STEP_SUMMARY"
               done <<< "$entries"
+              printf -- '- Completed (UTC): %s\n' "$(date -u +%FT%TZ)" >> "$GITHUB_STEP_SUMMARY"
               exit 0
             fi
             sleep 5

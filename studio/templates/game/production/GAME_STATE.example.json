@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "gameId": "example-game",
+  "baselineCommit": "0000000000000000000000000000000000000000",
+  "records": [
+    {
+      "id": "first-level",
+      "kind": "level",
+      "intendedBehavior": "Describe the expected player outcome.",
+      "implementation": "planned",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  ],
+  "knownGaps": [],
+  "save": null,
+  "publication": {
+    "rights": "unknown",
+    "preview": "unknown",
+    "release": "unknown",
+    "evidence": []
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": null,
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "http": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  }
+}

@@ -154,6 +154,16 @@ class GamePackTests(unittest.TestCase):
         target.write_bytes(b"dirty")
         self.reject("clean checkout")
 
+    def test_rejects_delta_pinned_to_a_stale_ancestor(self):
+        target, revision = self.existing()
+        self.manifest["baseCommit"] = revision
+        self.manifest["approvedScope"]["replace"] = [TARGET]
+        target.write_bytes(b"newer tracked content")
+        current = self.commit()
+        self.git("merge-base", "--is-ancestor", revision, current)
+        self.reject("must match checkout HEAD")
+        self.assertEqual(target.read_bytes(), b"newer tracked content")
+
     def test_rejects_archive_paths_duplicates_case_aliases_and_symlinks(self):
         cases = [
             ("payload/../escape", stat.S_IFREG, "Unsafe path"),
