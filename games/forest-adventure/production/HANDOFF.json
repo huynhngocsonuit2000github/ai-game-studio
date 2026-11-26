@@ -7,11 +7,11 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "G0 three-level scope approved in D03. S00 candidate acceptance and D06 public redistribution approval pending.",
+    "producerReview": "G0 scope and S00 accepted. S01 local G1 candidate awaits Producer acceptance. Public preview rights remain pending.",
     "verticalSlice": "L1 Fernlight Trail",
     "campaignAfterGate": "L2 and L3 after G2"
   },
-  "currentStage": "S00",
+  "currentStage": "S01",
   "nextTask": null,
   "status": "candidate_ready",
   "commands": {
@@ -20,27 +20,27 @@
   },
   "checks": {
     "assetOffline": "PASS",
-    "registryContract": "PASS (draft only)",
-    "studioVerification": "PASS (portal, Pages and isolated onboarding fixtures)"
+    "registryContract": "PASS (development registration and local launch)",
+    "studioVerification": "PASS (portal, Pages and isolated onboarding fixtures)",
+    "s01Gameplay": "PASS (local Chromium and simulation checks Q01–Q08)"
   },
   "readNext": [
     "AGENTS.md",
     "production/PROGRESS.md",
-    "stages/S00/STAGE.md",
+    "stages/S01/STAGE.md",
     "START_CODEX.md"
   ],
   "requiredTests": [
     "S00 read-only manifest and provenance validation, registry draft and change-scope checks, Studio verification",
-    "S01 through S06 QA cases Q01\u2013Q17"
+    "S01 through S06 QA cases Q01–Q17"
   ],
   "missingRequiredRuntimeMedia": [],
   "unverified": [
-    "Forest Adventure Phaser import, gameplay and performance",
     "In-browser audio playback and audible loop quality",
-    "Forest Adventure playable preview and Pages deployment",
-    "Public redistribution approval"
+    "Representative device performance and Producer playtest",
+    "Public redistribution approval and public development preview"
   ],
-  "nextAction": "Review the S00 PR. Record Producer acceptance and obtain Studio registry and dependency authorization before S01.",
+  "nextAction": "Review the S01 PR, obtain the trusted Studio scope exception, and record the Producer’s acceptance before S02.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
@@ -126,6 +126,9 @@
     "games/forest-adventure/design/LEVELS.json",
     "games/forest-adventure/design/LEVEL_DESIGN.md",
     "games/forest-adventure/design/TECH_DESIGN.md",
+    "games/forest-adventure/index.html",
+    "games/forest-adventure/package.json",
+    "games/forest-adventure/playwright.config.ts",
     "games/forest-adventure/production/ASSET_MANIFEST.csv",
     "games/forest-adventure/production/DECISIONS.md",
     "games/forest-adventure/production/HANDOFF.json",
@@ -136,6 +139,11 @@
     "games/forest-adventure/reports/QA_REPORT.md",
     "games/forest-adventure/reports/asset-validation.json",
     "games/forest-adventure/reports/registry-validation.json",
+    "games/forest-adventure/src/level.ts",
+    "games/forest-adventure/src/main.ts",
+    "games/forest-adventure/src/session.ts",
+    "games/forest-adventure/src/style.css",
+    "games/forest-adventure/src/trail-scene.ts",
     "games/forest-adventure/stages/S00/STAGE.md",
     "games/forest-adventure/stages/S01/STAGE.md",
     "games/forest-adventure/stages/S02/STAGE.md",
@@ -143,13 +151,17 @@
     "games/forest-adventure/stages/S04/STAGE.md",
     "games/forest-adventure/stages/S05/STAGE.md",
     "games/forest-adventure/stages/S06/STAGE.md",
+    "games/forest-adventure/tests/session.test.mjs",
+    "games/forest-adventure/tests/trail.spec.ts",
     "games/forest-adventure/tools/README.md",
     "games/forest-adventure/tools/build_art.py",
     "games/forest-adventure/tools/build_audio.py",
     "games/forest-adventure/tools/build_reference.py",
     "games/forest-adventure/tools/validate_pack.py",
-    "games/forest-adventure/tools/validate_registry.test.mjs"
+    "games/forest-adventure/tools/validate_registry.test.mjs",
+    "games/forest-adventure/tsconfig.json",
+    "games/forest-adventure/vite.config.ts"
   ],
-  "baselineCommit": "4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf",
-  "candidateBranch": "prod/forest-adventure/s00"
+  "baselineCommit": "9b7ff0e9dd8e89b8d449587ed2cf197f303577ad",
+  "candidateBranch": "prod/forest-adventure/s01"
 }

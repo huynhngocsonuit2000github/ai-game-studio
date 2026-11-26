@@ -15,4 +15,4 @@ Dependency: Producer approval of exact folder, scope D03 and G0 pack. Player out
 | S00-1 | PASS | Verified the import base, the three-level G0 decision, all runtime hashes, asset source records and the draft registry record. [QA report](../../reports/QA_REPORT.md) |
 | S00-2 | PASS | Found the existing import on main, verified the Studio checks, and documented the authorization route for catalog registration, Phaser, the shared lockfile and candidate CI. [Studio integration](../../production/STUDIO_INTEGRATION.md) |
 
-S00 is `candidate_ready`. The candidate head appears on the S00 PR from `prod/forest-adventure/s00`. Producer acceptance is pending. Open prerequisites and the next authorized action are in the [checkpoint](../../production/PROGRESS.md).
+S00 is `accepted`. The Producer approved PR #10 candidate `ab9e6ccaea1e4de3434c6cdc7b7bfac55cf7a7fa` on 2026-11-26. Main contains it at merge commit `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad`. [Decision D07](../../production/DECISIONS.md)
