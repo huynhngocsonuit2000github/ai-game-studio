@@ -1,0 +1,115 @@
+{
+  "status": "PASS",
+  "baseCommit": "ea96679a42732a3a260fa4d77b35c6a2ac8bd115",
+  "runtime": "Node v24.22.3 with pinned Session source",
+  "expandedLevelCount": 13,
+  "legacyIds": [
+    "fernlight-trail",
+    "willow-run",
+    "lantern-oak"
+  ],
+  "newMaps": [
+    {
+      "levelId": "trail-01",
+      "ticks": 711,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-02",
+      "ticks": 774,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-03",
+      "ticks": 803,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-04",
+      "ticks": 797,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-05",
+      "ticks": 858,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-06",
+      "ticks": 1145,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-07",
+      "ticks": 1039,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-08",
+      "ticks": 1076,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-09",
+      "ticks": 1133,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    },
+    {
+      "levelId": "trail-10",
+      "ticks": 1243,
+      "seeds": 3,
+      "fireflies": 8,
+      "hearts": 3,
+      "deaths": 0,
+      "lanternTouched": true
+    }
+  ],
+  "coverage": "Deterministic 60 Hz input replay with unmodified repository Session source: each new map cleared, all 3 seeds and 8 fireflies, no hits or deaths.",
+  "otherChecks": {
+    "browser": "NOT_RUN",
+    "rendering": "NOT_RUN",
+    "playtestAndTuning": "NOT_RUN",
+    "publishing": "PENDING"
+  },
+  "legacySessionTests": {
+    "status": "PASS",
+    "count": 9,
+    "browser": "NOT_RUN"
+  }
+}

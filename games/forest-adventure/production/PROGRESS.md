@@ -26,3 +26,10 @@
 - The default game build now packages Fernlight Trail, Willow Run and Lantern Oak for the canonical public In Development entry. The build verifies the 50 emitted runtime exports against D14 and copies the existing MIT notices. The catalog entry, version, cover, milestone and status retain their recorded values.
 - Trail clear shows **Next Trail** after Fernlight and Willow, **Replay** starts a fresh attempt, and **Trail selection** opens the unlocked trails directly. **Continue** still starts the latest unlocked trail from its trailhead. The finale appears after the Lantern Oak clear.
 - Candidate verification uses the normal `deployment/dist` Pages output at `/ai-game-studio/`. The [QA report](../reports/QA_REPORT.md) records results and open checks. After manual merge, verify the published SHA and replay the live campaign. G4 and formal promotion remain open.
+
+## EXP-10-TRAILS expansion
+
+- Pack `EX10-FERN-D1` based on `199fce3866c18d7b8267be10268ed9906079ca75`. The Producer authorized ten additional trails as a public development preview using cleared existing media. See the [expansion checkpoint](../features/exp-10-trails/CHECKPOINT.md).
+- The first three trails passed deterministic and keyboard checks in an isolated build before expansion to the full batch.
+- Full expansion verification covers all 13 deterministic and keyboard clears on the assembled Pages build, including save migration and the 13th-trail completion. Asset hashes and both license notices are verified. The catalog status is 0.1.0 / In Development.
+- The implementation PR is the candidate checkpoint. Live verification follows a manual merge and a matching Pages build SHA. Producer acceptance is pending.

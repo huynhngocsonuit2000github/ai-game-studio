@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/session.test.mjs tests/save.test.mjs tools/validate_registry.test.mjs",
+    "test": "node --test tests/session.test.mjs tests/save.test.mjs tests/replays.test.mjs tools/validate_registry.test.mjs",
     "build": "vite build",
     "preview": "vite preview",
     "test:browser": "pnpm -w build && pnpm -w assemble:pages && pnpm -w verify:pages && playwright test --config playwright.config.ts",

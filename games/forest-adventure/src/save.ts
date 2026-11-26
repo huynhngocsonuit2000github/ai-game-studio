@@ -1,6 +1,7 @@
 import type { Result } from './session.ts';
 
 export const SAVE_KEY = 'forest-adventure:save:v1';
+export const EXPANSION_SAVE_KEY = 'forest-adventure:exp-10-trails:preview:v1';
 
 export interface Settings {
   master: number;
@@ -62,26 +63,50 @@ export function parseSave(raw: unknown, ids: readonly string[], reducedMotion: b
   };
 }
 
+function decode(raw: string | null): unknown {
+  try {
+    return raw === null ? undefined : JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+}
+
 export class SaveStore {
   readonly data: Save;
   private readonly storage: Storage | undefined;
+  private readonly key: string;
   unavailable = false;
 
-  constructor(ids: readonly string[], reducedMotion: boolean, getStorage = () => window.localStorage) {
-    let raw: string | null = null;
+  constructor(
+    ids: readonly string[],
+    reducedMotion: boolean,
+    getStorage = () => window.localStorage,
+    legacyIds?: readonly string[],
+  ) {
+    this.key = legacyIds ? EXPANSION_SAVE_KEY : SAVE_KEY;
+    let parsed: unknown;
+    let legacy: unknown;
     try {
       this.storage = getStorage();
-      raw = this.storage.getItem(SAVE_KEY);
+      parsed = decode(this.storage.getItem(this.key));
+      if (legacyIds && object(parsed).schemaVersion !== 1) {
+        legacy = decode(this.storage.getItem(SAVE_KEY));
+      }
     } catch {
       this.unavailable = true;
     }
-    let parsed: unknown;
-    try {
-      if (raw !== null) parsed = JSON.parse(raw);
-    } catch {
-      // A corrupt save starts with the default progress and settings.
+
+    if (legacyIds && object(parsed).schemaVersion !== 1) {
+      this.data = parseSave(legacy, legacyIds, reducedMotion);
+      const lastClassic = legacyIds.at(-1);
+      const firstNew = ids[legacyIds.length];
+      if (lastClassic && firstNew && this.data.bestByLevel[lastClassic]) {
+        this.data.unlockedLevelIds.push(firstNew);
+      }
+      if (object(legacy).schemaVersion === 1) this.persist();
+    } else {
+      this.data = parseSave(parsed, ids, reducedMotion);
     }
-    this.data = parseSave(parsed, ids, reducedMotion);
   }
 
   record(id: string, result: Result, nextId?: string) {
@@ -96,7 +121,7 @@ export class SaveStore {
 
   persist() {
     try {
-      this.storage?.setItem(SAVE_KEY, JSON.stringify(this.data));
+      this.storage?.setItem(this.key, JSON.stringify(this.data));
     } catch {
       this.unavailable = true;
     }
