@@ -14,7 +14,8 @@
     "typecheck": "tsc --project portal/tsconfig.json",
     "test": "vitest run",
     "build": "pnpm --filter @studio/portal build",
-    "test:browser": "pnpm build && playwright test"
+    "test:browser": "pnpm build && playwright test",
+    "verify:pages": "node scripts/verify-pages.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",

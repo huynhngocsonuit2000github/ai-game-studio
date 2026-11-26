@@ -1,0 +1,26 @@
+.fixture-controls {
+  display: flex;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+
+.fixture-controls button {
+  padding: 0.5rem 1rem;
+  font: inherit;
+}
+
+:root {
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #eaf0fb;
+  background: #101522;
+  color-scheme: dark;
+}
+
+main {
+  width: min(100% - 2rem, 44rem);
+  margin: 3rem auto;
+}
+
+a {
+  color: #9ee6d1;
+}

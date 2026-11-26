@@ -9,6 +9,9 @@ Commands: `Continue studio`, `Continue <game-id>`, `Status <game-id|studio>`, `F
 ## Context and isolation
 Read this file, registry/games.json, relevant sections of studio/skills/AI_GAME_STUDIO_SKILLS.md and studio/standards/PRODUCTION_CONTRACT.md. For studio read studio/production/PROGRESS.md and BACKLOG.md. For a game read games/<id>/AGENTS.md, production/PROGRESS.md, current stage and only referenced design/asset docs. Do not recursively dump all games or binary assets into context. Inspect git status and current branch; preserve user edits. Game tasks may modify only games/<id>/** and explicitly authorized registry fields for that ID. Shared, portal, CI, lockfile and infrastructure changes require a declared studio task or narrow explicit approval. Never modify other games. CI must enforce changed-path scope using trusted base/head diffs; PR metadata is not authorization by itself. Shared changes require dependent-game regression tests. Do not run concurrent writers on the same game or lockfile.
 
+## Hosting and release
+GitHub Pages is the primary host. Every 2D and 3D game must produce an independent static build and pass browser smoke tests under the Pages project subpath, including relative asset loading and return to the portal. GitHub Actions validates pull requests and automatically deploys the verified site after changes merge into `main`. Docker is optional. See the [production contract](studio/standards/PRODUCTION_CONTRACT.md) and [Pages runbook](deployment/README.md).
+
 ## Execution loop
 Applies to all Studio and game development tasks.
 
