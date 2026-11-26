@@ -1,5 +1,23 @@
 # Studio progress
 
+## M1-00 — Premium Game Library Dashboard
+
+- Status: candidate_ready. Producer review pending at the milestone boundary.
+- Main baseline: `25eefb4` (Foundation sign-off merged). Tested dashboard: `276b17d0d20fd1a75550205f9980f6b07f1869d7`.
+- Scope: responsive dark library, featured selection, card covers, search, category and 2D/3D filters, release and development states, game detail and launch, and a local preview for built milestones.
+- Registry: `registry/games.json` stays canonical and empty. Optional display metadata is backward-compatible. Public builds include released entries, and development candidates and test fixtures are excluded from the production bundle and artifact.
+- Next: Producer approval of M1-00. Game import requires separate approval of the pack and target.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Baseline | PASS (0) | Frozen setup, lint, strict typecheck, 35 automated tests, build, static assembly and five Chromium tests on main. |
+| Candidate workflow lint, lint, typecheck and automated tests | PASS (0 each) | 35 registry tests and six pipeline regressions. |
+| Production build, assembly and artifact checks | PASS (0 each) | Pages artifact preserved the production catalog and static layout. Runtime hero WebP is 147.84 kB. |
+| Chromium browser regression | PASS (0) | Five tests cover the empty Pages catalog, desktop/mobile populated cards, search and filters, covers, direct and invalid URLs, release playback and return, and local development playback with a registry milestone. |
+| Hosted deployment | NOT_RUN | Candidate remains on its PR branch. |
+
+Screenshots from the local browser runs: [desktop empty](evidence/m1-00/desktop-empty.webp), [mobile empty](evidence/m1-00/mobile-empty.webp), [desktop populated](evidence/m1-00/desktop-populated.webp), [mobile populated](evidence/m1-00/mobile-populated.webp), and [released detail](evidence/m1-00/game-detail.webp). Populated screenshots use disposable test entries. [Studio artwork source and runtime conversion](../../portal/artwork/README.md).
+
 ## M0-05 — Foundation Acceptance
 
 - Status: accepted. The Producer explicitly approved M0-05 and accepted the Studio Foundation on 2026-11-26.

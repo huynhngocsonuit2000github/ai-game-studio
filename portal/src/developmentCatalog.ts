@@ -10,5 +10,8 @@ export const developmentCatalog = {
     cover: null,
     version: '1.0.0',
     visibility: 'development',
+    categories: ['Puzzle'],
+    dimension: '2D',
+    milestone: 'Navigation smoke test',
   }],
 };

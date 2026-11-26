@@ -63,3 +63,24 @@ describe('registry', () => {
     expect(publicGames(parsed)).toEqual([game]);
   });
 });
+
+describe('library metadata', () => {
+  it('validates optional metadata without changing legacy entries', () => {
+    expect(parseRegistry(registry(game)).games[0]).toEqual(game);
+    const metadata = { categories: [' Puzzle ', 'Adventure'], dimension: '2D', featured: true, milestone: 'Playable slice' };
+    expect(parseRegistry(registry({ ...game, ...metadata })).games[0]).toMatchObject({
+      ...metadata,
+      categories: ['Puzzle', 'Adventure'],
+    });
+  });
+
+  it.each([
+    ['categories', ['Puzzle', 'puzzle']],
+    ['categories', [' ']],
+    ['dimension', '4D'],
+    ['featured', 'true'],
+    ['milestone', ''],
+  ])('rejects invalid %s', (field, value) => {
+    expect(() => parseRegistry(registry({ ...game, [field as string]: value }))).toThrow(field as string);
+  });
+});
