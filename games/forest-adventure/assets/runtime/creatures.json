@@ -1,0 +1,164 @@
+{
+  "frames": [
+    {
+      "filename": "beetle-a",
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.8888888888888888
+      }
+    },
+    {
+      "filename": "beetle-b",
+      "frame": {
+        "x": 172,
+        "y": 4,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.8888888888888888
+      }
+    },
+    {
+      "filename": "beetle-stomped",
+      "frame": {
+        "x": 340,
+        "y": 4,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.8888888888888888
+      }
+    },
+    {
+      "filename": "moth-up",
+      "frame": {
+        "x": 4,
+        "y": 156,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "moth-mid",
+      "frame": {
+        "x": 172,
+        "y": 156,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    {
+      "filename": "moth-down",
+      "frame": {
+        "x": 340,
+        "y": 156,
+        "w": 160,
+        "h": 144
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 160,
+        "h": 144
+      },
+      "sourceSize": {
+        "w": 160,
+        "h": 144
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  ],
+  "meta": {
+    "image": "creatures.png",
+    "size": {
+      "w": 504,
+      "h": 304
+    },
+    "scale": "1",
+    "format": "RGBA8888",
+    "gutterPixels": 4
+  }
+}

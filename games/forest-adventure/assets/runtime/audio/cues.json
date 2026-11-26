@@ -1,0 +1,193 @@
+{
+  "sampleRate": 44100,
+  "tracks": [
+    {
+      "id": "fernlight-theme",
+      "seconds": 35.55555555555556,
+      "channels": 2,
+      "peakDbfs": -4.15,
+      "variants": [
+        "fernlight-theme.ogg",
+        "fernlight-theme.m4a"
+      ],
+      "loop": true,
+      "loopSamples": [
+        0,
+        1568000
+      ]
+    },
+    {
+      "id": "lantern-oak-theme",
+      "seconds": 35.55555555555556,
+      "channels": 2,
+      "peakDbfs": -4.73,
+      "variants": [
+        "lantern-oak-theme.ogg",
+        "lantern-oak-theme.m4a"
+      ],
+      "loop": true,
+      "loopSamples": [
+        0,
+        1568000
+      ]
+    },
+    {
+      "id": "forest-ambience",
+      "seconds": 12.0,
+      "channels": 2,
+      "peakDbfs": -9.9,
+      "variants": [
+        "forest-ambience.ogg",
+        "forest-ambience.m4a"
+      ],
+      "loop": true,
+      "loopSamples": [
+        0,
+        529200
+      ]
+    },
+    {
+      "id": "jump",
+      "seconds": 0.22,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "jump.ogg",
+        "jump.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "land",
+      "seconds": 0.18,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "land.ogg",
+        "land.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "stomp",
+      "seconds": 0.23,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "stomp.ogg",
+        "stomp.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "hurt",
+      "seconds": 0.33,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "hurt.ogg",
+        "hurt.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "seed",
+      "seconds": 0.48,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "seed.ogg",
+        "seed.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "firefly",
+      "seconds": 0.27,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "firefly.ogg",
+        "firefly.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "lantern",
+      "seconds": 0.72,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "lantern.ogg",
+        "lantern.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "gate",
+      "seconds": 0.82,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "gate.ogg",
+        "gate.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "fall",
+      "seconds": 0.42,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "fall.ogg",
+        "fall.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "confirm",
+      "seconds": 0.23,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "confirm.ogg",
+        "confirm.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "hover",
+      "seconds": 0.14,
+      "channels": 1,
+      "peakDbfs": -10.75,
+      "variants": [
+        "hover.ogg",
+        "hover.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "resume",
+      "seconds": 0.32,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "resume.ogg",
+        "resume.m4a"
+      ],
+      "loop": false
+    },
+    {
+      "id": "clear",
+      "seconds": 1.42,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "variants": [
+        "clear.ogg",
+        "clear.m4a"
+      ],
+      "loop": false
+    }
+  ]
+}

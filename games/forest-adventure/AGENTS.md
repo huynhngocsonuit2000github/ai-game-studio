@@ -1,0 +1,10 @@
+# Forest Adventure 2D — Game agent instructions
+
+Follow the root Studio AGENTS.md and selectively read [Studio playbook](../../studio/skills/AI_GAME_STUDIO_SKILLS.md) and [production contract](../../studio/standards/PRODUCTION_CONTRACT.md). For a standalone pack start with [README](README.md), then the [checkpoint](production/PROGRESS.md).
+
+1. Resolve forest-adventure in the registry. In this game context, Continue production means resume the next eligible stage. Check parent contract, git status, current main SHA and approval records. Complete one stage only. Do not scan unrelated game trees or load binary files into model context.
+2. Read the current stage, relevant design sections and asset IDs. Keep existing IDs, input conventions, save schemas and previous game behavior stable. Earlier stage evidence can be reused by exact commit. A failed dependency blocks its downstream stage.
+3. Change only this directory plus narrowly authorized Studio paths. Registry, dependency lockfile, root CI and scope policy have their own authorization workflow. Report exact files and coordinates when seeking a Studio prerequisite. Never touch other games.
+4. Reuse runtime asset exports and data. Confirm frame anchors, relative URLs, loop playback, keyboard focus and a real run. Run the stage-specific tests and root-required checks. Inspect actual screenshots along the run. Allow at most three repeated repair attempts without new evidence.
+5. Save assets and update production/PROGRESS.md after each checkpoint. Record stage, task IDs, status, base/head SHA, test commands and results, asset changes with manifest entry, blockers, preview URL/artifact, and next exact action. Keep the candidate latest version recoverable when the environment ends.
+6. After stage acceptance checks pass, automatically push the dedicated branch and open or update its single scoped PR per the root instructions. Include evidence and how to play. Never auto-merge. Stop for Producer acceptance and record the exact approved candidate. Do not start L2/L3 until G2 approval.

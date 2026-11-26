@@ -1,0 +1,27 @@
+{
+  "pixelsPerUnit": 2,
+  "cellLogicalWidth": 32,
+  "solidVisualTopInsetLogical": 5,
+  "ground": {
+    "left": "ground-left",
+    "fill": [
+      "ground-middle",
+      "ground-middle-reverse"
+    ],
+    "right": "ground-right",
+    "body": "soil-body.webp",
+    "bodyLogicalTile": [
+      256,
+      80
+    ],
+    "bodyStartOffsetLogical": 35
+  },
+  "shortPlatform": {
+    "layout": [
+      "ground-left",
+      "ground-right"
+    ],
+    "minimumWidthLogical": 64
+  },
+  "guidance": "Align painted top around map top Y; collision rectangles stay independent."
+}

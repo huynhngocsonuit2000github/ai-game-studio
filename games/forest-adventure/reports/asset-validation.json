@@ -1,0 +1,375 @@
+{
+  "images": {
+    "pip.png": {
+      "dimensions": "800x600",
+      "frames": 11,
+      "frameDimensions": "192x192"
+    },
+    "creatures.png": {
+      "dimensions": "504x304",
+      "frames": 6,
+      "frameDimensions": "160x144"
+    },
+    "forest-props.png": {
+      "dimensions": "1056x528",
+      "frames": 7,
+      "frameDimensions": "256x256"
+    },
+    "terrain.png": {
+      "dimensions": "360x136",
+      "frames": 4,
+      "frameDimensions": "64x128"
+    },
+    "soil-body.webp": {
+      "dimensions": "512x160",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "forest-vfx.png": {
+      "dimensions": "624x416",
+      "frames": 24,
+      "frameDimensions": "96x96"
+    },
+    "hud.png": {
+      "dimensions": "544x272",
+      "frames": 8,
+      "frameDimensions": "128x128"
+    },
+    "ui-panel.png": {
+      "dimensions": "256x144",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "bg-fernlight.webp": {
+      "dimensions": "3072x1024",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "bg-near.webp": {
+      "dimensions": "3072x256",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "bg-willow.webp": {
+      "dimensions": "3072x1024",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "bg-oak.webp": {
+      "dimensions": "3072x1024",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "cover.webp": {
+      "dimensions": "1200x800",
+      "frames": "",
+      "frameDimensions": ""
+    },
+    "banner.webp": {
+      "dimensions": "1600x640",
+      "frames": "",
+      "frameDimensions": ""
+    }
+  },
+  "audio": {
+    "fernlight-theme.ogg": {
+      "codec": "vorbis",
+      "seconds": 35.5556,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -4.11,
+      "loopEdgeDelta": 0.0008
+    },
+    "fernlight-theme.m4a": {
+      "codec": "aac",
+      "seconds": 35.573,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -4.27,
+      "loopEdgeDelta": 0.00415
+    },
+    "lantern-oak-theme.ogg": {
+      "codec": "vorbis",
+      "seconds": 35.5556,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -4.71,
+      "loopEdgeDelta": 0.00184
+    },
+    "lantern-oak-theme.m4a": {
+      "codec": "aac",
+      "seconds": 35.573,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -4.69,
+      "loopEdgeDelta": 0.00335
+    },
+    "forest-ambience.ogg": {
+      "codec": "vorbis",
+      "seconds": 12.0,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -10.05,
+      "loopEdgeDelta": 2e-05
+    },
+    "forest-ambience.m4a": {
+      "codec": "aac",
+      "seconds": 12.0047,
+      "sampleRate": 44100,
+      "channels": 2,
+      "peakDbfs": -9.93,
+      "loopEdgeDelta": 9e-05
+    },
+    "jump.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.2171,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.15,
+      "loopEdgeDelta": null
+    },
+    "jump.m4a": {
+      "codec": "aac",
+      "seconds": 0.2322,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.09,
+      "loopEdgeDelta": null
+    },
+    "land.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.2017,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.06,
+      "loopEdgeDelta": null
+    },
+    "land.m4a": {
+      "codec": "aac",
+      "seconds": 0.1858,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -4.15,
+      "loopEdgeDelta": null
+    },
+    "stomp.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.2271,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.24,
+      "loopEdgeDelta": null
+    },
+    "stomp.m4a": {
+      "codec": "aac",
+      "seconds": 0.2322,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -5.79,
+      "loopEdgeDelta": null
+    },
+    "hurt.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.3271,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "loopEdgeDelta": null
+    },
+    "hurt.m4a": {
+      "codec": "aac",
+      "seconds": 0.3483,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -4.44,
+      "loopEdgeDelta": null
+    },
+    "seed.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.4771,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.06,
+      "loopEdgeDelta": null
+    },
+    "seed.m4a": {
+      "codec": "aac",
+      "seconds": 0.4876,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.24,
+      "loopEdgeDelta": null
+    },
+    "firefly.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.2671,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.13,
+      "loopEdgeDelta": null
+    },
+    "firefly.m4a": {
+      "codec": "aac",
+      "seconds": 0.2786,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.27,
+      "loopEdgeDelta": null
+    },
+    "lantern.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.7171,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.07,
+      "loopEdgeDelta": null
+    },
+    "lantern.m4a": {
+      "codec": "aac",
+      "seconds": 0.743,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.11,
+      "loopEdgeDelta": null
+    },
+    "gate.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.8171,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.11,
+      "loopEdgeDelta": null
+    },
+    "gate.m4a": {
+      "codec": "aac",
+      "seconds": 0.8359,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.29,
+      "loopEdgeDelta": null
+    },
+    "fall.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.4171,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.16,
+      "loopEdgeDelta": null
+    },
+    "fall.m4a": {
+      "codec": "aac",
+      "seconds": 0.4412,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.03,
+      "loopEdgeDelta": null
+    },
+    "confirm.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.2271,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.18,
+      "loopEdgeDelta": null
+    },
+    "confirm.m4a": {
+      "codec": "aac",
+      "seconds": 0.2322,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.22,
+      "loopEdgeDelta": null
+    },
+    "hover.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.1371,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -10.53,
+      "loopEdgeDelta": null
+    },
+    "hover.m4a": {
+      "codec": "aac",
+      "seconds": 0.1625,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -10.18,
+      "loopEdgeDelta": null
+    },
+    "resume.ogg": {
+      "codec": "vorbis",
+      "seconds": 0.3171,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.12,
+      "loopEdgeDelta": null
+    },
+    "resume.m4a": {
+      "codec": "aac",
+      "seconds": 0.3251,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.11,
+      "loopEdgeDelta": null
+    },
+    "clear.ogg": {
+      "codec": "vorbis",
+      "seconds": 1.42,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.19,
+      "loopEdgeDelta": null
+    },
+    "clear.m4a": {
+      "codec": "aac",
+      "seconds": 1.4396,
+      "sampleRate": 44100,
+      "channels": 1,
+      "peakDbfs": -6.2,
+      "loopEdgeDelta": null
+    }
+  },
+  "levels": [
+    {
+      "id": "fernlight-trail",
+      "width": 2688,
+      "floorGaps": [
+        96,
+        96,
+        128
+      ],
+      "seeds": 3,
+      "fireflies": 8
+    },
+    {
+      "id": "willow-run",
+      "width": 3712,
+      "floorGaps": [
+        96,
+        96,
+        110,
+        96,
+        112
+      ],
+      "seeds": 3,
+      "fireflies": 8
+    },
+    {
+      "id": "lantern-oak",
+      "width": 4192,
+      "floorGaps": [
+        96,
+        112,
+        128,
+        128,
+        128
+      ],
+      "seeds": 3,
+      "fireflies": 8
+    }
+  ],
+  "runtimeBytes": 5585284,
+  "runtimeFiles": 58,
+  "structure": "PASS",
+  "gameImportAndPlaytest": "NOT_RUN: game code belongs to Codex Cloud stages"
+}

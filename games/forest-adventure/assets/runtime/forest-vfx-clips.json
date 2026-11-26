@@ -1,0 +1,54 @@
+{
+  "seed-spark": {
+    "fps": 12,
+    "loop": false,
+    "yoyo": false,
+    "frames": [
+      "seed-spark-0",
+      "seed-spark-1",
+      "seed-spark-2",
+      "seed-spark-3",
+      "seed-spark-4",
+      "seed-spark-5"
+    ]
+  },
+  "dust": {
+    "fps": 12,
+    "loop": false,
+    "yoyo": false,
+    "frames": [
+      "dust-0",
+      "dust-1",
+      "dust-2",
+      "dust-3",
+      "dust-4",
+      "dust-5"
+    ]
+  },
+  "hit": {
+    "fps": 12,
+    "loop": false,
+    "yoyo": false,
+    "frames": [
+      "hit-0",
+      "hit-1",
+      "hit-2",
+      "hit-3",
+      "hit-4",
+      "hit-5"
+    ]
+  },
+  "firefly": {
+    "fps": 12,
+    "loop": true,
+    "yoyo": false,
+    "frames": [
+      "firefly-0",
+      "firefly-1",
+      "firefly-2",
+      "firefly-3",
+      "firefly-4",
+      "firefly-5"
+    ]
+  }
+}

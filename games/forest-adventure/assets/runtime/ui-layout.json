@@ -1,0 +1,14 @@
+{
+  "panel": {
+    "image": "ui-panel.png",
+    "slicesPx": [
+      34,
+      34,
+      34,
+      34
+    ],
+    "assetScale": 2
+  },
+  "iconScale": 0.25,
+  "text": "DOM text, local system fonts"
+}

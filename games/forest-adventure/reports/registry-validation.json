@@ -1,0 +1,15 @@
+{
+  "result": "PASS",
+  "repo": "huynhngocsonuit2000github/ai-game-studio",
+  "parser": "portal/src/registry.ts",
+  "checks": [
+    "draft parses with null entry",
+    "development excluded from public list",
+    "verified release entry parses",
+    "release without entry rejected",
+    "duplicate ID rejected",
+    "path traversal rejected"
+  ],
+  "scope": "Parser verification only; no actual build, preview or published game.",
+  "parserBlobSha": "f4c5e345ef2be6174c596942d6def0fb6760d142"
+}
