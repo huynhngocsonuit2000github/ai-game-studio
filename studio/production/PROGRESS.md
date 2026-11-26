@@ -1,11 +1,28 @@
 # Studio progress
 
+## M0-05 — Foundation Acceptance
+
+- Status: candidate_ready. Foundation acceptance awaits explicit Producer approval of M0-05.
+- Main baseline and verified public build: `cbd8998a82ee1f3af62866768d91d87059c18077`. Tested M0-05 source: `1fee88ce6ba0a14c244f2144117f73eb89a24a85`.
+- Scope: production revision verification, full foundation regression, [game onboarding](../../games/README.md), and isolated release-path testing.
+- Next eligible work after acceptance requires a separate Producer-approved game or import. No production game or registry entry was added.
+
+| Foundation requirement | Result | Evidence |
+| --- | --- | --- |
+| M0-01 — Toolchain, registry and portal | PASS (0) | Node 24.22.3, pnpm 11.25.0, frozen install, workflow lint, ESLint, strict typecheck, 29 registry tests and production build. |
+| M0-02 — Library, detail, and game navigation | PASS (0) | Chromium smoke under the Pages subpath, desktop and mobile catalog, invalid IDs, fixture launch and return. |
+| M0-03 — GitHub Pages and public revision | PASS | [Latest main deployment](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45842086513) logged HTTP 200 at the [public site](https://huynhngocsonuit2000github.github.io/ai-game-studio/) and exact commit `cbd8998`. Main-push deploy and build marker passed. Manual dispatch remains configured. |
+| M0-04 — Scope, assembly, and rollback | PASS (0) | Six pipeline regressions cover Git diff isolation, registry grants, complete artifact construction and local rollback preserving published routes. This PR activates the trusted scope check on current main. |
+| M0-05 — Independent onboarding | PASS (0) | Two synthetic packages installed and rebuilt independently in a temporary workspace. Both playable entries launched through the catalog and by direct URL, loaded their own assets, and returned to the portal. A third unpublished entry was absent from the artifact and catalog bundle. [Screenshot](evidence/m0-05/synthetic-catalog.png). |
+
+The final local run passed 35 automated tests and five Chromium tests, plus full-site assembly and artifact validation. The scratch install uses the normal frozen lockfile path with cache preference. Offline-only verification failed because the workspace lacked cached package metadata. The workspace proxy blocked a direct public HTTP request, so production status comes from GitHub's public-URL smoke check. Synthetic onboarding and rollback ran locally. No synthetic game was published.
+
 ## M0-04 — Pages assembly, scope and rollback
 
-- Status: candidate_ready.
+- Status: accepted.
 - Main baseline: `2dc6530e64af9ad36cd18adc5de9e97b9d5143d2`. Tested candidate: `30d272fc5a70d3e921b11cb5fd38b4aaa4918cd8`.
 - Scope: trusted base-branch scope enforcement, whole-site assembly, released catalog and static output verification, Pages project-subpath browser regression, and rollback rehearsal.
-- Approval: M0-04 awaits explicit Producer approval. Next eligible task after acceptance: M0-05.
+- Approval: Producer explicitly approved M0-04 on 2026-11-26. Approved public main revision: `cbd8998a82ee1f3af62866768d91d87059c18077`. Next task: M0-05.
 
 | Check | Result | Evidence |
 | --- | --- | --- |
@@ -15,7 +32,7 @@
 | `pnpm build`, `pnpm assemble:pages`, `pnpm verify:pages` | PASS (0 each) | `deployment/dist/` contains the portal, all three required relative assets, and the release manifest. The current registry is empty. |
 | Assembled-site browser regression | PASS (0) | Four Chromium tests under `/ai-game-studio/`, including catalog, unavailable ID and fixture launch/return. [Mobile screenshot](evidence/m0-04/assembled-site-mobile.png). |
 | Rollback rehearsal | PASS (0) | Published two synthetic local games, rejected a broken candidate while preserving the artifact, updated one game, and restored its prior release with both game routes intact. |
-| M0-04 live deploy, live rollback and trusted base scope workflow | NOT_RUN | This PR validates its assembled artifact. A production deploy requires authorized merge. The trusted scope workflow begins checking PRs once it exists on main. |
+| M0-04 live deploy | PASS | [Main deploy](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45842086513) verified HTTP 200 at `cbd8998` after PR #5 merged. Live rollback was NOT_RUN. |
 
 The independent workspace HTTP probe was blocked by the network proxy. The successful hosted run and Producer verification provide live M0-03 evidence. GitHub Actions and the local rollback rehearsal did not change the live site.
 
