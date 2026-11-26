@@ -1,11 +1,9 @@
 # Production checkpoint
 
-- Target forest-adventure · Pack 0.1.0 · 2026-11-26.
-- Current: S00 design/import candidate. G0 approval and import pending. No candidate commit or gameplay build.
-- Completed C01: nine source-art slots scoped, first five masters and base design saved.
-- Completed C02: nine masters, production image/atlas exports, 16 cues, three layout records, stage contracts and manifest saved.
-- Completed C03: file-level validation, static art compositions, registry checks and final package integrity confirmed. See reports/ and HANDOFF.json.
-- Evidence: 58 runtime files (5,585,284 bytes), 60 atlas frames, 32 encoded audio files, 3 static level checks, 6 registry assertions. Verified status is limited to offline data and media validation. Browser/Phaser import, audible loops, gameplay and Pages are stage checks.
-- Blockers: exact detailed design requires G0 Producer approval. Import scope and shared lockfile/CI authorization must be confirmed under the master contract. No live playable preview is available until S01. Public rights and visibility are pending.
-- Next exact task: S00-1 after Producer approves D03 and authorizes import to games/forest-adventure/. Run S00 in Codex Cloud with START_CODEX.md.
-- Resume: Continue production here or Continue production: forest-adventure in the monorepo. Read the newest checkpoint first. Record base/head SHA, changed tasks and assets, actions and evidence, current blockers, Producer decision and the next task. Reuse stage branch/PR; preserve assets and avoid redoing accepted stages.
+- Target `forest-adventure`, pack 0.1.0. S00-1 and S00-2 are `candidate_ready` for Producer review, 2026-11-26.
+- Base and asset revision `4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf` from `origin/main`. PR #9 already imported the pack. Candidate branch `prod/forest-adventure/s00`. Use the PR head for the exact candidate SHA.
+- G0 scope approval recorded in [D03](DECISIONS.md). Initial release is Fernlight Trail, Willow Run and Lantern Oak. S00 candidate acceptance and D06 public redistribution approval are pending.
+- C01–C03 supplied the design, source masters, runtime exports and offline evidence. S00 reused all supplied media. The checked-in manifest hashes, sizes and source paths match all 58 runtime files (5,585,284 bytes). See the [QA report](../reports/QA_REPORT.md) for commands, versions and results.
+- The Studio parser accepts the development draft with null entry and cover. Live catalog registration requires a separately reviewed Studio registry change. The shared lockfile, Phaser version and candidate CI route are [documented](STUDIO_INTEGRATION.md).
+- [Static art targets](../assets/concept/README.md) are the S00 preview. S01 is the first playable stage.
+- Next action is Producer review of the S00 PR. Before starting S01, confirm S00 acceptance and get the Studio approvals documented above. S01 work has not started.

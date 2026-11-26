@@ -3,13 +3,16 @@
   "repo": "huynhngocsonuit2000github/ai-game-studio",
   "parser": "portal/src/registry.ts",
   "checks": [
-    "draft parses with null entry",
-    "development excluded from public list",
-    "verified release entry parses",
-    "release without entry rejected",
-    "duplicate ID rejected",
-    "path traversal rejected"
+    "development draft has null entry and cover",
+    "development draft is visible only in the development catalog",
+    "parser accepts the proposed project-relative release paths",
+    "release without entry is rejected",
+    "duplicate ID is rejected",
+    "traversal in entry or cover is rejected",
+    "trusted scope checker rejects an ordinary game PR adding the registry ID"
   ],
-  "scope": "Parser verification only; no actual build, preview or published game.",
-  "parserBlobSha": "f4c5e345ef2be6174c596942d6def0fb6760d142"
+  "scope": "Draft and trusted checker verification. The canonical registry contains no Forest Adventure entry.",
+  "parserBlobSha": "f4c5e345ef2be6174c596942d6def0fb6760d142",
+  "baseCommit": "4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf",
+  "command": "node --test games/forest-adventure/tools/validate_registry.test.mjs"
 }
