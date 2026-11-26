@@ -28,7 +28,7 @@
     "s04Campaign": "PASS (all three trails and 24 fireflies, final ending, replay and Continue)",
     "pages": "PASS (public assembly and project-subpath smoke)",
     "s05Polish": "PASS (seven Chromium campaign checks, all trails and 24 fireflies)",
-    "s05Compatibility": "PARTIAL (Chromium suite and Firefox ESR smoke; target laptop and full matrix open)",
+    "s05Compatibility": "PARTIAL (Chromium, Chrome and Edge suites and Firefox ESR smoke; target laptop and full matrix open)",
     "s06Pages": "PASS locally (public entries preserved, existing preview media cleared, rollback baseline rebuilt)",
     "s06LiveRelease": "BLOCKED (rights, trusted scope authorization, Producer acceptance and authorized merge)"
   },
@@ -46,7 +46,7 @@
   "missingRequiredRuntimeMedia": [],
   "unverified": [
     "Five unaided first-time playtests and manual Producer acceptance",
-    "Audible loop seams and complete desktop Firefox, Edge and Safari coverage",
+    "Audible loop seams and full Firefox and Safari coverage",
     "Representative integrated-device measurements",
     "Public distribution clearance for campaign media and trusted registry authorization",
     "Live candidate publication and smoke test after authorized merge"

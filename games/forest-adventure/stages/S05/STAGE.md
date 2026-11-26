@@ -11,4 +11,4 @@ Dependency: S04 accepted. Player outcome: consistently usable browser release ca
 
 S05-1 completed the campaign polish under D12 and exercised the progression, defeat recovery, victory, restart and save flows. The pack specifies lantern or trailhead recovery with no lives limit. Gameplay scenarios cover all three trails, their existing geometry and eight optional fireflies per trail.
 
-S05-2 passed the Cloud Chromium budgets and produced three-trail captures. Full Firefox/Edge/Safari coverage, audible loop seams, target laptop measurements and unaided first-time playtests are open. See the [QA report](../../reports/QA_REPORT.md) for the candidate evidence and open checks.
+S05-2 passed the Cloud Chromium budgets and produced three-trail captures. The Chrome and Edge campaign suites passed. Full Firefox and Safari coverage, audible loop seams, target laptop measurements and unaided first-time playtests are open. See the [QA report](../../reports/QA_REPORT.md) for the candidate evidence and open checks.
