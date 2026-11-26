@@ -1,6 +1,6 @@
 # Onboard a game
 
-Start after Producer approval of the Foundation and the specific game scope or import. Use the [game template](../studio/templates/game/) and [import checklist](../studio/templates/IMPORT_CHECKLIST.md). Assign an immutable lowercase kebab-case ID and keep the package, sources, assets, tests, and production records under `games/<id>/`.
+Start after Producer approval of the Foundation and the specific game scope or import. Use the [V5.1 handoff](../studio/standards/WORKFLOW_V5_1.md), [game template](../studio/templates/game/) and [import checklist](../studio/templates/IMPORT_CHECKLIST.md). Assign an immutable lowercase kebab-case ID and keep the package, sources, assets, tests, and production records under `games/<id>/`.
 
 ## Develop and build independently
 

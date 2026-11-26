@@ -5,8 +5,9 @@ import { parseRegistry } from '../portal/src/registry.ts';
 
 const registry = 'registry/games.json';
 const editableFields = ['title', 'description', 'engine', 'version', 'cover'];
+const privateMetadata = ['title', 'description', 'version'];
 
-export function validateScope(paths, readBase, readHead, policy = {}, head = '') {
+export function validateScope(paths, readBase, readHead, policy = {}, head = '', readTrustedBase) {
   const approvedHeads = policy.approvedHeads ?? {};
   if (Object.hasOwn(approvedHeads, head)) {
     const approvedPaths = approvedHeads[head];
@@ -38,7 +39,7 @@ export function validateScope(paths, readBase, readHead, policy = {}, head = '')
     const fields = Object.hasOwn(grants, id) ? grants[id] : [];
     const priorRegistry = JSON.parse(readBase(registry));
     const nextRegistry = JSON.parse(readHead(registry));
-    parseRegistry(priorRegistry);
+    const parsedPrior = parseRegistry(priorRegistry);
     parseRegistry(nextRegistry);
     const { games: prior, ...priorRoot } = priorRegistry;
     const { games: next, ...nextRoot } = nextRegistry;
@@ -54,9 +55,14 @@ export function validateScope(paths, readBase, readHead, policy = {}, head = '')
     )) {
       throw new Error('Game PR registry edits must preserve the game ID and all other entries.');
     }
+    const currentRegistry = readTrustedBase ? parseRegistry(JSON.parse(readTrustedBase(registry))) : parsedPrior;
+    const onTrustedBase = currentRegistry.games.find((game) => game.id === id);
+    const staysPrivate = ['planned', 'development'].includes(before.status) &&
+      [before, after, onTrustedBase].every((game) => game?.visibility === 'development' && game.status === before.status);
     for (const field of new Set([...Object.keys(before), ...Object.keys(after)])) {
+      const standingGrant = staysPrivate && privateMetadata.includes(field);
       if (!isDeepStrictEqual(before[field], after[field]) &&
-          (!editableFields.includes(field) || !fields.includes(field))) {
+          !standingGrant && (!editableFields.includes(field) || !fields.includes(field))) {
         throw new Error(`Registry field is outside the trusted grant: ${id}.${field}`);
       }
     }
@@ -72,8 +78,13 @@ if (process.argv[1] && import.meta.main) {
   const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
   const fork = git('merge-base', base, head).trim();
   const paths = git('diff', '--name-only', '--no-renames', '-z', fork, head).split('\0').filter(Boolean);
-  const readAt = (sha) => (path) => git('show', `${sha}:${path}`);
+  const readAt = (sha) => (path) => {
+    if (!git('ls-tree', sha, '--', path).startsWith('100644 blob ')) {
+      throw new Error(`Expected a regular, nonexecutable file: ${path}`);
+    }
+    return git('show', `${sha}:${path}`);
+  };
   const policy = JSON.parse(readAt(base)('studio/production/registry-scope.json'));
-  const scope = validateScope(paths, readAt(fork), readAt(head), policy, head);
+  const scope = validateScope(paths, readAt(fork), readAt(head), policy, head, fork === base ? undefined : readAt(base));
   process.stdout.write(`Verified ${scope} scope across ${paths.length} changed paths.\n`);
 }

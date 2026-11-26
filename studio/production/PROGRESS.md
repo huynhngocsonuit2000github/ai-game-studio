@@ -1,5 +1,28 @@
 # Studio progress
 
+## Studio V5.1 — Workflow upgrade
+
+- Base: `ea96679a42732a3a260fa4d77b35c6a2ac8bd115`. Workflow-only scope covers exact-ID handoffs, pack validation, feature and import templates, autonomous delivery, and trusted scope regression. The game trees, canonical registry and published Pages route remain as recorded at the base. Forest Adventure is a public In Development preview.
+- Use the [V5.1 handoff](../standards/WORKFLOW_V5_1.md) for new-game and delta ZIPs, prompt-only fixes and resume. The validator writes a private before/after review and provenance receipt. Apply only the reviewed diff after checking rights, approval and checkout state.
+- Scope: standing edits to title, description and version apply only to the same planned or development entry that remains private on the trusted base and candidate. A stale private branch loses the standing grant if main makes the entry public. Public entries and other fields retain Studio review or the existing field grant. Mixed lockfile, workflow and shared changes still require a separate trusted exception. The S01 historical exception still passes for its original 23 paths.
+- Attachment verification: the task supplied a readable text upload. ZIP attachment access and a live import were NOT_RUN. The local deterministic ZIP tests passed. Use the documented manual transfer fallback when attachment bytes are unavailable.
+- Next: review the workflow PR and its checks. Human merge is required. This upgrade carries no game or playtest approvals.
+
+| Local check | Result |
+| --- | --- |
+| Frozen setup, workflow lint, ESLint, portal and Forest Adventure typechecks | PASS |
+| Portal, scope and Pages unit/regression tests | PASS (35 registry and 7 pipeline tests) |
+| Forest Adventure unit tests | PASS (19) |
+| ZIP fixture and validator tests | PASS (11) |
+| Production builds, Pages assembly and artifact verification | PASS. The release manifest resolves `games/forest-adventure/index.html` at version `0.1.0`. |
+| Chromium project-subpath smoke | PASS (6). Covers the portal, public Forest Adventure preview, local game and synthetic onboarding. |
+| Chromium Forest Adventure S01 | PASS (2). Covers catalog launch/return, direct entry, keyboard play, pause, resize and restart. |
+| Chromium Forest Adventure private campaign | PASS (7). Covers the same routes plus saved progress, audio and asset recovery in the local-only build. |
+
+Local runs used pinned Node and pnpm and system Chromium 156.0.8078.79. Live deployment is outside this PR and follows verified main after a human merge.
+
+The first hosted Pages check caught a wait on the public-preview cover selector while the catalog still showed the featured and result images. The smoke test now waits for the game detail view and checks its cover. [Initial hosted run](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45907678208)
+
 ## M1-00 — Premium Game Library Dashboard
 
 - Status: candidate_ready. Producer review pending at the milestone boundary.

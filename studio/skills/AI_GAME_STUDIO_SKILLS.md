@@ -1,4 +1,4 @@
-# AI Game Studio — Skills Playbook v1.0
+# AI Game Studio — Skills Playbook V5.1
 Reusable reference for ChatGPT Project Game and Work. These are documented workflows, not installed executable plugins. Select the relevant sections by task. For any game, maintain a single source of truth and avoid duplicated inconsistent plans.
 
 ## S01 — Game design
@@ -36,14 +36,14 @@ Reusable reference for ChatGPT Project Game and Work. These are documented workf
 **Trigger:** approved concept or scope change. **Output:** PRODUCTION_PLAN.md, BACKLOG.md, PROGRESS.md.
 - Milestones: M0 design and setup; M1 playable prototype; M2 polished vertical slice; M3 core systems; M4 content; M5 optional multiplayer; M6 polish/performance; M7 release. Collapse or split as needed. Each milestone must result in a runnable increment or a clearly justified design deliverable.
 - Backlog fields: ID, player outcome, priority, milestone, dependencies, acceptance tests, required assets, status. Use ready/in_progress/blocked/review/done; only done after evidence. Prioritize critical path, batch independent work, minimize unnecessary sequential stages.
-- Record decisions, current commit, completed IDs, evidence, failures, remaining work and next task in PROGRESS.md. Define scope cuts, budget and stop conditions. No invented completion percentages or time promises. Review after vertical slice before multiplying levels/assets.
+- Record decisions, current commit, completed IDs, evidence, failures, remaining work and next task in PROGRESS.md. Record any authorized named stage batch and its deferred reviews. Review after the vertical slice before multiplying levels/assets unless G2 is explicitly deferred for that batch.
 
 ## S07 — Game development
 **Trigger:** implementation, bug fix, refactor. **Output:** source changes, tests, progress and PR summary.
 - Read AGENTS.md, game docs and existing code; inspect working tree; run baseline checks. Select a coherent backlog slice. Preserve existing behavior and avoid unrelated rewrites. Implement real gameplay interactions and game states rather than static mock UI.
 - Work in small testable increments; integrate assets early; use meaningful animation, sound and feedback. Ensure keyboard/mouse and any explicitly supported touch/gamepad controls, resize, pause, restart and save behavior. Use strict typing, bounded resources, deterministic test hooks and seeded randomness when relevant.
 - Run actual lint/typecheck/unit/build/browser tests as configured. Capture commands, exit results and screenshots. If dependencies or browser tooling unavailable, mark blocked and give reproducible commands. Never fabricate logs or claim passing checks from code inspection alone.
-- Limit repair attempts to three per repeated failure unless new evidence warrants another attempt; document root cause and unblock path. Commit or PR only with authorized access; keep secrets outside repository and browser bundle.
+- Limit repair attempts to three per repeated failure unless new evidence warrants another attempt. Carry authorized work through checkpoint, commit, push and one scoped PR when access permits. Leave an exact checkpoint and draft PR when blocked and supported.
 
 ## S08 — Game QA and playtest
 **Trigger:** prototype, milestone, feedback, regression. **Output:** QA_REPORT.md and issue list.
@@ -56,7 +56,7 @@ Reusable reference for ChatGPT Project Game and Work. These are documented workf
 **Trigger:** milestone completion or release. **Output:** gate decision with evidence.
 - G0: GDD, scope, technical feasibility, art target, asset rights and acceptance criteria approved or assumptions explicitly accepted.
 - G1: prototype core loop playable end-to-end, no core blockers; temporary assets allowed only if labeled.
-- G2: one polished representative level, final-quality art direction, UI/audio/animation/feedback, core gameplay verified, actual screenshot and playtest. Human approval before scaling content unless explicitly waived.
+- G2: one polished representative level, final-quality art direction, UI/audio/animation/feedback, core gameplay verified, actual screenshot and playtest. Human approval before scaling content unless the Producer explicitly defers G2 for a named batch.
 - G3: required features and content covered by traceable tests, no unapproved placeholders, no P0/P1 open; test evidence exists.
 - G4: clean build, deployed smoke test, browser compatibility and measured performance within agreed budgets or approved exceptions, licenses/credits, save/restart and rollback path. Release requires human approval.
 - Gate result: PASS / FAIL / BLOCKED / NOT_RUN; include commit, criteria, evidence and exceptions. Never convert untested into PASS. A successful build is not proof of visual quality or fun. Failed gates produce concrete issues and bounded remediation.
