@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#101f1b">
     <link rel="icon" href="./cover.webp">
-    <title>Forest Adventure · Fernlight Trail</title>
+    <title>Forest Adventure</title>
   </head>
   <body>
     <main id="game" aria-label="Forest Adventure">
       <div id="world" aria-hidden="true"></div>
       <div id="hud" hidden>
         <div class="counts">
+          <span id="chapter-name"></span>
           <span id="hearts"></span>
           <span id="seeds"></span>
           <span id="fireflies"></span>
@@ -20,6 +21,7 @@
         <p id="hint"></p>
       </div>
       <div id="playfield" role="region" tabindex="-1" aria-label="Fernlight Trail playfield"></div>
+      <p id="keyboard-note">Play with a keyboard in landscape.</p>
       <div id="notice" class="sr-only" role="status"></div>
       <dialog id="panel" aria-labelledby="panel-title"></dialog>
       <noscript>Forest Adventure needs JavaScript. <a href="../../#/">Back to Studio</a></noscript>

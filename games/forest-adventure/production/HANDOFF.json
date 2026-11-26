@@ -7,11 +7,11 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "G0 scope and S00 accepted. S01 visual assets cleared for the public development preview. S01 awaits Producer playtest and acceptance.",
+    "producerReview": "G0, S00 and deployed S01 accepted. D11 authorizes combined implementation and review of S02\u2013S04.",
     "verticalSlice": "L1 Fernlight Trail",
-    "campaignAfterGate": "L2 and L3 after G2"
+    "campaignAfterGate": "L2 and L3 implemented in the local campaign candidate under D11."
   },
-  "currentStage": "S01",
+  "currentStage": "S04",
   "nextTask": null,
   "status": "candidate_ready",
   "commands": {
@@ -22,25 +22,30 @@
     "assetOffline": "PASS",
     "registryContract": "PASS (development registration and local launch)",
     "studioVerification": "PASS (portal, Pages and isolated onboarding fixtures)",
-    "s01Gameplay": "PASS (local Chromium and simulation checks Q01–Q08)"
+    "s01Gameplay": "PASS (local Chromium and simulation checks Q01\u2013Q08)",
+    "s02VerticalSlice": "PASS (internal Fernlight browser clear, recovery, gate and restart before expansion)",
+    "s03AudioAndSettings": "PASS (automated Chromium unlock, loop points, pause, mute, resume and fallback request)",
+    "s04Campaign": "PASS (all three trails and 24 fireflies, final ending, replay and Continue)",
+    "pages": "PASS (public assembly and project-subpath smoke)"
   },
   "readNext": [
     "AGENTS.md",
     "production/PROGRESS.md",
-    "stages/S01/STAGE.md",
-    "START_CODEX.md"
+    "stages/S04/STAGE.md",
+    "reports/QA_REPORT.md"
   ],
   "requiredTests": [
     "S00 read-only manifest and provenance validation, registry draft and change-scope checks, Studio verification",
-    "S01 through S06 QA cases Q01–Q17"
+    "S01 through S06 QA cases Q01\u2013Q17"
   ],
   "missingRequiredRuntimeMedia": [],
   "unverified": [
-    "In-browser audio playback and audible loop quality",
-    "Representative device performance and Producer playtest",
-    "Live public development preview"
+    "Five unaided first-time playtests and combined Producer acceptance",
+    "Audible loop seams across supported browsers",
+    "Representative integrated-device measurements",
+    "Public distribution rights for later-stage media"
   ],
-  "nextAction": "Merge the S01 rights record before the Studio publishing PR. Verify the deployed preview, then obtain Producer playtest and acceptance before S02.",
+  "nextAction": "Review the combined campaign candidate. The QA report gives the local game and browser suite commands.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
@@ -139,8 +144,12 @@
     "games/forest-adventure/reports/QA_REPORT.md",
     "games/forest-adventure/reports/asset-validation.json",
     "games/forest-adventure/reports/registry-validation.json",
+    "games/forest-adventure/src/audio.ts",
     "games/forest-adventure/src/level.ts",
     "games/forest-adventure/src/main.ts",
+    "games/forest-adventure/src/preview-art.ts",
+    "games/forest-adventure/src/preview.ts",
+    "games/forest-adventure/src/save.ts",
     "games/forest-adventure/src/session.ts",
     "games/forest-adventure/src/style.css",
     "games/forest-adventure/src/trail-scene.ts",
@@ -151,17 +160,21 @@
     "games/forest-adventure/stages/S04/STAGE.md",
     "games/forest-adventure/stages/S05/STAGE.md",
     "games/forest-adventure/stages/S06/STAGE.md",
+    "games/forest-adventure/tests/campaign-routes.ts",
+    "games/forest-adventure/tests/candidate.spec.ts",
+    "games/forest-adventure/tests/save.test.mjs",
     "games/forest-adventure/tests/session.test.mjs",
     "games/forest-adventure/tests/trail.spec.ts",
     "games/forest-adventure/tools/README.md",
     "games/forest-adventure/tools/build_art.py",
     "games/forest-adventure/tools/build_audio.py",
     "games/forest-adventure/tools/build_reference.py",
+    "games/forest-adventure/tools/prepare_campaign.mjs",
     "games/forest-adventure/tools/validate_pack.py",
     "games/forest-adventure/tools/validate_registry.test.mjs",
     "games/forest-adventure/tsconfig.json",
     "games/forest-adventure/vite.config.ts"
   ],
-  "baselineCommit": "9b7ff0e9dd8e89b8d449587ed2cf197f303577ad",
-  "candidateBranch": "prod/forest-adventure/s01"
+  "baselineCommit": "fbb9e318b094562b92f42c466ecb1d50b0884d52",
+  "candidateBranch": "prod/forest-adventure/s02-s04"
 }

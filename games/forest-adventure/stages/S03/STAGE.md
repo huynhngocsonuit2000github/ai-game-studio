@@ -6,3 +6,7 @@ Dependency: S02 accepted. Player outcome: one polished complete L1 with audio an
 - Assets: cues.json, both codec variants, visual QA evidence from S02 and changed assets.
 - Acceptance: Q01–Q14 pass where applicable, no P0/P1, G2 acceptance targets documented in LEVEL_DESIGN.md. Producer signs exact commit before L2/L3.
 - Preview: play through a link or locally served package with exact SHA. Automatically create/update one PR and stop for G2 approval.
+
+## Combined candidate checkpoint
+
+S03-1 integrated the original score, ambience and effects with persistent mixer and motion settings. Chromium verified Play unlock, loop configuration, pause, mute, resume and codec fallback requests. S03-2 reran the Fernlight movement, combat, recovery and full keyboard route. Listening on supported browsers, integrated-device results and five unaided first-time runs remain pending. D11 deferred the intermediate Producer gate for this combined implementation. [Combined QA report](../../reports/QA_REPORT.md)

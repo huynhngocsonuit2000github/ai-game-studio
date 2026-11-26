@@ -63,3 +63,56 @@ button:focus-visible, a:focus-visible { outline: 3px solid #fff3d5; outline-offs
   #hud { gap: .3rem; inset-inline: 8px; }
   #pause { padding: .32rem .44rem; font-size: .74rem; }
 }
+
+#hud {
+  inset: max(14px, calc((100% - 56.25vw) / 2 + 14px), env(safe-area-inset-top))
+    max(14px, calc((100% - 177.77dvh) / 2 + 14px), env(safe-area-inset-right)) auto
+    max(14px, calc((100% - 177.77dvh) / 2 + 14px), env(safe-area-inset-left));
+}
+.counts span, #hint:not(:empty), #pause {
+  background-color: #102b23;
+  box-shadow: 0 3px 10px #06161152;
+}
+#hearts, #seeds { display: inline-flex; align-items: center; }
+#seeds { --icon-x: -69px; }
+#hearts.empty { --icon-x: -35px; }
+#seeds.empty { --icon-x: -103px; }
+#hearts::before, #seeds::before {
+  content: '';
+  width: 28px;
+  height: 26px;
+  margin: -.3rem .28rem -.3rem -.4rem;
+  background: var(--hud-art, none) var(--icon-x, -1px) -4px / 136px 68px no-repeat;
+}
+:root:not([style*="--hud-art"]) :is(#hearts, #seeds)::before { display: none; }
+dialog {
+  max-height: calc(100% - 28px);
+  background: linear-gradient(145deg, #193e31, #10291f);
+  border-image: var(--panel-art, none) 34 / 17px stretch;
+}
+button:hover { background-color: #ffdf9c; }
+#keyboard-note { display: none; }
+@media (max-width: 600px) and (orientation: portrait) {
+  #keyboard-note {
+    display: block;
+    position: absolute;
+    inset: auto 1rem 0;
+    color: #fff3d5;
+    text-align: center;
+  }
+}
+
+.settings { display: grid; gap: .55rem; }
+.settings label { display: flex; align-items: center; gap: .6rem; font-weight: 650; }
+.settings input { accent-color: #eed095; }
+.settings input[type="range"] { margin-left: auto; width: min(40%, 10rem); }
+.settings label span { min-width: 3ch; text-align: right; }
+.settings input:focus-visible { outline: 2px solid #fff3d5; outline-offset: 2px; }
+.storage-note { color: #f4ca7f; font-size: .875rem; }
+
+#chapter-name { color: #ffe2a7; font-family: Georgia, serif; }
+.record { color: #ffdfa2; }
+@media (max-width: 600px) {
+  #chapter-name { display: none; }
+  #hearts::before, #seeds::before { display: none; }
+}
