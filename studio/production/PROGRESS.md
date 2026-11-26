@@ -1,13 +1,31 @@
 # Studio progress
 
-## M0-02 — Catalog navigation
+## M0-03 — GitHub Actions and GitHub Pages
 
 - Status: candidate_ready
+- Baseline: M0-02 PR #2 head `e1ca3c3530ca53ea8260b8f7b80c14586c5931b9`. Fetched current main `8a91e16107f498ccf124d059c5e17e26db83f69f` and verified its tree matches the M0-01 base of M0-02. Use the M0-02 branch as the review base while PR #2 remains open.
+- Tested candidate: `883bec2487b37afe0c7e747e8950358d40c3c876`.
+- Scope: GitHub Pages workflow, project-subpath tests, portal artifact validation, and hosting, onboarding and acceptance standards. Docker is optional.
+- Approval: M0-03 awaits explicit Producer approval. Next task after approval: M0-04, changed-path scope validation, full-site assembly and rollback verification.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| `actionlint` 1.7.12 | PASS (0) | Workflow lint passed |
+| `pnpm setup`, `pnpm lint`, `pnpm typecheck`, `pnpm test` | PASS (0 each) | Frozen install and 29 unit tests |
+| `STUDIO_PAGES_BASE_PATH=/ai-game-studio/ pnpm test:browser` | PASS (0) | Production build and four local Chromium tests. Inspected [mobile screenshot](evidence/m0-03/pages-subpath.png). |
+| `pnpm verify:pages` | PASS (0) | Output index and three site-relative assets verified. In temporary copies, nonempty registry, fixture directory and root-relative asset each failed with the expected diagnostic. |
+| Hosted deployment and published commit check | NOT_RUN | Requires GitHub Pages source configuration and authorized merge into main. The platform response did not allow reading Pages settings from this workspace. |
+
+Local checks used Linux, Node 24.22.3, pnpm 11.25.0, and Chromium 156.0.8078.79 at `/usr/bin/chromium` via `STUDIO_CHROMIUM_PATH`. Set `PNPM_CONFIG_STORE_DIR` to a writable directory in restricted environments. See the [deployment runbook](../../deployment/README.md) for setup and live verification.
+
+## M0-02 — Catalog navigation
+
+- Status: accepted
 - Baseline: `daaddfbae158fe2362ff718cf985f8d09ebbe98e`, the M0-01 PR head. Latest `main` (`2fe3d2a`) is its ancestor. Use the M0-01 PR branch as the review base while it is open.
 - Scope: catalog and game detail routes, invalid ID handling, development-only fixture and return navigation.
 - Baseline checks: setup, lint, typecheck, 29 unit tests, production build and two Chromium smoke cases passed.
 - Tested candidate: `dab05ab202c9e63d6ebdcea0933b6b2c990b7e49`. Build output: `portal/dist/` with JS `index-DteRKj1o.js` and CSS `index-Ekb0i_C_.css`.
-- Approval: M0-02 awaits explicit Producer approval. Next task after approval: M0-03 (Docker preview, health check, and rollback).
+- Approval: Producer explicitly approved M0-02 on 2026-11-26. Approved PR #2 head: `e1ca3c3530ca53ea8260b8f7b80c14586c5931b9`. Next task: M0-03, GitHub Actions and GitHub Pages.
 - Limitations: local verification on Linux with headless Chromium 156.0.8078.79. Hosted preview and deployment were NOT_RUN. Production catalog contains zero games.
 
 | Check | Result | Evidence |
