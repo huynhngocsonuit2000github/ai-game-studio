@@ -1,0 +1,5 @@
+packages:
+  - portal
+
+allowBuilds:
+  esbuild@0.28.2: true

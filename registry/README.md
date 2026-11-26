@@ -1,2 +1,15 @@
 # Catalog contract
-Root object: schemaVersion (1), games array. Each entry: id (unique immutable kebab-case), title, description, engine (phaser/three/other), status (planned/development/released/archived), entry (relative site path or null), cover (relative path or null), version (string), visibility (development/public). No entry until verified runtime exists. Validate IDs, duplicate routes, path traversal and allowed status/visibility. M0 implements schema validator. Public library only shows public released entries; development view may show candidates, but is not authentication. Registry currently empty.
+
+The root must have `schemaVersion` set to `1` and a `games` array. Each entry requires an immutable, unique lowercase kebab-case `id`, nonempty `title`, `description` and `version`, and these fields.
+
+| Field | Values |
+| --- | --- |
+| `engine` | `phaser`, `three`, `other` |
+| `status` | `planned`, `development`, `released`, `archived` |
+| `visibility` | `development`, `public` |
+| `entry` | Unique relative runtime path, or `null` before a verified runtime exists. Required for released games. |
+| `cover` | Relative cover path or `null` |
+
+Use letters, digits, dots, underscores and hyphens in path segments. The validator rejects empty segments, traversal, absolute paths and URL syntax. The ID `studio` is reserved. Portal routes are derived from IDs.
+
+The public library lists only public released entries. Visibility is a catalog filter. The production registry currently contains zero games.

@@ -1,0 +1,62 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #eaf0fb;
+  background: #101522;
+  line-height: 1.5;
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+}
+
+.container {
+  width: min(100% - 2.5rem, 64rem);
+  margin-inline: auto;
+}
+
+.site-header {
+  border-bottom: 1px solid #303a52;
+}
+
+.brand {
+  padding-block: 1.25rem;
+  color: #9ee6d1;
+  font-weight: 700;
+}
+
+main {
+  padding-block: clamp(2.5rem, 8vw, 6rem);
+}
+
+h1 {
+  margin: 0 0 1.75rem;
+  font-size: clamp(2.5rem, 7vw, 4.5rem);
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.empty-state,
+.game-list li {
+  padding: clamp(1.5rem, 4vw, 3rem);
+  border: 1px solid #303a52;
+  border-radius: 0.75rem;
+  background: #191f30;
+}
+
+h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.25rem;
+}
+
+p {
+  margin: 0;
+  color: #b7c3db;
+}
+
+.game-list {
+  display: grid;
+  gap: 1rem;
+  padding: 0;
+  list-style: none;
+}
