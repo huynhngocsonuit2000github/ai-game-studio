@@ -45,6 +45,18 @@ dialog::backdrop { background: #0a18135c; }
 h1 { margin: 0; font: 700 clamp(32px, 6vw, 52px)/1.02 Georgia, serif; text-wrap: balance; }
 p { line-height: 1.55; }
 .location { color: #f4ca7f; font-size: .85rem; font-weight: 650; margin: 0 0 .5rem; }
+dialog[data-screen="results"] {
+  border-color: #e4bc72;
+  background: linear-gradient(145deg, #234634, #142d24 70%);
+}
+dialog[data-screen="results"] h1 { color: #ffe1a0; }
+:root[data-reduced-motion="false"] dialog[open] .actions {
+  animation: reveal-actions 160ms ease-out both;
+}
+@keyframes reveal-actions {
+  from { opacity: .72; }
+  to { opacity: 1; }
+}
 .actions { display: flex; flex-wrap: wrap; align-items: center; margin-top: 1.15rem; gap: .65rem; }
 button, a { font: 650 .95rem/1.2 system-ui, sans-serif; }
 button {
@@ -91,9 +103,14 @@ dialog {
   border-image: var(--panel-art, none) 34 / 17px stretch;
 }
 button:hover { background-color: #ffdf9c; }
-#keyboard-note { display: none; }
+.actions button:not(:first-child) { background: #1e4234; color: #fff3d5; }
+.actions button:not(:first-child):hover, #pause:hover { background: #2b5543; }
+#seeds[data-charged="true"] { border-color: #f4ca7f; color: #ffe7a7; }
+#hint:empty { display: none; }
+#keyboard-note, .keyboard-note { display: none; }
 @media (max-width: 600px) and (orientation: portrait) {
-  #keyboard-note {
+  .keyboard-note { display: block; color: #f4ca7f; }
+  #game:not(:has(dialog[open])) #keyboard-note {
     display: block;
     position: absolute;
     inset: auto 1rem 0;

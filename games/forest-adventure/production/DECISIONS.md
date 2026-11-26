@@ -13,3 +13,4 @@
 | D09 | Superseded, S01 | The Producer initially kept S01 local pending rights clearance. D06 now authorizes the S01 visual assets for public preview. |
 | D10 | Accepted, S01 | On 2026-11-26 the Producer approved S01 after successfully playing the deployed prototype from the public preview integration in PR #14. The integration revision is `fbb9e31` on main. |
 | D11 | Approved, combined implementation | On 2026-11-26 the Producer authorized S02–S04 on one branch and PR, with internal Fernlight validation before campaign expansion and intermediate manual approvals deferred until combined review. D06 still governs public media. |
+| D12 | Approved, combined implementation | On 2026-11-26 the Producer authorized S05 polish and S06 release preparation in one implementation task and PR. Final manual playtesting, Producer acceptance and merge remain pending. D06 continues to govern public media. |

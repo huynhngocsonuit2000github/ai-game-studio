@@ -7,13 +7,13 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "G0, S00 and deployed S01 accepted. D11 authorizes combined implementation and review of S02\u2013S04.",
+    "producerReview": "D12 authorizes combined S05–S06 preparation. Final manual playtesting and Producer acceptance are pending.",
     "verticalSlice": "L1 Fernlight Trail",
-    "campaignAfterGate": "L2 and L3 implemented in the local campaign candidate under D11."
+    "campaignAfterGate": "Three-trail campaign playable in the local review build. D06 governs public S01 media."
   },
-  "currentStage": "S04",
-  "nextTask": null,
-  "status": "candidate_ready",
+  "currentStage": "S06",
+  "nextTask": "S06-2",
+  "status": "blocked",
   "commands": {
     "resumeHere": "Continue production",
     "resumeInStudio": "Continue production: forest-adventure"
@@ -22,30 +22,36 @@
     "assetOffline": "PASS",
     "registryContract": "PASS (development registration and local launch)",
     "studioVerification": "PASS (portal, Pages and isolated onboarding fixtures)",
-    "s01Gameplay": "PASS (local Chromium and simulation checks Q01\u2013Q08)",
+    "s01Gameplay": "PASS (local Chromium and simulation checks Q01–Q08)",
     "s02VerticalSlice": "PASS (internal Fernlight browser clear, recovery, gate and restart before expansion)",
     "s03AudioAndSettings": "PASS (automated Chromium unlock, loop points, pause, mute, resume and fallback request)",
     "s04Campaign": "PASS (all three trails and 24 fireflies, final ending, replay and Continue)",
-    "pages": "PASS (public assembly and project-subpath smoke)"
+    "pages": "PASS (public assembly and project-subpath smoke)",
+    "s05Polish": "PASS (seven Chromium campaign checks, all trails and 24 fireflies)",
+    "s05Compatibility": "PARTIAL (Chromium, Chrome and Edge suites and Firefox ESR smoke; target laptop and full matrix open)",
+    "s06Pages": "PASS locally (public entries preserved, existing preview media cleared, rollback baseline rebuilt)",
+    "s06LiveRelease": "BLOCKED (rights, trusted scope authorization, Producer acceptance and authorized merge)"
   },
   "readNext": [
     "AGENTS.md",
     "production/PROGRESS.md",
-    "stages/S04/STAGE.md",
+    "stages/S05/STAGE.md",
+    "stages/S06/STAGE.md",
     "reports/QA_REPORT.md"
   ],
   "requiredTests": [
     "S00 read-only manifest and provenance validation, registry draft and change-scope checks, Studio verification",
-    "S01 through S06 QA cases Q01\u2013Q17"
+    "S01 through S06 QA cases Q01–Q17"
   ],
   "missingRequiredRuntimeMedia": [],
   "unverified": [
-    "Five unaided first-time playtests and combined Producer acceptance",
-    "Audible loop seams across supported browsers",
+    "Five unaided first-time playtests and manual Producer acceptance",
+    "Audible loop seams and full Firefox and Safari coverage",
     "Representative integrated-device measurements",
-    "Public distribution rights for later-stage media"
+    "Public distribution clearance for campaign media and trusted registry authorization",
+    "Live candidate publication and smoke test after authorized merge"
   ],
-  "nextAction": "Review the combined campaign candidate. The QA report gives the local game and browser suite commands.",
+  "nextAction": "Review the private candidate, complete the remaining QA and rights checks, and obtain release acceptance before publishing. The draft PR head identifies the candidate.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
@@ -175,6 +181,6 @@
     "games/forest-adventure/tsconfig.json",
     "games/forest-adventure/vite.config.ts"
   ],
-  "baselineCommit": "fbb9e318b094562b92f42c466ecb1d50b0884d52",
-  "candidateBranch": "prod/forest-adventure/s02-s04"
+  "baselineCommit": "e8c20fb6ed114d8e2a25177ad967b4b5deb2ca4c",
+  "candidateBranch": "prod/forest-adventure/s05-s06"
 }

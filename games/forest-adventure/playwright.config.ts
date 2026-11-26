@@ -1,6 +1,9 @@
 import { defineConfig } from '@playwright/test';
 
 const candidateSite = process.env.FOREST_CAMPAIGN_SITE;
+const target = process.env.FOREST_TEST_BROWSER;
+const browserName = target === 'firefox' || target === 'webkit' ? target : 'chromium';
+const executablePath = browserName === 'chromium' ? process.env.STUDIO_CHROMIUM_PATH : undefined;
 
 export default defineConfig({
   testDir: './tests',
@@ -10,9 +13,9 @@ export default defineConfig({
   timeout: 90_000,
   use: {
     baseURL: 'http://127.0.0.1:4181',
-    browserName: 'chromium',
+    browserName,
     viewport: { width: 1366, height: 768 },
-    launchOptions: { executablePath: process.env.STUDIO_CHROMIUM_PATH },
+    launchOptions: { executablePath },
   },
   webServer: {
     command: candidateSite

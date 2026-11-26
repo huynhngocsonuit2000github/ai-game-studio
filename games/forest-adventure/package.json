@@ -10,7 +10,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:browser": "pnpm run build && playwright test --config playwright.config.ts",
-    "test:campaign": "pnpm -w assemble:pages && pnpm -w verify:pages && node tools/prepare_campaign.mjs && vite build --mode campaign && FOREST_CAMPAIGN_SITE=1 playwright test --config playwright.config.ts"
+    "test:campaign": "pnpm -w build && pnpm -w assemble:pages && pnpm -w verify:pages && node tools/prepare_campaign.mjs && vite build --mode campaign && FOREST_CAMPAIGN_SITE=1 playwright test --config playwright.config.ts"
   },
   "dependencies": {
     "phaser": "3.90.0"

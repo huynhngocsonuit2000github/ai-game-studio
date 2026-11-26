@@ -41,6 +41,7 @@ function jumpDown() {
 }
 
 function display(title: string, text: string, actions: { label: string; run: () => void }[], chapter = '', content?: HTMLElement) {
+  panel.dataset.screen = screen;
   panel.replaceChildren();
   if (chapter) {
     const line = document.createElement('p');
@@ -54,6 +55,12 @@ function display(title: string, text: string, actions: { label: string; run: () 
   const copy = document.createElement('p');
   copy.textContent = text;
   panel.append(heading, copy);
+  if (screen === 'menu') {
+    const keyboardNote = document.createElement('p');
+    keyboardNote.className = 'keyboard-note';
+    keyboardNote.textContent = 'Play with a keyboard in landscape.';
+    panel.append(keyboardNote);
+  }
   if (content) panel.append(content);
   if (save.unavailable && campaignPreview) {
     const warning = document.createElement('p');
@@ -112,7 +119,8 @@ function showResults(result: Result) {
   const summary = [run];
   if (result.fireflies === 8) summary.push('Firefly stamp');
   if (result.flawless) summary.push('Flawless');
-  const actions = [{ label: 'Replay', run: () => start(currentLevel) }];
+  const actions = next ? [{ label: 'Next trail', run: () => start(next) }] : [];
+  actions.push({ label: 'Replay', run: () => start(currentLevel) });
   let record: HTMLElement | undefined;
   if (campaignPreview) {
     save.record(currentLevel.id, result, next?.id);
@@ -121,8 +129,13 @@ function showResults(result: Result) {
     record.className = 'record';
     if (best) record.textContent = `Best time ${time(best.ticks)} · Best fireflies ${best.fireflies}/8`;
     actions.push({ label: 'Trail selection', run: menu });
-    if (next) actions.push({ label: 'Next trail', run: () => start(next) });
-    if (finale) summary.unshift('Pip returned the Heartseeds. Light has come back to the forest.');
+    if (finale) {
+      const ending = document.createElement('p');
+      ending.textContent = 'Pip returned the Heartseeds. Light has come back to the forest.';
+      const finaleDetails = document.createElement('div');
+      finaleDetails.append(ending, record);
+      record = finaleDetails;
+    }
   }
   display(finale ? 'The Lantern Oak wakes' : 'Trail cleared', summary.join(' · '), actions, currentLevel.name, record);
 }
@@ -136,6 +149,12 @@ if (previewArt) {
 }
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
 const save = new SaveStore(playable.map(({ id }) => id), motionPreference.matches);
+function applyMotionPreference() {
+  document.documentElement.dataset.reducedMotion = String(campaignPreview ? save.data.settings.reducedMotion : motionPreference.matches);
+}
+applyMotionPreference();
+motionPreference.addEventListener('change', applyMotionPreference);
+
 const audio = audioModule ? new audioModule.TrailAudio(save.data.settings) : undefined;
 
 function menu() {
@@ -195,6 +214,7 @@ function showSettings(back: () => void) {
     checkbox.addEventListener('change', () => {
       settings[key] = checkbox.checked;
       audio?.applySettings();
+      applyMotionPreference();
       save.persist();
     });
     label.append(checkbox, name);
@@ -235,9 +255,13 @@ const trail = mountTrail(world, {
     write(hint, describe(session));
     hearts.classList.toggle('empty', session.hearts === 0);
     seeds.classList.toggle('empty', session.seeds.size === 0);
+    if (events.includes('seedCollected')) {
+      seeds.dataset.charged = String(session.gateOpen);
+    }
     if (session.phase === 'recovering' && (events.includes('fall') || events.includes('healthChanged'))) {
       write(notice, describe(session));
-    } else if (events.includes('gateOpened')) write(notice, 'The portal is open.');
+    } else if (events.includes('respawn')) write(notice, 'Pip is ready. All hearts restored.');
+    else if (events.includes('gateOpened')) write(notice, 'The portal is open.');
     else if (events.includes('lanternLit')) write(notice, 'Checkpoint lit.');
     else if (events.includes('seedCollected')) write(notice, seeds.textContent ?? '');
     else if (events.includes('fireflyCollected')) write(notice, fireflies.textContent ?? '');
@@ -281,6 +305,7 @@ function beginAttempt(level: Level) {
   audio?.playLevel(level.id === 'lantern-oak');
   enterGame();
   write(notice, '');
+  seeds.dataset.charged = 'false';
   trail.startAttempt(level);
 }
 
@@ -305,7 +330,7 @@ function pause() {
 function confirmRestart() {
   screen = 'restart';
   display('Restart trail?', 'This clears your current attempt.',
-    [{ label: 'Keep playing', run: pauseFromConfirmation }, { label: 'Start over', run: () => start(currentLevel) }]);
+    [{ label: 'Cancel', run: pauseFromConfirmation }, { label: 'Start over', run: () => start(currentLevel) }]);
 }
 
 function pauseFromConfirmation() {

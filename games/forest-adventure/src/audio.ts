@@ -4,6 +4,7 @@ import type { Session } from './session.ts';
 
 const urls = import.meta.glob<string>('../assets/runtime/audio/*.{ogg,m4a}', { eager: true, query: '?url', import: 'default' });
 type Cue = (typeof cues.tracks)[number];
+type Track = { source: AudioBufferSourceNode; volume: GainNode };
 type Voice = { source: AudioBufferSourceNode; critical: boolean };
 type Event = ReturnType<Session['step']>[number];
 
@@ -23,7 +24,7 @@ export class TrailAudio {
   private buffers = new Map<string, Promise<AudioBuffer | undefined>>();
   private decoded = new Map<string, AudioBuffer>();
   private voices = new Set<Voice>();
-  private tracks = new Map<string, AudioBufferSourceNode>();
+  private tracks = new Map<string, Track>();
   private planned = new Set<string>();
   private active = false;
   private lastLand = -Infinity;
@@ -71,11 +72,19 @@ export class TrailAudio {
   playLevel(oak: boolean) {
     if (!this.context) return;
     this.setActive(true);
+    const previous = this.planned;
     this.planned = new Set([oak ? 'lantern-oak-theme' : 'fernlight-theme', 'forest-ambience']);
-    for (const [id, voice] of this.tracks) {
+    for (const id of previous) {
       if (this.planned.has(id)) continue;
-      voice.stop();
-      this.tracks.delete(id);
+      const track = this.tracks.get(id);
+      if (track) {
+        const now = this.context.currentTime;
+        track.volume.gain.cancelScheduledValues(now);
+        track.volume.gain.setTargetAtTime(0, now, .065);
+        track.source.stop(now + .32);
+        this.tracks.delete(id);
+      }
+      this.buffers.delete(id);
     }
     for (const id of this.planned) {
       const cue = cues.tracks.find((track) => track.id === id);
@@ -127,7 +136,7 @@ export class TrailAudio {
       replace.source.stop();
       this.voices.delete(replace);
     }
-    const source = this.source(buffer, this.sfx, ui.has(id) ? .4 : (critical.has(id) || id === 'firefly') ? .72 : .6);
+    const { source } = this.source(buffer, this.sfx, ui.has(id) ? .4 : (critical.has(id) || id === 'firefly') ? .72 : .6);
     const voice = { source, critical: critical.has(id) };
     this.voices.add(voice);
     source.onended = () => this.voices.delete(voice);
@@ -137,7 +146,10 @@ export class TrailAudio {
   private load(cue: Cue) {
     const existing = this.buffers.get(cue.id);
     if (existing) return existing;
-    const pending = this.decode(cue);
+    const pending = this.decode(cue).then((buffer) => {
+      if (!buffer && this.buffers.get(cue.id) === pending) this.buffers.delete(cue.id);
+      return buffer;
+    });
     this.buffers.set(cue.id, pending);
     return pending;
   }
@@ -152,7 +164,7 @@ export class TrailAudio {
         const response = await fetch(url);
         if (!response.ok) continue;
         const buffer = await this.context.decodeAudioData(await response.arrayBuffer());
-        this.decoded.set(cue.id, buffer);
+        if (!cue.loop) this.decoded.set(cue.id, buffer);
         return buffer;
       } catch {
         // Try the alternate codec when a fetch or decode fails.
@@ -163,13 +175,15 @@ export class TrailAudio {
   private async startTrack(cue: Cue) {
     const buffer = await this.load(cue);
     if (!buffer || !this.score || !this.planned.has(cue.id) || this.tracks.has(cue.id)) return;
-    const source = this.source(buffer, this.score, cue.id === 'forest-ambience' ? .24 : .4);
+    const track = this.source(buffer, this.score, 0);
+    const { source, volume } = track;
+    volume.gain.setTargetAtTime(cue.id === 'forest-ambience' ? .24 : .4, source.context.currentTime, .085);
     const [start = 0, end = buffer.duration * cues.sampleRate] = cue.loopSamples ?? [];
     source.loop = true;
     source.loopStart = start / cues.sampleRate;
     source.loopEnd = Math.min(buffer.duration, end / cues.sampleRate);
     source.start();
-    this.tracks.set(cue.id, source);
+    this.tracks.set(cue.id, track);
   }
 
   private source(buffer: AudioBuffer, output: AudioNode, gain: number) {
@@ -179,6 +193,10 @@ export class TrailAudio {
     volume.gain.value = gain;
     source.buffer = buffer;
     source.connect(volume).connect(output);
-    return source;
+    source.addEventListener('ended', () => {
+      source.disconnect();
+      volume.disconnect();
+    }, { once: true });
+    return { source, volume };
   }
 }

@@ -104,6 +104,13 @@ test('unlocks decoded Web Audio after Play and applies pause, mute and resume', 
 });
 
 test('uses AAC after a Vorbis decode failure and skips optional foliage when unavailable', async ({ page }) => {
+  await page.addInitScript(() => {
+    const start = AudioBufferSourceNode.prototype.start;
+    AudioBufferSourceNode.prototype.start = function (...args) {
+      start.apply(this, args);
+      if (this.loop && this.loopEnd > 30) document.documentElement.dataset.themeDecoded = 'true';
+    };
+  });
   const response = page.waitForResponse(event => /fernlight-theme-[^/]+\.m4a$/.test(event.url()));
   await page.route(/fernlight-theme-[^/]+\.ogg$/, route => route.fulfill({ status: 200, body: 'Invalid audio' }));
   await page.route(/bg-near-[^/]+\.webp$/, route => route.abort());
@@ -111,7 +118,46 @@ test('uses AAC after a Vorbis decode failure and skips optional foliage when una
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Fernlight Trail playfield' })).toBeFocused();
   expect((await response).ok()).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('data-theme-decoded', 'true');
   await page.keyboard.down('ArrowRight');
   await expect(page.locator('#fireflies')).toHaveText('Fireflies 1/8');
   await page.keyboard.up('ArrowRight');
+});
+
+test('retries a deferred backdrop, keeps saved progress and fits the supported desktop sizes', async ({ page }, testInfo) => {
+  const backdrop = /\/bg-willow-[^/]+\.webp$/;
+  await page.addInitScript(key => {
+    localStorage.setItem(key, JSON.stringify({
+      schemaVersion: 1, unlockedLevelIds: ['fernlight-trail', 'willow-run'],
+      bestByLevel: { 'fernlight-trail': { ticks: 1100, fireflies: 8 } },
+    }));
+  }, SAVE_KEY);
+  await page.route(backdrop, route => route.abort());
+  await page.goto(game);
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('heading', { name: 'Trail could not load' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Retry' })).toBeFocused();
+  await page.unroute(backdrop);
+  await page.keyboard.press('Enter');
+  await expect(page.getByRole('region', { name: 'Willow Run playfield' })).toBeFocused();
+  await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+
+  for (const [width, height] of [[960, 540], [1366, 768], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    const pause = page.getByRole('button', { name: 'Pause', exact: true });
+    await expect(pause).toBeInViewport({ ratio: 1 });
+    await expect(page.locator('#fireflies')).toBeInViewport({ ratio: 1 });
+    await expect.poll(async () => {
+      const bounds = await page.locator('canvas').boundingBox();
+      return Math.round(bounds?.width ?? 0);
+    }).toBeLessThanOrEqual(width);
+    await page.screenshot({ path: testInfo.outputPath(`willow-${width}.png`) });
+  }
+  await expect(page.locator('canvas')).toHaveCount(1);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByText('Play with a keyboard in landscape.').first()).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: 'Resume' })).toBeFocused();
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '{}').bestByLevel, SAVE_KEY))
+    .toEqual({ 'fernlight-trail': { ticks: 1100, fireflies: 8 } });
 });

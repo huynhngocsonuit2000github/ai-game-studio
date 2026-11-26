@@ -93,3 +93,34 @@ Run `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventu
 At 1920×1080, DPR 1, with the browser cache disabled and network emulated at 10 Mbps / 100 ms RTT, the final local review build reached Play in 2.62 s with 2.23 MB transferred. The campaign game files total about 6.60 MB on disk. An earlier two-minute Cloud Chromium traversal sample before deferring the optional foliage recorded 7,146 frames at 16.8 ms p95 and 8.13 MB JS heap. The final short sample also recorded 16.8 ms p95. These samples describe the Cloud environment. Target laptop traces and cold loads across target browsers remain open.
 
 The public artifact contained 13 game media files. Every file matched a SHA-256 entry cleared for S01 in the manifest. The full campaign and its evidence remain local.
+
+## S05–S06 candidate · 2026-11-26
+
+Base `e8c20fb6ed114d8e2a25177ad967b4b5deb2ca4c`. The implementation PR head identifies the candidate. Tests used Debian 13, Node 24.22.3, pnpm 11.25.0, Chromium 156.0.8078.79, Chrome 158.0.8127.88, Edge 158.0.4370.45 and Firefox ESR 153.5.1.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Q01–Q08 | PASS in Chromium | Simulation and keyboard tests cover held and tapped jumps, buffer/coyote time, stomps and contact, closed/open gate, falls, zero hearts, checkpoint respawn, pause and ten restarts. The assembled Pages artifact and the private review build both launch at the Studio project subpath. |
+| Q09 | PASS in Cloud Chromium | Reviewed the three trail captures and finale, and checked canvas/HUD fit at 960×540, 1366×768 and 1920×1080. The portrait keyboard guidance is visible. The target laptop remains untested. |
+| Q10 | PASS in Chromium | Forced required Fernlight and deferred Willow backdrop failures, then recovered via the focused Retry button. An unavailable decorative layer left play reachable. |
+| Q11 | PASS for tested workflows | Keyboard settings, pause, restart and default Next trail focus passed. Reduced motion suppresses action fades and optional movement effects. Checked HUD, result and button text colors at 7.66:1 or higher for the tested combinations. |
+| Q12 | PASS for game states | Tested the seed gate states, lit lantern and visible gameplay feedback. The two-minute stress run left one canvas. The dedicated 200-landing pool test is recorded against S02–S04 above. |
+| Q13 | PARTIAL | Chromium verified user-gesture unlock, loop endpoints, pause/resume, mute and actual AAC decode/playback start after an induced Vorbis failure. Firefox decoded both loops in a BiDi smoke check. Its headless audio context stayed suspended. Chrome and Edge passed the same audio suite. Audible loop seams and Safari playback remain open. |
+| Q14 | PARTIAL | Completed the scripted campaign and Cloud performance run. Five unaided first-time playtests, first-clear timing, target device metrics and manual Producer review remain open. |
+| Q15 | PASS in Chromium | Cleared all three trails with all 24 optional fireflies, reached the finale, and verified replay, Continue, independent bests, corrupt save recovery and blocked storage. Tests confirmed the title only offers unlocked trails. |
+| Q16 | PARTIAL | See the Cloud trace results below. Firefox BiDi smoke also covered play, a keyboard pickup, pause, restart, resize and return. The Playwright browser downloads returned HTTP 403, and stock Firefox ESR rejected a media emulation command in the full suite. Chrome and Edge passed the seven-case campaign suite. Safari coverage and representative-device budgets remain open. |
+| Q17 | PASS locally, live check BLOCKED | Clean build, assembly and verification passed. Rebuilt the prior main in a detached worktree and compared public manifests and entry paths. The 13 shipped game media files match their D06-cleared manifest hashes. Full campaign publication and candidate live smoke require rights, trusted scope authorization, Producer acceptance and authorized merge. The Cloud request to the existing live Pages endpoint returned HTTP 403. |
+
+Frozen install, Studio lint and typecheck, 35 Vitest tests, six Studio script tests, 19 Forest Adventure unit/registry tests, and the read-only pack validator passed. The pack validator checked 58 files, 60 atlas frames, 32 audio bitstreams and three level layouts. Six Studio Chromium tests, two public-preview game tests and seven private campaign tests each on Chromium, Chrome and Edge passed. The campaign shares its static subpath with Pages and keeps the production art and audio outside the default public build.
+
+Run `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventure test:campaign` from the repository root to rebuild the private artifact and recapture `fernlight-trail.png`, `willow-run.png`, `lantern-oak.png` and `oak-finale.png` under `games/forest-adventure/test-results/campaign-browser/`. The Playwright config serves the review build from `test-results/campaign-site/dist/`; select `FOREST_TEST_BROWSER=firefox` or `webkit` when the corresponding Playwright browser is installed. Campaign screenshots remain in workspace evidence under D06.
+
+### Cloud Chromium measurements
+
+Measured the game build at `d242e35` using headless Chromium on Debian 13 / AMD EPYC at 1366×768, DPR 1. Three cold loads at 10 Mbps and 100 ms RTT, with browser cache disabled, reached the usable menu in 2.446 s, 2.341 s and 2.338 s. Each transferred 2,232,754 bytes. The static game directory was 6,603,495 bytes. Estimated concurrently decoded source images were 33.7 MiB, using four bytes per pixel and a maximum of two resident far backdrops.
+
+The 124.1 s real-clock Fernlight keyboard traversal and restart stress recorded 7,378 frames at 16.7 ms median and 16.8 ms p95. After 29 confirmed restarts, one canvas remained and post-GC JS heap was 6.35 MiB. There were no failed requests or page exceptions in that run. These values meet the numeric limits in the tech design for the measured environment. Representative hardware coverage is open.
+
+## Release checkpoint
+
+The public Studio catalog remains In Development. No gameplay blockers surfaced in the covered Chromium flows. The incomplete support matrix, device measurements, live verification and Producer gates leave G3/G4 open. Review the exact PR build locally. Then record campaign redistribution rights and trusted Studio authorization before changing public media and registry fields. After manual acceptance and an authorized merge, confirm the live SHA, launch the published game through Studio and verify its return path. Use the prior public main above as the rollback baseline.

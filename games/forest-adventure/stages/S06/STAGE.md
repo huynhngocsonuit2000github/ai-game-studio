@@ -6,3 +6,9 @@ Dependency: S05 accepted, recorded Producer approval for release, rights and pub
 - Assets: checked manifest, cover, paid-free production bundle and license notices.
 - Acceptance: Q17 passes on candidate and deployed smoke when authorized. Keep stage candidate until live checks and Producer acceptance complete, record exact SHA both times. Zero P0/P1.
 - Preview: candidate remains playable before merge. Automatically create/update one release PR; do not merge automatically.
+
+## Combined S05–S06 result
+
+S06-1 passed local Pages assembly and catalog, direct-entry and return smoke. A clean rebuild of main at `e8c20fb6ed114d8e2a25177ad967b4b5deb2ca4c` supplies the rollback baseline. Its public manifest matches the candidate and the existing Forest Adventure entry is preserved. For a faulty future release, create a revert PR, rebuild and smoke-test the complete site before authorized merge, then verify the replacement commit marker and game route.
+
+S06-2 awaits campaign media clearance, trusted Studio authorization, Producer approval and an authorized merge. After deployment, verify `build-sha.txt` against the merged revision, launch through the live catalog and direct entry, complete representative play, and follow Back to Studio. Record the deployed SHA, build, route and result. See the [QA report](../../reports/QA_REPORT.md) for the local artifact and checks.
