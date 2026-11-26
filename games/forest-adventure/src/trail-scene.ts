@@ -63,6 +63,7 @@ class TrailScene extends Phaser.Scene {
   private previousX = fernlight.spawn.x;
   private previousY = fernlight.spawn.y;
   private backdrop!: Phaser.GameObjects.Image;
+  private backdropScroll = .18;
   private pip!: Phaser.GameObjects.Sprite;
   private enemySprites = new Map<string, Phaser.GameObjects.Sprite>();
   private landscape: Phaser.GameObjects.GameObject[] = [];
@@ -205,7 +206,7 @@ class TrailScene extends Phaser.Scene {
     const left = this.session.player.x + this.session.player.vx / 250 * 96 - WIDTH / 2;
     const target = Phaser.Math.Clamp(left, 0, this.session.level.width - WIDTH);
     camera.scrollX += (target - camera.scrollX) * (1 - Math.exp(-Math.min(delta, 100) / 150));
-    this.backdrop.x = -camera.scrollX * .18 * this.backdrop.scaleX;
+    this.backdrop.x = -camera.scrollX * this.backdropScroll;
     if (this.nearLayer) this.nearLayer.tilePositionX = camera.scrollX * .64;
     this.motes?.clear();
     if (campaignPreview && !this.host.reducedMotion()) {
@@ -274,8 +275,11 @@ class TrailScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, level.width, level.height);
     this.cameras.main.setScroll(0, level.height - HEIGHT);
     this.backdrop.setTexture(level === fernlight ? 'forest' : level.id);
-    // Every backdrop is wide enough for the full viewport plus the trail's parallax travel.
-    this.backdrop.setScale(HEIGHT / this.backdrop.height);
+    const isOak = level.id === 'lantern-oak';
+    // Frame the first oak in the mirrored artwork throughout the final trail.
+    const scale = HEIGHT / this.backdrop.height * (isOak ? 1.66 : 1);
+    this.backdrop.setScale(scale).setY(isOak ? -64 : 0);
+    this.backdropScroll = scale * (isOak ? .14 : .18);
     this.drawTerrain(level);
     for (const hazard of level.hazards) {
       this.landscape.push(this.sprite(hazard.x + hazard.width / 2, hazard.y + hazard.height, 'props', 'bramble', .37));

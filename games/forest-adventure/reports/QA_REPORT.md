@@ -117,7 +117,7 @@ Run `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventu
 
 ### Cloud Chromium measurements
 
-Measured headless on Debian 13 / AMD EPYC at 1366×768, DPR 1. Three cold loads at 10 Mbps and 100 ms RTT, with browser cache disabled, reached the usable menu in 2.761 s, 2.443 s and 2.443 s. Each transferred 2,232,716 bytes. The static game directory was 6,603,391 bytes. Estimated concurrently decoded source images were 33.7 MiB, using four bytes per pixel and a maximum of two resident far backdrops.
+Measured Fernlight on commit `15182b1` using headless Chromium on Debian 13 / AMD EPYC at 1366×768, DPR 1. The final review commit reframes only the Oak backdrop and keeps Fernlight gameplay and media unchanged. Three cold loads at 10 Mbps and 100 ms RTT, with browser cache disabled, reached the usable menu in 2.761 s, 2.443 s and 2.443 s. Each transferred 2,232,716 bytes. The static game directory was 6,603,391 bytes. Estimated concurrently decoded source images were 33.7 MiB, using four bytes per pixel and a maximum of two resident far backdrops.
 
 The 122.9 s real-clock keyboard traversal and restart stress recorded 7,228 frames at 16.7 ms median and 16.8 ms p95. After 28 confirmed restarts, one canvas remained and post-GC JS heap was 6.35 MiB. There were no failed requests or page exceptions in that run. These values meet the numeric limits in the tech design for the measured environment. Representative hardware coverage is open.
 
