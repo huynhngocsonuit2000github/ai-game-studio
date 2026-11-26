@@ -1,0 +1,2 @@
+# Game agent contract
+Read root AGENTS.md first. This game is scoped to its own directory. Read production/PROGRESS.md, current stage/STAGE.md and referenced design documents. Do not modify sibling games or shared infrastructure without explicit approval. Run actual gameplay tests, update evidence and stop at approval gates. Replace template placeholders before production; do not treat template as approved design.
