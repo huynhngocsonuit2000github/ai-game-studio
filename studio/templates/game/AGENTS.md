@@ -1,2 +1,5 @@
-# Game agent contract
-Read root AGENTS.md first. This game is scoped to its own directory. Read production/PROGRESS.md, current stage/STAGE.md and referenced design documents. Do not modify sibling games or shared infrastructure without explicit approval. Run actual gameplay tests, update evidence and stop at approval gates. Replace template placeholders before production; do not treat template as approved design.
+# Game agent contract — V5.1
+
+Read root `AGENTS.md`, this game's checkpoint, the active stage and referenced design and asset docs. Route tasks by this game's exact ID. Keep game work within this directory and permitted own-ID registry changes under trusted Studio policy.
+
+Execute the authorized prompt or validated pack through the root workflow. Use the Studio feature brief for features and expansions and check existing saves. For a named stage batch, record acceptance evidence per stage and honor approvals as specified in the root contract. Preserve earlier stage and release records. Template placeholders require actual game decisions and evidence.

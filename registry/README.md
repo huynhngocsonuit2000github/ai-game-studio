@@ -19,4 +19,4 @@ Use letters, digits, dots, underscores and hyphens in path segments. The validat
 The public library and Pages artifact include releases and playable development previews with explicit public visibility. Public entries and covers must resolve inside `games/<id>/`. Released games retain their public entry paths across builds. Studio review can withdraw a development preview by changing its visibility.
 
 
-The Studio reviews editorial metadata under the existing change-scope policy. Entries with missing categories or format appear in the unfiltered library. The local portal also lists planned and development entries. Register a relative entry only once a playable build exists.
+For a game PR, the trusted scope checker permits changes to that game's title, description and version while its entry remains private and planned or in development. Use the [Studio change-scope policy](../.github/workflows/README.md) for registration, public changes and other fields. Entries with missing categories or format appear in the unfiltered library. The local portal also lists planned and development entries. Register a relative entry only once a playable build exists.

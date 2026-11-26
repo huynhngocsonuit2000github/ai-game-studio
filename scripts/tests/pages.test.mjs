@@ -120,6 +120,27 @@ test('requires an exact trusted commit and path set for Studio exceptions', () =
   assert.throws(() => validateScope([...paths, 'games/beta/package.json'], null, null, policy, 'approved'), /exact changed paths/);
 });
 
+test('allows only three standing metadata fields for one private planned or development game', () => {
+  const alpha = game('alpha', { status: 'development', visibility: 'development' });
+  const beta = game('beta');
+  const paths = ['games/alpha/src/main.ts', 'registry/games.json'];
+  const prior = () => JSON.stringify(registry(alpha, beta));
+  const next = (changes) => () => JSON.stringify(registry({ ...alpha, ...changes }, beta));
+  assert.equal(validateScope(paths, prior, next({
+    title: 'Alpha update', description: 'Updated description', version: '1.1.0',
+  })), 'alpha');
+  for (const changes of [
+    { status: 'released' }, { visibility: 'public' }, { entry: 'games/beta/other.html' },
+    { cover: 'games/alpha/cover.webp' }, { engine: 'phaser' }, { featured: true },
+  ]) {
+    assert.throws(() => validateScope(paths, prior, next(changes)), /outside the trusted grant/);
+  }
+  assert.throws(() => validateScope(paths, prior, next({ title: '   ' })), /nonempty string/);
+  assert.throws(() => validateScope(paths, prior, () => JSON.stringify(registry(beta, alpha))), /entry order/);
+  assert.throws(() => validateScope(paths, prior, () => JSON.stringify({ ...registry(alpha, beta), extra: true })),
+    /preserve the registry contract/);
+});
+
 test('checks a real Git diff and treats a cross-game rename as two paths', (t) => {
   const cwd = mkdtempSync(join(tmpdir(), 'studio-scope-'));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
@@ -135,6 +156,12 @@ test('checks a real Git diff and treats a cross-game rename as two paths', (t) =
 
   git('init');
   put(join(cwd, 'studio/production/registry-scope.json'), '{}');
+  put(join(cwd, 'registry/games.json'), JSON.stringify(registry(game('alpha', {
+    status: 'development', visibility: 'development',
+  }))));
+  for (const path of ['.github/workflows/scope.yml', 'scripts/check-change-scope.mjs', 'shared/shared.txt', 'pnpm-lock.yaml']) {
+    put(join(cwd, path), 'trusted');
+  }
   put(join(cwd, 'games/alpha/game.txt'), 'alpha');
   const base = commit('base');
   put(join(cwd, 'games/alpha/notes.txt'), 'notes');
@@ -147,4 +174,25 @@ test('checks a real Git diff and treats a cross-game rename as two paths', (t) =
   const rejected = check(base, commit('cross-game move'));
   assert.equal(rejected.status, 1);
   assert.match(rejected.stderr, /one game directory/);
+
+  for (const path of ['.github/workflows/scope.yml', 'scripts/check-change-scope.mjs', 'shared/shared.txt',
+    'pnpm-lock.yaml', 'studio/production/registry-scope.json']) {
+    git('checkout', '--detach', gameHead);
+    put(join(cwd, path), '{"approvedHeads":{"anything":[]}}');
+    const attempt = check(base, commit(`change ${path}`));
+    assert.equal(attempt.status, 1, path);
+    assert.match(attempt.stderr, /one game directory/, path);
+  }
+
+  git('checkout', '--detach', gameHead);
+  put(join(cwd, 'registry/games.json'), JSON.stringify(registry(game('alpha', {
+    status: 'development', visibility: 'development', version: '1.1.0',
+  }))));
+  const registryHead = commit('valid private game metadata');
+  assert.equal(check(base, registryHead).status, 0);
+  git('update-index', '--chmod=+x', 'registry/games.json');
+  git('-c', 'user.name=Studio Test', '-c', 'user.email=test@example.test', 'commit', '-m', 'registry mode change');
+  const modeTamper = check(base, git('rev-parse', 'HEAD'));
+  assert.equal(modeTamper.status, 1);
+  assert.match(modeTamper.stderr, /regular, nonexecutable file/);
 });

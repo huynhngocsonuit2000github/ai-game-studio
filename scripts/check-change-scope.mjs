@@ -5,6 +5,7 @@ import { parseRegistry } from '../portal/src/registry.ts';
 
 const registry = 'registry/games.json';
 const editableFields = ['title', 'description', 'engine', 'version', 'cover'];
+const privateMetadata = ['title', 'description', 'version'];
 
 export function validateScope(paths, readBase, readHead, policy = {}, head = '') {
   const approvedHeads = policy.approvedHeads ?? {};
@@ -55,8 +56,11 @@ export function validateScope(paths, readBase, readHead, policy = {}, head = '')
       throw new Error('Game PR registry edits must preserve the game ID and all other entries.');
     }
     for (const field of new Set([...Object.keys(before), ...Object.keys(after)])) {
+      const standingGrant = before.visibility === 'development' && after.visibility === 'development' &&
+        ['planned', 'development'].includes(before.status) && before.status === after.status &&
+        privateMetadata.includes(field);
       if (!isDeepStrictEqual(before[field], after[field]) &&
-          (!editableFields.includes(field) || !fields.includes(field))) {
+          !standingGrant && (!editableFields.includes(field) || !fields.includes(field))) {
         throw new Error(`Registry field is outside the trusted grant: ${id}.${field}`);
       }
     }
@@ -72,7 +76,12 @@ if (process.argv[1] && import.meta.main) {
   const git = (...args) => execFileSync('git', args, { encoding: 'utf8' });
   const fork = git('merge-base', base, head).trim();
   const paths = git('diff', '--name-only', '--no-renames', '-z', fork, head).split('\0').filter(Boolean);
-  const readAt = (sha) => (path) => git('show', `${sha}:${path}`);
+  const readAt = (sha) => (path) => {
+    if (!git('ls-tree', sha, '--', path).startsWith('100644 blob ')) {
+      throw new Error(`Expected a regular, nonexecutable file: ${path}`);
+    }
+    return git('show', `${sha}:${path}`);
+  };
   const policy = JSON.parse(readAt(base)('studio/production/registry-scope.json'));
   const scope = validateScope(paths, readAt(fork), readAt(head), policy, head);
   process.stdout.write(`Verified ${scope} scope across ${paths.length} changed paths.\n`);
