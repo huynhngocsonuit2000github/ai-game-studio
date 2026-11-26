@@ -1,0 +1,34 @@
+name: Verify changed-path scope
+
+on:
+  pull_request_target:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  scope:
+    name: Check Studio and game isolation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Keep the checker, permissions and policy on the trusted base.
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          fetch-depth: 0
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+      - name: Check PR head without executing it
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags origin "refs/pull/${PR_NUMBER}/head"
+          git cat-file -e "${PR_HEAD}^{commit}"
+          node scripts/check-change-scope.mjs "$PR_BASE" "$PR_HEAD"

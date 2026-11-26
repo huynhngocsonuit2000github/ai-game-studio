@@ -1,5 +1,6 @@
 packages:
   - portal
+  - games/*
 
 allowBuilds:
   esbuild@0.28.2: true

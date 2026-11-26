@@ -12,9 +12,10 @@
     "dev": "pnpm --filter @studio/portal dev",
     "lint": "eslint . --max-warnings 0",
     "typecheck": "tsc --project portal/tsconfig.json",
-    "test": "vitest run",
+    "test": "vitest run && node --test scripts/tests/*.test.mjs",
     "build": "pnpm --filter @studio/portal build",
     "test:browser": "pnpm build && playwright test",
+    "assemble:pages": "node scripts/assemble-pages.mjs",
     "verify:pages": "node scripts/verify-pages.mjs"
   },
   "devDependencies": {

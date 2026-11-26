@@ -1,9 +1,13 @@
 import { expect, test } from '@playwright/test';
+import registry from '../../registry/games.json' with { type: 'json' };
+import { parseRegistry, publicGames } from '../src/registry';
+
+const expectedGames = publicGames(parseRegistry(registry));
 
 const pagesBase = process.env.STUDIO_PAGES_BASE_PATH ?? '/studio/';
 
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-  test(`loads the empty catalog at ${viewport.width}px under ${pagesBase}`, async ({ page }, testInfo) => {
+  test(`loads the production catalog at ${viewport.width}px under ${pagesBase}`, async ({ page }, testInfo) => {
     const failures: string[] = [];
     page.on('pageerror', (error) => failures.push(error.message));
     page.on('console', (message) => {
@@ -19,8 +23,14 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     expect(loaded?.status()).toBe(200);
     await expect(page).toHaveTitle('Game Library | AI Game Studio');
     await expect(page.getByRole('heading', { name: 'Game Library', level: 1 })).toBeVisible();
-    await expect(page.getByRole('heading', { name: 'No games available yet' })).toBeVisible();
-    await expect(page.getByRole('listitem')).toHaveCount(0);
+    await expect(page.getByRole('listitem')).toHaveCount(expectedGames.length);
+    if (expectedGames.length === 0) {
+      await expect(page.getByRole('heading', { name: 'No games available yet' })).toBeVisible();
+    } else {
+      for (const game of expectedGames) {
+        await expect(page.locator(`a[href="#/games/${game.id}"]`)).toHaveText(game.title);
+      }
+    }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     expect(failures).toEqual([]);
 
@@ -29,7 +39,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
 }
 
 test('production handles direct links to unknown, malformed and development-only IDs', async ({ page }, testInfo) => {
-  for (const id of ['missing-game', 'Invalid%20ID', 'navigation-fixture']) {
+  for (const id of ['', 'Invalid%20ID', 'navigation-fixture']) {
     await page.goto(`${pagesBase}#/games/${id}`);
     await expect(page.getByRole('heading', { name: 'Game not found' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Launch game' })).toHaveCount(0);
@@ -38,7 +48,7 @@ test('production handles direct links to unknown, malformed and development-only
   await page.screenshot({ path: testInfo.outputPath('unavailable.png') });
   await page.getByRole('link', { name: 'Back to Game Library' }).click();
   await expect(page.getByRole('heading', { name: 'Game Library', level: 1 })).toBeFocused();
-  await expect(page.getByRole('heading', { name: 'No games available yet' })).toBeVisible();
+  await expect(page.getByRole('listitem')).toHaveCount(expectedGames.length);
 });
 
 test('development catalog launches a standalone game and returns to the library', async ({ page }, testInfo) => {
@@ -59,7 +69,7 @@ test('development catalog launches a standalone game and returns to the library'
 
   const library = 'http://127.0.0.1:4174/studio-dev/';
   await page.goto(library);
-  await page.getByRole('link', { name: 'Navigation Fixture' }).click();
+  await page.locator('a[href="#/games/navigation-fixture"]').click();
   await expect(page).toHaveURL(`${library}#/games/navigation-fixture`);
   await expect(page.getByRole('heading', { name: 'Navigation Fixture' })).toBeFocused();
   await page.goBack();
@@ -78,6 +88,6 @@ test('development catalog launches a standalone game and returns to the library'
   await page.screenshot({ path: testInfo.outputPath('fixture.png') });
   await page.getByRole('link', { name: 'Return to Game Library' }).click();
   await expect(page).toHaveURL(`${library}#/`);
-  await expect(page.getByRole('link', { name: 'Navigation Fixture' })).toBeVisible();
+  await expect(page.locator('a[href="#/games/navigation-fixture"]')).toBeVisible();
   expect(failures).toEqual([]);
 });
