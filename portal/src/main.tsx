@@ -1,11 +1,10 @@
 import { StrictMode, useEffect, useRef, useSyncExternalStore } from 'react';
 import { createRoot } from 'react-dom/client';
-import catalog from '../../registry/games.json';
 import { developmentCatalog } from './developmentCatalog';
-import { parseRegistry, publicGames } from './registry';
+import { parseRegistry } from './registry';
 import './styles.css';
 
-const releasedGames = publicGames(parseRegistry(catalog));
+const releasedGames = __STUDIO_PUBLIC_GAMES__;
 const games = import.meta.env.DEV
   ? [...releasedGames, ...parseRegistry(developmentCatalog).games]
   : releasedGames;

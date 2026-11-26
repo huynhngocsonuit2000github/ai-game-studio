@@ -23,14 +23,18 @@ From the repository root, run the pinned setup in the [portal README](../portal/
 pnpm lint
 pnpm typecheck
 pnpm test
-STUDIO_PAGES_BASE_PATH=/ai-game-studio/ pnpm test:browser
+pnpm build
+pnpm assemble:pages
 pnpm verify:pages
+STUDIO_PAGES_BASE_PATH=/ai-game-studio/ STUDIO_TEST_ASSEMBLED_PAGES=1 pnpm exec playwright test
 ```
 
-Set `STUDIO_CHROMIUM_PATH` to a compatible installed Chromium executable when a browser download is unavailable. Browser smoke builds the portal and checks it under the project subpath. Docker is optional.
+Set `STUDIO_CHROMIUM_PATH` to a compatible installed Chromium executable when a browser download is unavailable. Browser smoke serves the assembled artifact under the project subpath. Docker is optional.
 
-The foundation workflow publishes `portal/dist/` with a commit marker. Its artifact check rejects a nonempty registry until M0-04 adds full-site assembly. Each production 2D and 3D game needs an independent static entry, relative asset URLs, and a return link. Include every released game in the full-site artifact.
+The workflow publishes `deployment/dist/` with a commit marker and release manifest. Assembly rebuilds all public released games. Each game package under `games/<id>/` must provide a `pnpm run build` script that produces a fresh `dist/`. Registry entry and cover paths must be under `games/<id>/` and exist in the assembled site. Game outputs must contain regular files and directories. The game entry needs relative asset URLs and a return link. Development and unpublished entries are excluded.
+
+CI uses trusted main registry history to protect previously public IDs and entry paths, including in reruns. A normal update or rollback must keep all of those routes. Retiring a route requires an explicit Studio release-policy change.
 
 ## Failure and rollback
 
-A failed validation prevents a new deployment. If provisioning fails, check the Pages source and environment rules, then rerun the workflow for the current main commit. If a published release is faulty, open a revert PR for the offending changes. After authorized merge, verify the replacement deployment and its commit marker. Deploying old runs is skipped once main has advanced.
+A failed validation prevents a new deployment. If provisioning fails, check the Pages source and environment rules, then rerun the workflow for the current main commit. For a faulty release, open a revert PR for the offending changes. If a normal revert would remove a public game, restore the previous working version while preserving the published entry. Build and smoke-test the complete rollback artifact. After authorized merge, verify HTTP 200, the commit marker and the released routes. The local regression suite rehearses an update, a failed candidate and a rollback with two synthetic games. Deploying old runs is skipped once main has advanced.
