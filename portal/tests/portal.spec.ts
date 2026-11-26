@@ -64,8 +64,10 @@ test('launches the Forest Adventure public preview from the assembled site', asy
 
   await page.goto(pagesBase);
   await page.getByRole('list', { name: 'Game results' }).getByRole('link', { name: preview.title }).click();
+  await expect(page).toHaveURL(`${pagesBase}#/games/${preview.id}`);
+  await expect(page.getByRole('link', { name: 'Play preview' })).toBeVisible();
   await expect(page.getByText('In Development', { exact: true })).toBeVisible();
-  const cover = page.locator('img[src="./games/forest-adventure/cover.webp"]');
+  const cover = page.locator('.detail-art img[src="./games/forest-adventure/cover.webp"]');
   await expect(cover).toBeVisible();
   await expect.poll(() => cover.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
   await page.getByRole('link', { name: 'Play preview' }).click();

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { execFileSync, spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { test } from 'node:test';
@@ -190,9 +190,15 @@ test('checks a real Git diff and treats a cross-game rename as two paths', (t) =
   }))));
   const registryHead = commit('valid private game metadata');
   assert.equal(check(base, registryHead).status, 0);
-  git('update-index', '--chmod=+x', 'registry/games.json');
-  git('-c', 'user.name=Studio Test', '-c', 'user.email=test@example.test', 'commit', '-m', 'registry mode change');
-  const modeTamper = check(base, git('rev-parse', 'HEAD'));
+  chmodSync(join(cwd, 'registry/games.json'), 0o755);
+  const modeTamper = check(base, commit('registry mode change'));
   assert.equal(modeTamper.status, 1);
   assert.match(modeTamper.stderr, /regular, nonexecutable file/);
+
+  git('checkout', '--detach', base);
+  put(join(cwd, 'registry/games.json'), JSON.stringify(registry(game('alpha', { status: 'development' }))));
+  const publishedBase = commit('public preview approved on main');
+  const stalePrivateBranch = check(publishedBase, registryHead);
+  assert.equal(stalePrivateBranch.status, 1);
+  assert.match(stalePrivateBranch.stderr, /outside the trusted grant/);
 });
