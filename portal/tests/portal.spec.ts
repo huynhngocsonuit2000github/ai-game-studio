@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test';
 
+const pagesBase = process.env.STUDIO_PAGES_BASE_PATH ?? '/studio/';
+
 for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-  test(`loads the empty catalog at ${viewport.width}px under /studio/`, async ({ page }, testInfo) => {
+  test(`loads the empty catalog at ${viewport.width}px under ${pagesBase}`, async ({ page }, testInfo) => {
     const failures: string[] = [];
     page.on('pageerror', (error) => failures.push(error.message));
     page.on('console', (message) => {
@@ -13,7 +15,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
     });
 
     await page.setViewportSize(viewport);
-    const loaded = await page.goto('/studio/', { waitUntil: 'load' });
+    const loaded = await page.goto(pagesBase, { waitUntil: 'load' });
     expect(loaded?.status()).toBe(200);
     await expect(page).toHaveTitle('Game Library | AI Game Studio');
     await expect(page.getByRole('heading', { name: 'Game Library', level: 1 })).toBeVisible();
@@ -28,7 +30,7 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
 
 test('production handles direct links to unknown, malformed and development-only IDs', async ({ page }, testInfo) => {
   for (const id of ['missing-game', 'Invalid%20ID', 'navigation-fixture']) {
-    await page.goto(`/studio/#/games/${id}`);
+    await page.goto(`${pagesBase}#/games/${id}`);
     await expect(page.getByRole('heading', { name: 'Game not found' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Launch game' })).toHaveCount(0);
   }

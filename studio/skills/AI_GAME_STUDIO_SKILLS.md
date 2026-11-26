@@ -73,7 +73,7 @@ Reusable reference for ChatGPT Project Game and Work. These are documented workf
 ## S11 — Build, CI/CD and deployment
 **Trigger:** initial setup, preview or release. **Output:** reproducible build instructions and CI config when requested.
 - Static web default: dependency lockfile, Node version, npm ci, typecheck/lint/test/build, browser smoke test, dist artifact. Adapt commands to actual repo scripts; configure Playwright browsers if needed. Validate base URL for subpath hosting, asset URLs, MIME, compression and browser caching.
-- GitHub Actions: PR checks, protected main where available, deploy only verified commits; configure GitHub Pages or approved free host and permissions. No claim of live deployment until actual URL and successful smoke test. Preview and stable branches if supported. Keep rollback instructions and release tag.
+- GitHub Actions: PR checks, protected main where available, deploy only verified commits; use GitHub Pages as the primary host and configure its deployment permissions. No claim of live deployment until actual URL and successful smoke test. Preview and stable branches if supported. Keep rollback instructions and release tag.
 - GitHub Pages availability depends on plan/repo visibility; public games may expose source on free public repos. Confirm privacy and rights before public deploy. Do not put API keys in frontend or commit tokens. Backend/multiplayer needs separate hosting; static hosting alone is insufficient.
 - Verify deployed game loads, assets work, console clean, representative gameplay works. Record commit/version, URL, test result, known limitations. Respect host limits and no extra spending without approval.
 
