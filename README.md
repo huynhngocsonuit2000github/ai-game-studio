@@ -3,7 +3,7 @@ A web-first monorepo for independent original 2D and 3D games. The foundation in
 
 ## Local development
 
-See [portal setup and verification](portal/README.md).
+See [portal setup and verification](portal/README.md) and the [approved game onboarding workflow](games/README.md).
 
 ## Start a new repository from the Foundation Pack
 1. Extract this pack into the root of a new GitHub repository (main). Preserve existing README history if needed; review files before upload.
