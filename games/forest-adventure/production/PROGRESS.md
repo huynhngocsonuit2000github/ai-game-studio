@@ -13,3 +13,9 @@
 - S06-1 built the complete Studio Pages artifact at the project subpath and rebuilt the prior main for rollback comparison. Existing public entries and the S01 media clearance are preserved. The private campaign build uses the same catalog, game and return paths.
 - S05 is ready for local review with open compatibility and playtest gates. S06 release is blocked. D06 covers the S01 development preview. Campaign rights, the trusted Studio registry and publication authorization, and Producer acceptance remain open. S06-2 can run against the published SHA only after authorized merge.
 - Resume by running the private campaign Playwright command in the [QA report](../reports/QA_REPORT.md), then complete the open checks in [S05](../stages/S05/STAGE.md) and [S06](../stages/S06/STAGE.md). Keep the current draft open and the catalog status as In Development until the release requirements are met.
+
+## Final S06 checkpoint · 2026-11-27
+
+- Based on `95cdbb639594a0685490a16e3549589905c66375`, which merged PR #16. D13 records the Producer's campaign gameplay acceptance and conditional release direction. The exact Producer-tested build identity is unverified. The Pages smoke for this main revision passed against the S01 preview.
+- S06-1 verified the first-party campaign sources and pinned notices. The default build selects the full campaign only when the canonical Studio entry is public and Released. Both the default S01 artifact and a local Released fixture passed Pages assembly. The canonical catalog still says In Development.
+- S06-2 is blocked by the open validation in the [QA report](../reports/QA_REPORT.md). The representative laptop trace and five unaided playtests remain mandatory. Record their evidence or an explicit measured Producer exception where the stage permits one. The exact trusted scope grant and two registry fields then follow the [release notes](RELEASE_NOTES.md). Live campaign verification follows authorized manual merge.

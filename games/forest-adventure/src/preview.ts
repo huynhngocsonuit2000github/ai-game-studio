@@ -1,2 +1,3 @@
-// D06 permits the public S01 preview media. The campaign build is for local review.
-export const campaignPreview = import.meta.env.MODE === 'campaign';
+declare const __FOREST_CAMPAIGN_ENABLED__: boolean;
+
+export const campaignPreview = __FOREST_CAMPAIGN_ENABLED__;

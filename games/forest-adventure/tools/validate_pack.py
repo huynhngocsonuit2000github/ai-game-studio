@@ -29,8 +29,8 @@ IMAGE_SPEC = {
     "banner.webp": ("promotion", "Wide promo banner", "S02","key.png"),
 }
 ATLAS = {"pip":11,"creatures":6,"forest-props":7,"terrain":4,"forest-vfx":24,"hud":8}
-LICENSE = "Original pack asset; see assets/source/PROVENANCE.md; public release approval pending"
-S01_PREVIEW_LICENSE = "Producer-authorized for public S01 preview only (2026-11-26); see assets/source/PROVENANCE.md"
+LICENSE = "First-party campaign asset; Studio Pages release subject to D13 gates; see assets/source/PROVENANCE.md"
+S01_PREVIEW_LICENSE = "Public S01 preview cleared under D06; campaign release subject to D13 gates; see assets/source/PROVENANCE.md"
 S01_PREVIEW_ASSETS = {
     "bg-fernlight.webp", "cover.webp", "soil-body.webp", "pip.png",
     "pip.json", "pip-clips.json", "creatures.png", "creatures.json",
@@ -250,7 +250,7 @@ def main():
         print("Checked-in manifest paths, hashes, sizes and provenance match.")
     else:
         with MANIFEST.open("w", newline="", encoding="utf-8") as file:
-            writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+            writer = csv.DictWriter(file, fieldnames=list(rows[0]), lineterminator="\n")
             writer.writeheader()
             writer.writerows(rows)
         (ROOT/"reports/asset-validation.json").write_text(json.dumps(evidence,indent=2)+"\n")
