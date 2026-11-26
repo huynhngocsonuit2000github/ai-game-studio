@@ -2,6 +2,7 @@ name: Verify and deploy to GitHub Pages
 
 on:
   pull_request:
+  workflow_dispatch:
   push:
     branches: [main]
 
@@ -41,17 +42,17 @@ jobs:
           path: test-results/
           if-no-files-found: ignore
       - name: Stamp the verified commit
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         run: printf '%s\n' "$GITHUB_SHA" > portal/dist/build-sha.txt
       - name: Upload the Pages artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
         with:
           path: portal/dist
 
   deploy:
     name: Deploy verified main to GitHub Pages
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     needs: verify
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -90,11 +91,14 @@ jobs:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
           url="${PAGE_URL%/}/"
-          curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors "$url" > /tmp/studio-pages-index.html
+          status="$(curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors \
+            --output /tmp/studio-pages-index.html --write-out '%{http_code}' "$url")"
+          [[ "$status" == '200' ]]
           grep -Fq '<title>Game Library | AI Game Studio</title>' /tmp/studio-pages-index.html
           for attempt in {1..6}; do
             if published_sha="$(curl --fail --silent --show-error --location --max-time 10 "${url}build-sha.txt?sha=${GITHUB_SHA}")" &&
               [[ "$published_sha" == "$GITHUB_SHA" ]]; then
+              printf 'Verified %s returned HTTP %s and published commit %s.\n' "$url" "$status" "$published_sha"
               exit 0
             fi
             sleep 5

@@ -2,11 +2,12 @@
 
 ## M0-03 — GitHub Actions and GitHub Pages
 
-- Status: candidate_ready
+- Status: candidate_ready for the recovery PR. Live acceptance remains blocked until the public site returns HTTP 200 with the expected commit.
+- Recovery: PR #3 merged into `studio/m0-02-catalog` at `2406516`. Current main `8a91e16` lacks `pages.yml`, so that merge did not trigger a main deployment. The recovery PR targets main directly and adds a manual deployment trigger restricted to current main. Pages source is reported as GitHub Actions. Recovery checks passed workflow lint, build, lint, typecheck, 29 unit tests, four Chromium tests under the project subpath, and artifact validation. The workspace HTTP client and Cloud browser were blocked by the network proxy before receiving an origin response.
 - Baseline: M0-02 PR #2 head `e1ca3c3530ca53ea8260b8f7b80c14586c5931b9`. Fetched current main `8a91e16107f498ccf124d059c5e17e26db83f69f` and verified its tree matches the M0-01 base of M0-02. Use the M0-02 branch as the review base while PR #2 remains open.
 - Tested candidate: `883bec2487b37afe0c7e747e8950358d40c3c876`.
 - Scope: GitHub Pages workflow, project-subpath tests, portal artifact validation, and hosting, onboarding and acceptance standards. Docker is optional.
-- Approval: M0-03 awaits explicit Producer approval. Next task after approval: M0-04, changed-path scope validation, full-site assembly and rollback verification.
+- Approval: M0-03 awaits live verification and explicit Producer approval. Next task after acceptance: M0-04, changed-path scope validation, full-site assembly and rollback verification.
 
 | Check | Result | Evidence |
 | --- | --- | --- |

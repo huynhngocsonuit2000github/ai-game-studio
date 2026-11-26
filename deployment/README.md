@@ -1,6 +1,6 @@
 # GitHub Pages deployment
 
-GitHub Pages is the Studio's primary host. The [Pages workflow](../.github/workflows/pages.yml) validates pull requests, saves browser evidence, and deploys the verified artifact automatically after an authorized merge into `main`. A PR run has read-only permissions and produces no deployment.
+GitHub Pages is the Studio's primary host. The [Pages workflow](../.github/workflows/pages.yml) validates pull requests, saves browser evidence, and deploys the verified artifact automatically after an authorized merge into `main`. A PR run has read-only permissions and produces no deployment. A manual run can also deploy from `main`.
 
 ## Repository setup
 
@@ -8,6 +8,12 @@ GitHub Pages is the Studio's primary host. The [Pages workflow](../.github/workf
 2. If the `github-pages` environment has deployment branch rules, allow `main`. For automatic deployment after merging, keep the environment free of a second manual approval gate.
 3. Review and merge the approved PR. In **Actions**, open **Verify and deploy to GitHub Pages** for that main commit. Confirm that the deploy job and its published revision smoke test passed.
 4. Use the deployment URL reported by the workflow. Confirm the home page loads and that `build-sha.txt` matches the main commit. For a game release, also smoke-test the published game and its return path. Record the URL, SHA and result in the milestone evidence.
+
+## Recover a missing deployment
+
+Check that `.github/workflows/pages.yml` exists on `main` and inspect the merged PR's base branch. A merge into a milestone branch only updates that branch. Open a PR into `main` carrying the workflow and its application dependencies if they are missing there.
+
+Once the workflow exists on `main`, open **Actions → Verify and deploy to GitHub Pages → Run workflow**, select **main**, and run it. With an authenticated GitHub CLI, use `gh workflow run pages.yml --ref main`. The manual run repeats verification before deployment. Other branches can run checks, but only the current main revision can publish. Recheck the deployment URL and commit marker before closing the milestone.
 
 ## Local verification
 
