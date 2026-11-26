@@ -8,6 +8,8 @@ import type { AddressInfo } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, extname, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
+import { createServer as createViteServer } from 'vite';
+import type { ViteDevServer } from 'vite';
 
 const execute = promisify(execFile);
 const repo = resolve(import.meta.dirname, '../..');
@@ -54,7 +56,11 @@ function catalogEntry(game: typeof draft, released: boolean) {
     engine: 'other',
     status: released ? 'released' : 'development',
     entry: `games/${game.id}/index.html`,
-    cover: null,
+    cover: game.id === published[0]?.id ? `games/${game.id}/cover.webp` : null,
+    dimension: game.id === published[0]?.id ? '2D' : '3D',
+    categories: [game.id === published[0]?.id ? 'Puzzle' : 'Adventure'],
+    featured: game.id === published[0]?.id,
+    ...(!released ? { milestone: 'Playable test milestone' } : {}),
     version: '1.0.0',
     visibility: released ? 'public' : 'development',
   };
@@ -62,7 +68,7 @@ function catalogEntry(game: typeof draft, released: boolean) {
 
 const contentTypes: Record<string, string> = {
   '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css',
-  '.txt': 'text/plain', '.json': 'application/json', '.png': 'image/png',
+  '.txt': 'text/plain', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp',
 };
 
 test('onboards isolated game packages and plays them from the assembled Pages site', async ({ page }, testInfo) => {
@@ -89,11 +95,12 @@ test('onboards isolated game packages and plays them from the assembled Pages si
     }
   });
 
+  let developmentServer: ViteDevServer | undefined;
   try {
     for (const file of [
       '.npmrc', '.node-version', 'package.json', 'pnpm-workspace.yaml', 'pnpm-lock.yaml',
       'portal/package.json', 'portal/index.html', 'portal/src', 'portal/public',
-      'portal/vite.config.ts', 'portal/tsconfig.json', 'registry/games.json',
+      'portal/vite.config.ts', 'portal/preview-builds.ts', 'portal/tsconfig.json', 'registry/games.json',
       'scripts/assemble-pages.mjs', 'scripts/verify-pages.mjs',
     ]) {
       cpSync(join(repo, file), join(root, file), { recursive: true });
@@ -106,6 +113,7 @@ test('onboards isolated game packages and plays them from the assembled Pages si
     ]);
 
     for (const game of [...published, draft]) createPackage(root, game);
+    cpSync(join(repo, 'portal/src/assets/library-hero.webp'), join(root, 'games/onboarding-alpha/src/cover.webp'));
     write(join(root, 'registry/games.json'), JSON.stringify({
       schemaVersion: 1,
       games: [...published.map((game) => catalogEntry(game, true)), catalogEntry(draft, false)],
@@ -145,6 +153,31 @@ test('onboards isolated game packages and plays them from the assembled Pages si
     await page.goto(origin + sitePath);
     await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
     await expect(page.getByRole('listitem')).toHaveCount(2);
+    await expect(page.getByRole('region', { name: 'Featured game' }).getByRole('heading', { name: 'Onboarding Alpha' })).toBeVisible();
+    const cover = page.getByRole('listitem').filter({ hasText: 'Onboarding Alpha' }).locator('img');
+    await expect.poll(() => cover.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    await expect(page.getByText('Released', { exact: true })).toHaveCount(2);
+    await page.getByRole('searchbox', { name: 'Search games' }).fill('  Beta  ');
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await page.getByRole('combobox', { name: 'Category' }).selectOption('puzzle');
+    await expect(page.getByRole('heading', { name: 'No matching games' })).toBeVisible();
+    await page.getByRole('button', { name: 'Clear filters' }).click();
+    await page.getByRole('button', { name: '2D', exact: true }).click();
+    await expect(page.getByRole('listitem')).toHaveText(/Onboarding Alpha/);
+    await page.getByRole('button', { name: '3D', exact: true }).click();
+    await expect(page.getByRole('listitem')).toHaveText(/Onboarding Beta/);
+    await page.getByRole('combobox', { name: 'Category' }).selectOption('adventure');
+    await expect(page.getByRole('listitem')).toHaveCount(1);
+    await page.getByRole('combobox', { name: 'Category' }).selectOption('');
+    await page.getByRole('button', { name: 'All', exact: true }).click();
+    await page.screenshot({ path: testInfo.outputPath('synthetic-catalog.png'), fullPage: true });
+    const desktop = page.viewportSize();
+    if (!desktop) throw new Error('Expected a desktop viewport');
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
+    await expect(page.getByRole('listitem')).toHaveCount(2);
+    await page.screenshot({ path: testInfo.outputPath('synthetic-mobile.png'), fullPage: true });
+    await page.setViewportSize(desktop);
     await expect(page.getByText(draft.title)).toHaveCount(0);
     const excluded = await page.request.get(`${origin}${sitePath}games/${draft.id}/index.html`);
     expect(excluded.status()).toBe(404);
@@ -155,7 +188,10 @@ test('onboards isolated game packages and plays them from the assembled Pages si
     for (const game of published) {
       await page.getByRole('link', { name: game.title }).click();
       await expect(page.getByRole('heading', { name: game.title })).toBeVisible();
-      await page.getByRole('link', { name: 'Launch game' }).click();
+      if (game.id === published[0]?.id) {
+        await page.screenshot({ path: testInfo.outputPath('released-detail.png'), fullPage: true });
+      }
+      await page.getByRole('link', { name: 'Play Now' }).click();
       const entry = `${origin}${sitePath}games/${game.id}/index.html`;
       await expect(page).toHaveURL(entry);
       await page.getByRole('button', { name: 'Play' }).click();
@@ -165,8 +201,29 @@ test('onboards isolated game packages and plays them from the assembled Pages si
       await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
     }
     expect(errors).toEqual([]);
-    await page.screenshot({ path: testInfo.outputPath('synthetic-catalog.png') });
+    await run('pnpm', ['--dir', `games/${draft.id}`, 'run', 'build']);
+    developmentServer = await createViteServer({
+      root: join(root, 'portal'),
+      base: '/preview/',
+      server: { host: '127.0.0.1', port: 0 },
+      configFile: join(root, 'portal/vite.config.ts'),
+      logLevel: 'error',
+    });
+    await developmentServer.listen();
+    const devOrigin = `http://127.0.0.1:${(developmentServer.httpServer?.address() as AddressInfo).port}`;
+    await page.goto(`${devOrigin}/preview/#/games/${draft.id}`);
+    await expect(page.getByRole('heading', { name: draft.title })).toBeVisible();
+    await expect(page.getByText('In Development')).toBeVisible();
+    await expect(page.getByText('Playable test milestone')).toBeVisible();
+    await page.getByRole('link', { name: 'Play preview' }).click();
+    await page.getByRole('button', { name: 'Play' }).click();
+    await expect(page.getByRole('status')).toHaveText(draft.asset);
+    await page.getByRole('link', { name: 'Return to Game Library' }).click();
+    await expect(page).toHaveURL(`${devOrigin}/preview/#/`);
+    await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
+    expect(errors).toEqual([]);
   } finally {
+    await developmentServer?.close();
     if (server.listening) {
       server.closeAllConnections();
       await new Promise<void>((done) => server.close(() => done()));

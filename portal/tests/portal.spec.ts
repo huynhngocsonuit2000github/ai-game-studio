@@ -28,13 +28,13 @@ for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 
       await expect(page.getByRole('heading', { name: 'No games available yet' })).toBeVisible();
     } else {
       for (const game of expectedGames) {
-        await expect(page.locator(`a[href="#/games/${game.id}"]`)).toHaveText(game.title);
+        await expect(page.getByRole('list', { name: 'Game results' }).locator(`a[href="#/games/${game.id}"]`)).toHaveText(game.title);
       }
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(viewport.width);
     expect(failures).toEqual([]);
 
-    await page.screenshot({ path: testInfo.outputPath('catalog.png') });
+    await page.screenshot({ path: testInfo.outputPath('catalog.png'), fullPage: true });
   });
 }
 
@@ -42,7 +42,7 @@ test('production handles direct links to unknown, malformed and development-only
   for (const id of ['', 'Invalid%20ID', 'navigation-fixture']) {
     await page.goto(`${pagesBase}#/games/${id}`);
     await expect(page.getByRole('heading', { name: 'Game not found' })).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Launch game' })).toHaveCount(0);
+    await expect(page.getByRole('link', { name: /Play Now|Play preview/ })).toHaveCount(0);
   }
 
   await page.screenshot({ path: testInfo.outputPath('unavailable.png') });
@@ -69,7 +69,7 @@ test('development catalog launches a standalone game and returns to the library'
 
   const library = 'http://127.0.0.1:4174/studio-dev/';
   await page.goto(library);
-  await page.locator('a[href="#/games/navigation-fixture"]').click();
+  await page.getByRole('list', { name: 'Game results' }).locator('a[href="#/games/navigation-fixture"]').click();
   await expect(page).toHaveURL(`${library}#/games/navigation-fixture`);
   await expect(page.getByRole('heading', { name: 'Navigation Fixture' })).toBeFocused();
   await page.goBack();
@@ -77,8 +77,10 @@ test('development catalog launches a standalone game and returns to the library'
   await page.goForward();
   await page.reload();
   await expect(page).toHaveTitle('Navigation Fixture | AI Game Studio');
+  await expect(page.getByText('In Development')).toBeVisible();
+  await expect(page.getByText('Navigation smoke test')).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('detail.png') });
-  await page.getByRole('link', { name: 'Launch game' }).click();
+  await page.getByRole('link', { name: /Play Now|Play preview/ }).click();
   await expect(page).toHaveURL(`${library}fixtures/navigation/index.html`);
   await expect(page).toHaveTitle('Navigation Fixture');
   await page.getByRole('button', { name: 'Circle' }).click();
@@ -88,6 +90,6 @@ test('development catalog launches a standalone game and returns to the library'
   await page.screenshot({ path: testInfo.outputPath('fixture.png') });
   await page.getByRole('link', { name: 'Return to Game Library' }).click();
   await expect(page).toHaveURL(`${library}#/`);
-  await expect(page.locator('a[href="#/games/navigation-fixture"]')).toBeVisible();
+  await expect(page.getByRole('list', { name: 'Game results' }).locator('a[href="#/games/navigation-fixture"]')).toBeVisible();
   expect(failures).toEqual([]);
 });

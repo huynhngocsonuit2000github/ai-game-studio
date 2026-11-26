@@ -19,8 +19,14 @@ pnpm build
 pnpm test:browser
 ```
 
-Browser smoke rebuilds and serves the production bundle under `/studio/`. It checks the empty library at desktop and mobile viewport widths, records console and network failures, and writes screenshots to `test-results/`.
+Browser smoke rebuilds and serves the production bundle under `/studio/`. It checks the production library at desktop and mobile viewport widths, records console and network failures, and writes screenshots to `test-results/`.
 
 The library uses `#/` and game detail pages use `#/games/<id>`. These routes work on a static host under a site subpath. A game launches from its validated site-relative entry path. Unknown or unavailable IDs show a link back to the library.
 
 `pnpm dev` adds the development-only Navigation Fixture to the catalog. Open its detail page, launch the independent game, choose the square, and use the return link. The production build excludes the fixture and uses the canonical registry. Browser smoke exercises production and development on separate local subpaths.
+
+## Library and playable previews
+
+The portal reads cover art, category, 2D/3D format, featured selection, and milestone labels from the [registry contract](../registry/README.md). The deployed site includes public releases. The local Vite portal also displays planned and in-development entries, with Play preview when the registry contains a verified entry.
+
+Build a registered candidate with `pnpm --dir games/<id> run build`, then launch the local portal with `pnpm dev`. It serves the package's static `dist/` at `games/<id>/` under the portal base path. The corresponding release paths and Pages artifact use the same relative URL structure.

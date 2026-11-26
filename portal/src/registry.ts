@@ -1,5 +1,6 @@
 const engines = ['phaser', 'three', 'other'] as const;
 const statuses = ['planned', 'development', 'released', 'archived'] as const;
+const dimensions = ['2D', '3D'] as const;
 const visibilities = ['development', 'public'] as const;
 const gameId = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const pathSegment = /^[A-Za-z0-9._-]+$/;
@@ -36,6 +37,18 @@ function relativePath(value: unknown, field: string): string | null {
   return path;
 }
 
+function parseCategories(value: unknown, field: string): string[] {
+  if (!Array.isArray(value) || value.length > 8) {
+    throw new Error(`${field} must be an array of up to eight category names`);
+  }
+  const names = value.map((name: unknown) => requiredText(name, field).trim());
+  if (names.some((name) => name.length > 40) ||
+      new Set(names.map((name) => name.toLowerCase())).size !== names.length) {
+    throw new Error(`${field} must contain distinct category names of up to 40 characters`);
+  }
+  return names;
+}
+
 function parseGame(value: unknown, index: number) {
   const field = `games[${index}]`;
   const game = record(value, field);
@@ -50,6 +63,10 @@ function parseGame(value: unknown, index: number) {
     throw new Error(`${field}.entry is required for released games`);
   }
 
+  if (game.featured !== undefined && typeof game.featured !== 'boolean') {
+    throw new Error(`${field}.featured must be boolean`);
+  }
+
   return {
     id,
     title: requiredText(game.title, `${field}.title`),
@@ -60,6 +77,10 @@ function parseGame(value: unknown, index: number) {
     cover: relativePath(game.cover, `${field}.cover`),
     version: requiredText(game.version, `${field}.version`),
     visibility: choice(game.visibility, visibilities, `${field}.visibility`),
+    ...(game.categories === undefined ? {} : { categories: parseCategories(game.categories, `${field}.categories`) }),
+    ...(game.dimension === undefined ? {} : { dimension: choice(game.dimension, dimensions, `${field}.dimension`) }),
+    ...(game.featured === undefined ? {} : { featured: game.featured }),
+    ...(game.milestone === undefined ? {} : { milestone: requiredText(game.milestone, `${field}.milestone`).trim() }),
   };
 }
 
@@ -88,4 +109,8 @@ export function parseRegistry(value: unknown) {
 
 export function publicGames(registry: ReturnType<typeof parseRegistry>) {
   return registry.games.filter((game) => game.status === 'released' && game.visibility === 'public');
+}
+
+export function developmentGames(registry: ReturnType<typeof parseRegistry>) {
+  return registry.games.filter((game) => game.status === 'development' || game.status === 'planned');
 }
