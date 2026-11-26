@@ -162,7 +162,7 @@ test('launches from the development catalog, clears by keyboard and returns to S
   await travel(42);
   await expect(page.getByRole('heading', { name: 'Trail cleared' })).toBeVisible();
   await expect(page.getByText(/20\.\d s · 8\/8 fireflies · 1 fall or defeat/)).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Replay' })).toBeFocused();
+  await expect(page.getByRole('button', { name: campaign ? 'Next trail' : 'Replay' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('trail-cleared.png') });
   await page.keyboard.up('ArrowRight');
   activeDirection = null;

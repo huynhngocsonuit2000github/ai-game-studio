@@ -62,11 +62,12 @@ class TrailScene extends Phaser.Scene {
   private accumulator = 0;
   private previousX = fernlight.spawn.x;
   private previousY = fernlight.spawn.y;
-  private backdrop!: Phaser.GameObjects.TileSprite;
+  private backdrop!: Phaser.GameObjects.Image;
   private pip!: Phaser.GameObjects.Sprite;
   private enemySprites = new Map<string, Phaser.GameObjects.Sprite>();
   private landscape: Phaser.GameObjects.GameObject[] = [];
   private gateLights!: Phaser.GameObjects.Graphics;
+  private displayedSeeds = -1;
   private enemySignals!: Phaser.GameObjects.Graphics;
   private oakLight!: Phaser.GameObjects.Graphics;
   private lantern!: Phaser.GameObjects.Sprite;
@@ -99,9 +100,7 @@ class TrailScene extends Phaser.Scene {
     const camera = this.cameras.main;
     camera.setBounds(0, 0, fernlight.width, fernlight.height);
     camera.setScroll(0, fernlight.height - HEIGHT);
-    this.backdrop = this.add.tileSprite(0, 0, WIDTH, HEIGHT, 'forest')
-      .setOrigin(0).setScrollFactor(0).setDepth(-2);
-    this.backdrop.setTileScale(HEIGHT / this.backdrop.texture.getSourceImage().height);
+    this.backdrop = this.add.image(0, 0, 'forest').setOrigin(0).setScrollFactor(0).setDepth(-2);
     this.motes = this.add.graphics().setScrollFactor(0).setDepth(4);
 
     for (const [key, clip] of Object.entries(pipClips)) this.addClip(key, 'pip', clip);
@@ -153,15 +152,21 @@ class TrailScene extends Phaser.Scene {
   }
 
   startAttempt(level = fernlight) {
-    if (level !== this.session.level) this.drawLevel(level);
+    const previousLevel = this.session.level;
+    if (level !== previousLevel) {
+      this.drawLevel(level);
+      if (previousLevel !== fernlight) this.textures.remove(previousLevel.id);
+    }
     this.session = new Session(level);
     this.loadNearLayer();
     this.rememberPlayerPosition();
     this.cameras.main.scrollX = 0;
-    this.backdrop.tilePositionX = 0;
+    this.backdrop.x = 0;
     if (this.nearLayer) this.nearLayer.tilePositionX = 0;
     this.motes?.clear();
     this.landingUntil = 0;
+    this.displayedSeeds = -1;
+    this.pip.stop();
     for (const effect of this.effects) effect.setVisible(false).stop();
     this.setRunning(true);
     this.syncSprites();
@@ -200,7 +205,7 @@ class TrailScene extends Phaser.Scene {
     const left = this.session.player.x + this.session.player.vx / 250 * 96 - WIDTH / 2;
     const target = Phaser.Math.Clamp(left, 0, this.session.level.width - WIDTH);
     camera.scrollX += (target - camera.scrollX) * (1 - Math.exp(-Math.min(delta, 100) / 150));
-    this.backdrop.tilePositionX = camera.scrollX * .18;
+    this.backdrop.x = -camera.scrollX * .18 * this.backdrop.scaleX;
     if (this.nearLayer) this.nearLayer.tilePositionX = camera.scrollX * .64;
     this.motes?.clear();
     if (campaignPreview && !this.host.reducedMotion()) {
@@ -269,7 +274,8 @@ class TrailScene extends Phaser.Scene {
     this.cameras.main.setBounds(0, 0, level.width, level.height);
     this.cameras.main.setScroll(0, level.height - HEIGHT);
     this.backdrop.setTexture(level === fernlight ? 'forest' : level.id);
-    this.backdrop.setTileScale(HEIGHT / this.backdrop.texture.getSourceImage().height);
+    // Every backdrop is wide enough for the full viewport plus the trail's parallax travel.
+    this.backdrop.setScale(HEIGHT / this.backdrop.height);
     this.drawTerrain(level);
     for (const hazard of level.hazards) {
       this.landscape.push(this.sprite(hazard.x + hazard.width / 2, hazard.y + hazard.height, 'props', 'bramble', .37));
@@ -297,7 +303,7 @@ class TrailScene extends Phaser.Scene {
 
   private drawTerrain(level: Level) {
     const { ground, cellLogicalWidth, solidVisualTopInsetLogical, pixelsPerUnit } = terrainLayout;
-    const shade = this.add.graphics().setDepth(.1);
+    const shade = this.add.graphics().setDepth(.25);
     this.landscape.push(shade);
     for (const [index, solid] of level.solids.entries()) {
       const y = solid.y - solidVisualTopInsetLogical;
@@ -310,8 +316,13 @@ class TrailScene extends Phaser.Scene {
         fill.tilePositionX = index * 193;
         this.landscape.push(fill);
         for (let depth = 0; depth < bodyHeight; depth += 8) {
-          shade.fillStyle(0x141b24, .14 + .42 * depth / bodyHeight);
+          shade.fillStyle(0x141b24, .18 + .38 * depth / bodyHeight);
           shade.fillRect(solid.x, bodyY + depth, solid.width, Math.min(8, bodyHeight - depth));
+        }
+        shade.fillStyle(0x141b24, .28);
+        if (solid.x > 0) shade.fillRect(solid.x, bodyY + 11, 4, bodyHeight - 11);
+        if (solid.x + solid.width < level.width) {
+          shade.fillRect(solid.x + solid.width - 4, bodyY + 11, 4, bodyHeight - 11);
         }
       }
       const columns = Math.ceil(solid.width / cellLogicalWidth);
@@ -320,10 +331,11 @@ class TrailScene extends Phaser.Scene {
           : column === columns - 1 ? ground.right
             : ground.fill[((column * 17) ^ (column >> 1) ^ index) & 1] ?? ground.left;
         const tileWidth = solid.width * pixelsPerUnit / columns;
+        const capWidth = column === 0 || column === columns - 1 ? 64 : Math.min(tileWidth, 64);
         const tileHeight = Math.min(solid.height + solidVisualTopInsetLogical, deep ? 41 : 62) * pixelsPerUnit;
         const cap = this.add.image(solid.x + column * solid.width / columns, y, 'terrain', frame)
-          .setOrigin(0).setCrop(0, 0, Math.min(tileWidth, 64), tileHeight)
-          .setScale(tileWidth / Math.min(tileWidth, 64) / pixelsPerUnit, 1 / pixelsPerUnit).setDepth(.2);
+          .setOrigin(0).setCrop(0, 0, capWidth, tileHeight)
+          .setScale(tileWidth / capWidth / pixelsPerUnit, 1 / pixelsPerUnit).setDepth(.2);
         this.landscape.push(cap);
       }
       for (let offset = 95 + index * 13 % 56; offset < solid.width - 35; offset += 133 + index * 11 % 63) {
@@ -345,7 +357,9 @@ class TrailScene extends Phaser.Scene {
     const fraction = this.running ? Phaser.Math.Clamp(this.accumulator / STEP_MS, 0, 1) : 1;
     this.pip.setPosition(Phaser.Math.Linear(this.previousX, player.x, fraction),
       Phaser.Math.Linear(this.previousY, player.y, fraction))
-      .setFlipX(player.facing < 0).setVisible(session.phase !== 'recovering').play(pipClip, true);
+      .setFlipX(player.facing < 0).setVisible(session.phase !== 'recovering');
+    if (pipClip === 'idle' || pipClip === 'run') this.pip.play(pipClip, true);
+    else this.pip.stop().setFrame(pipClip);
     this.pip.setAlpha(!this.host.reducedMotion() && session.damageTicks > 0 && session.damageTicks % 16 < 5 ? .66 : 1);
     if (pipClip === 'run') this.pip.anims.timeScale = .75 + .45 * Math.abs(player.vx) / 250;
     else this.pip.anims.timeScale = 1;
@@ -357,7 +371,10 @@ class TrailScene extends Phaser.Scene {
       if (!actor) continue;
       const clip = beetle ? (enemy.defeated ? 'beetle-stomped' : 'beetle-walk')
         : (enemy.dipping ? 'moth-dip' : 'moth-hover');
-      actor.setPosition(enemy.x, enemy.y).setFlipX(enemy.direction > 0).play(clip, true);
+      actor.setPosition(enemy.x, enemy.y).setFlipX(enemy.direction > 0);
+      if (enemy.defeated) actor.stop().setFrame('beetle-stomped');
+      else actor.play(clip, true);
+      actor.setScale(.5, beetle && enemy.turnTicks > 0 && !this.host.reducedMotion() ? .45 : .5);
       if (!beetle && enemy.warning) {
         this.enemySignals.fillStyle(0x281c32, .95).fillCircle(enemy.x, enemy.y - 29, 8);
         this.enemySignals.fillStyle(0xffdb91).fillTriangle(
@@ -368,6 +385,20 @@ class TrailScene extends Phaser.Scene {
       else if (this.running) actor.anims.resume();
     }
     this.lantern.setFrame(session.checkpoint ? 'lantern' : 'lantern-dormant');
+    this.syncGate();
+    for (const [id, sprite] of this.pickups) sprite.setVisible(!session.seeds.has(id));
+    for (const [id, sprite] of this.fireflies) {
+      const visible = !session.fireflies.has(id);
+      sprite.setVisible(visible);
+      if (!visible || this.host.reducedMotion()) sprite.stop().setFrame('firefly-1');
+      else if (this.running) sprite.play('firefly', true);
+    }
+  }
+
+  private syncGate() {
+    const session = this.session;
+    if (this.displayedSeeds === session.seeds.size) return;
+    this.displayedSeeds = session.seeds.size;
     this.gate.setFrame(session.gateOpen ? 'portal' : 'portal-dormant');
     this.gateLights.clear();
     for (let index = 0; index < session.level.seeds.length; index++) {
@@ -382,12 +413,6 @@ class TrailScene extends Phaser.Scene {
       for (let radius = 105; radius >= 21; radius -= 21) {
         this.oakLight.fillStyle(0xffca71, .07).fillCircle(this.gate.x, this.gate.y - 91, radius);
       }
-    }
-    for (const [id, sprite] of this.pickups) sprite.setVisible(!session.seeds.has(id));
-    for (const [id, sprite] of this.fireflies) {
-      sprite.setVisible(!session.fireflies.has(id));
-      if (this.host.reducedMotion()) sprite.stop().setFrame('firefly-1');
-      else if (this.running) sprite.play('firefly', true);
     }
   }
 }

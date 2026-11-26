@@ -223,7 +223,7 @@ export class Session {
         enemy.x = spec.x + 48 * Math.sin(angle);
         enemy.y = spec.y - 20 * Math.cos(angle);
         enemy.direction = Math.cos(angle) >= 0 ? 1 : -1;
-        enemy.warning = phase > 0.15 && phase <= 0.28;
+        enemy.warning = phase > 0.10 && phase <= 0.28;
         enemy.dipping = phase > 0.28 && phase < 0.57;
       }
     }
