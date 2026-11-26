@@ -11,9 +11,13 @@ export default defineConfig({
     browserName: 'chromium',
     launchOptions: { executablePath },
   },
-  webServer: {
+  webServer: [{
     command: 'pnpm --filter @studio/portal preview --host 127.0.0.1 --port 4173 --strictPort --base /studio/',
     url: `${origin}/studio/`,
     reuseExistingServer: false,
-  },
+  }, {
+    command: 'pnpm --filter @studio/portal dev --host 127.0.0.1 --port 4174 --strictPort --base /studio-dev/',
+    url: 'http://127.0.0.1:4174/studio-dev/',
+    reuseExistingServer: false,
+  }],
 });

@@ -60,3 +60,17 @@ p {
   padding: 0;
   list-style: none;
 }
+
+a {
+  color: #9ee6d1;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.launch-link {
+  display: inline-block;
+  margin-top: 1rem;
+}
