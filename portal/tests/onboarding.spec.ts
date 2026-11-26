@@ -187,7 +187,7 @@ test('onboards isolated game packages and plays them from the assembled Pages si
 
     for (const game of published) {
       await page.getByRole('link', { name: game.title }).click();
-      await expect(page.getByRole('heading', { name: game.title })).toBeVisible();
+      await expect(page.getByRole('heading', { name: game.title, level: 1 })).toBeVisible();
       if (game.id === published[0]?.id) {
         await page.screenshot({ path: testInfo.outputPath('released-detail.png'), fullPage: true });
       }

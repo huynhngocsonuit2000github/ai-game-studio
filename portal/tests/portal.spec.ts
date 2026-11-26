@@ -71,7 +71,7 @@ test('development catalog launches a standalone game and returns to the library'
   await page.goto(library);
   await page.getByRole('list', { name: 'Game results' }).locator('a[href="#/games/navigation-fixture"]').click();
   await expect(page).toHaveURL(`${library}#/games/navigation-fixture`);
-  await expect(page.getByRole('heading', { name: 'Navigation Fixture' })).toBeFocused();
+  await expect(page.getByRole('heading', { name: 'Navigation Fixture', level: 1 })).toBeFocused();
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
   await page.goForward();
