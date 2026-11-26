@@ -18,9 +18,9 @@ S01 registers Forest Adventure with `status: development` and `visibility: devel
 
 Open `http://127.0.0.1:4181/ai-game-studio/#/games/forest-adventure` and choose Play preview. Build first so the portal can serve the game package's `dist/` files.
 
-S01 changes `registry/games.json`, `pnpm-lock.yaml` and `.github/workflows/pages.yml` under the Producer's authorization. The companion Studio PR grants the S01 head and its complete changed path list under `approvedHeads`. Merge the reviewed policy into `main` before retesting scope on S01. The trusted workflow reads the policy from the PR event's base commit. A fresh PR edit event after the policy merge picks up that base without changing the authorized S01 head.
+S01 changes `registry/games.json`, `pnpm-lock.yaml` and `.github/workflows/pages.yml` under the Producer's authorization. The companion Studio PR grants the S01 head and its complete changed path list under `approvedHeads`. The trusted policy entered `main` through PR #12 and the scope check passed for the unchanged S01 commit. PR #11 subsequently merged.
 
-Public Pages continues to select only public released games. The Producer directed S01 to keep the preview local pending D06 rights clearance. Any future public In Development build requires a reviewed Studio change that admits explicitly public development builds in the catalog and Pages assembly together. The S01 build and browser tests use the project subpath.
+D06 records the Producer's clearance for the S01 visual assets. Public display and Pages assembly follow the reviewed Studio publishing change, with the S01 catalog status kept In Development. The Pages workflow verifies the live game URL after publishing the merged candidate. The Producer playtest and S01 acceptance remain separate.
 
 Alternatively share a CI ZIP with the exact candidate layout under games/forest-adventure/, SHA marker and portal preview output when available, serve it on Producer machine using a regular HTTP static server, and specify the direct relative entry. Example if the artifact includes an ai-game-studio/ parent directory:
 

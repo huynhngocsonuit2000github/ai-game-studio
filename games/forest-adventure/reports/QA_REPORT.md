@@ -17,7 +17,7 @@ Tested in the candidate worktree based on `4bfdb37c79b921ea63efdcdaf1e3c9e1185ae
 | Studio browser smoke | PASS | `STUDIO_CHROMIUM_PATH=/usr/bin/chromium STUDIO_PAGES_BASE_PATH=/ai-game-studio/ STUDIO_TEST_ASSEMBLED_PAGES=1 pnpm exec playwright test` passed 5 tests. The first run passed 4 and hit an unwritable default pnpm data directory in the onboarding fixture. Rerunning all 5 with `XDG_DATA_HOME` set to a writable temporary directory resolved it. Screenshots are in the ignored `test-results/` directory. |
 | Studio registration | BLOCKED | Canonical registry has no Forest Adventure entry. Studio approval is required to add the validated draft. [Integration instructions](../production/STUDIO_INTEGRATION.md) |
 | G0 initial scope | PASS | The Producer approved the reduced three-level scope. [D03](../production/DECISIONS.md) |
-| Public redistribution | BLOCKED | Producer authorization is pending. [D06](../production/DECISIONS.md) |
+| Public redistribution | BLOCKED in S00 | Producer authorization was pending in S00. [D06](../production/DECISIONS.md) |
 | Forest Adventure runtime, listening, playtest and deploy | NOT_RUN in S00 | S00 verified the pack and static art targets. See the S01 runtime evidence below. |
 
 ## S01 evidence · 2026-11-26
@@ -40,7 +40,7 @@ S01 base `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad`. The PR head identifies the 
 - Studio frozen install, lint, typecheck, `pnpm test` (35 Vitest and 6 Node tests), portal build, Pages assembly and verification, and the 5 Studio Chromium tests passed. The production assembly excluded the Forest Adventure development build.
 - The first PR Pages run exposed a clean-checkout 404 for the catalog cover. CI now builds Forest Adventure after the public artifact is verified and before the local development catalog smoke. The catalog still uses the supplied cover.
 - Gameplay screenshots `fernlight-trail.png`, `lantern-checkpoint.png`, `closed-gate.png`, `open-gate.png` and `trail-cleared.png` are retained with the SHA-stamped local candidate in `test-results/s01-evidence/`. Run the game browser tests to capture them again from the branch. The Producer directed the team to keep the preview local pending rights clearance.
-- Public Pages preview is blocked on redistribution rights. Trusted merge scope also awaits the exact-head Studio approval for the registry, lockfile and CI build-order changes. Representative laptop performance, browser audio, and the Producer playtest remain stage checks.
+- The original S01 candidate merged after the trusted scope check passed. D06 records subsequent authorization for S01 public visual assets. Public verification follows the Studio publishing PR. Representative laptop performance, browser audio, and the Producer playtest remain stage checks.
 
 ## Implementation matrix
 
