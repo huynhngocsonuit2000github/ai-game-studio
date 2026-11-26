@@ -14,7 +14,7 @@
     "typecheck": "tsc --project portal/tsconfig.json",
     "test": "vitest run && node --test scripts/tests/*.test.mjs",
     "build": "pnpm --filter @studio/portal build",
-    "test:browser": "pnpm build && playwright test",
+    "test:browser": "pnpm build && pnpm assemble:pages && STUDIO_TEST_ASSEMBLED_PAGES=1 playwright test",
     "assemble:pages": "node scripts/assemble-pages.mjs",
     "verify:pages": "node scripts/verify-pages.mjs"
   },

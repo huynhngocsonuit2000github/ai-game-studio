@@ -31,7 +31,7 @@ STUDIO_PAGES_BASE_PATH=/ai-game-studio/ STUDIO_TEST_ASSEMBLED_PAGES=1 pnpm exec 
 
 Set `STUDIO_CHROMIUM_PATH` to a compatible installed Chromium executable when a browser download is unavailable. Browser smoke serves the assembled artifact under the project subpath. Docker is optional.
 
-The workflow publishes `deployment/dist/` with a commit marker and release manifest. Assembly rebuilds all public released games. Each game package under `games/<id>/` must provide a `pnpm run build` script that produces a fresh `dist/`. Registry entry and cover paths must be under `games/<id>/` and exist in the assembled site. Game outputs must contain regular files and directories. The game entry needs relative asset URLs and a return link. Development and unpublished entries are excluded.
+The workflow publishes `deployment/dist/` with a commit marker and release manifest. Assembly rebuilds public releases and explicitly public development previews. Studio review requires asset clearance before setting a preview to public. Each game package under `games/<id>/` must provide a `pnpm run build` script that produces a fresh `dist/`. Its entry and cover must be under `games/<id>/` and exist in the assembled site. Game outputs must contain regular files and directories. The entry needs relative asset URLs and a return link. Private development entries are excluded. A preview can be withdrawn by reverting its public visibility, and released entry paths remain protected.
 
 CI uses trusted main registry history to protect previously public IDs and entry paths, including in reruns. A normal update or rollback must keep all of those routes. Retiring a route requires an explicit Studio release-policy change.
 

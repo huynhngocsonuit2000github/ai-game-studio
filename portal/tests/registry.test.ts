@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import catalog from '../../registry/games.json';
-import { parseRegistry, publicGames } from '../src/registry';
+import { developmentGames, parseRegistry, publicGames } from '../src/registry';
 
 const game = {
   id: 'sample-game',
@@ -54,13 +54,16 @@ describe('registry', () => {
     expect(() => parseRegistry(registry({ ...game, [field]: value }))).toThrow(field);
   });
 
-  it('lists only public releases and accepts planned games without runtime paths', () => {
+  it('lists public releases and playable opt-in previews without duplicating local entries', () => {
+    const preview = { ...game, id: 'preview', status: 'development', entry: 'games/preview/index.html' };
+    const hidden = { ...preview, id: 'private-candidate', entry: 'games/private/index.html', visibility: 'development' };
+    const unbuilt = { ...preview, id: 'unbuilt', entry: null };
+    const planned = { ...game, id: 'planned', entry: null, status: 'planned' };
     const parsed = parseRegistry(registry(
-      game,
-      { ...game, id: 'private-candidate', entry: 'games/private/index.html', visibility: 'development' },
-      { ...game, id: 'planned', entry: null, status: 'planned' },
+      game, preview, hidden, unbuilt, planned,
     ));
-    expect(publicGames(parsed)).toEqual([game]);
+    expect(publicGames(parsed)).toEqual([game, preview]);
+    expect(developmentGames(parsed)).toEqual([hidden, unbuilt, planned]);
   });
 });
 

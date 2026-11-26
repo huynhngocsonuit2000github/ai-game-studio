@@ -20,7 +20,7 @@ const put = (path, value) => {
 };
 const read = (path) => readFileSync(path, 'utf8');
 
-test('assembles every public release, excludes development and rehearses a rollback', (t) => {
+test('assembles public releases and opt-in previews, excludes private drafts and rehearses rollback', (t) => {
   const root = mkdtempSync(join(tmpdir(), 'studio-release-'));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const output = join(root, 'deployment/dist');
@@ -28,6 +28,7 @@ test('assembles every public release, excludes development and rehearses a rollb
   const beta = game('beta', { cover: 'games/beta/assets/cover.txt' });
   const candidate = game('alpha', { version: '2.0.0' });
   const hidden = game('draft', { status: 'development', visibility: 'development' });
+  const preview = game('preview', { status: 'development', cover: 'games/preview/cover.webp' });
   const builds = [];
   const buildGame = (cwd) => builds.push(cwd);
 
@@ -35,6 +36,8 @@ test('assembles every public release, excludes development and rehearses a rollb
   put(join(root, 'games/alpha/dist/index.html'), 'Alpha previous');
   put(join(root, 'games/beta/dist/index.html'), 'Beta');
   put(join(root, 'games/beta/dist/assets/cover.txt'), 'Cover');
+  put(join(root, 'games/preview/dist/index.html'), 'Preview');
+  put(join(root, 'games/preview/dist/cover.webp'), 'Preview cover');
   const publish = (next, previouslyPublished = [alpha, beta]) => {
     assemblePages({ root, registry: next, output, buildGame, previouslyPublished });
   };
@@ -46,6 +49,12 @@ test('assembles every public release, excludes development and rehearses a rollb
   assert.throws(() => read(join(output, 'games/draft/index.html')), { code: 'ENOENT' });
   const before = read(join(output, 'release-manifest.json'));
   assert.equal(JSON.parse(before).games.length, 2);
+
+  publish(registry(alpha, beta, preview, hidden));
+  assert.equal(read(join(output, 'games/preview/index.html')), 'Preview');
+  assert.equal(read(join(output, 'games/preview/cover.webp')), 'Preview cover');
+  publish(registry(alpha, beta, { ...preview, visibility: 'development' }), [alpha, beta, preview]);
+  assert.throws(() => read(join(output, 'games/preview/index.html')), { code: 'ENOENT' });
 
   assert.throws(() => publish(registry(alpha)), /preserve its entry: beta/);
   assert.throws(() => publish(registry(alpha, game('beta', { entry: 'games/beta/missing.html' }))), /preserve its entry: beta/);

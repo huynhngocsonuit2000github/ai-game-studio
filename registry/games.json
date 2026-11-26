@@ -4,10 +4,10 @@
     {
       "id": "forest-adventure",
       "title": "Forest Adventure 2D",
-      "description": "Guide Pip through the woods and wake the Lantern Oak in a hand-painted platform adventure.",
+      "description": "Guide Pip through the woods and wake the Lantern Oak in a forest platform adventure with AI-generated artwork.",
       "engine": "phaser",
       "status": "development",
-      "visibility": "development",
+      "visibility": "public",
       "entry": "games/forest-adventure/index.html",
       "cover": "games/forest-adventure/cover.webp",
       "version": "0.1.0",
