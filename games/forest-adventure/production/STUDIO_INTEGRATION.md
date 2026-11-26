@@ -10,7 +10,7 @@ Verified at `main` commit `4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf` on 2026-11-
 
 ## Producer preview commands
 
-S01 registers Forest Adventure with `status: development` and `visibility: development`. Its verified entry and cover are inside `games/forest-adventure/`. Test the development catalog from the candidate checkout.
+S01 registers Forest Adventure with `status: development` and `visibility: development`. The verified entry and supplied cover come from the local game build. The Pages workflow builds the game after verifying the public artifact and before the development catalog smoke test. The game preview stays outside the public artifact.
 
     pnpm install --frozen-lockfile
     pnpm --filter @studio/forest-adventure build
@@ -18,7 +18,7 @@ S01 registers Forest Adventure with `status: development` and `visibility: devel
 
 Open `http://127.0.0.1:4181/ai-game-studio/#/games/forest-adventure` and choose Play preview. Build first so the portal can serve the game package's `dist/` files.
 
-S01 changes `registry/games.json` and `pnpm-lock.yaml` under the Producer's authorization. The base policy still needs a separately reviewed `approvedHeads` entry keyed by the S01 PR head, with the complete set of changed paths from `git diff --name-only --no-renames origin/main...HEAD`. The existing trusted workflow reads that policy from `main`.
+S01 changes `registry/games.json`, `pnpm-lock.yaml` and `.github/workflows/pages.yml` under the Producer's authorization. The companion Studio PR grants the S01 head and its complete changed path list under `approvedHeads`. Merge the reviewed policy into `main` before retesting scope on S01. The trusted workflow reads the policy from the PR event's base commit. A fresh PR edit event after the policy merge picks up that base without changing the authorized S01 head.
 
 Public Pages continues to select only public released games. The Producer directed S01 to keep the preview local pending D06 rights clearance. Any future public In Development build requires a reviewed Studio change that admits explicitly public development builds in the catalog and Pages assembly together. The S01 build and browser tests use the project subpath.
 

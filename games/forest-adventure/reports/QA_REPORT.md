@@ -26,7 +26,7 @@ S01 base `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad`. The PR head identifies the 
 
 | Case | Status | Observed result |
 | --- | --- | --- |
-| Q01 | PASS | The game launched from the Studio development catalog at `/ai-game-studio/`. The cover and all 12 requested runtime media files loaded under the game path. Play started focused. Console, page and request checks were clean. |
+| Q01 | PASS | The game launched from the Studio development catalog at `/ai-game-studio/`. All 12 requested runtime media files loaded under the game path. The built cover was served as WebP. Play started focused. Console, page and request checks were clean. |
 | Q02 | PASS | The simulation met held and tapped apex targets and the 100 ms coyote and 120 ms buffer windows. Chromium played held and tapped jumps with actual key events and tested focus and resize. |
 | Q03 | PASS | Simulation verified one beetle stomp and bounce, stomp priority, side damage, the 900 ms damage lockout and that the moth cannot be stomped. The browser route stomped the beetle and took one moth hit on the return to the open portal. |
 | Q04 | PASS | Simulation rejected the gate at 0, 1 and 2 seeds and cleared once on the third. Chromium reached the locked gate with two seeds, backtracked for the third and entered the open portal. |
@@ -38,8 +38,9 @@ S01 base `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad`. The PR head identifies the 
 - `pnpm --filter @studio/forest-adventure typecheck`, `pnpm --filter @studio/forest-adventure test` (16 tests) and `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventure test:browser` (2 Chromium tests; includes Vite build) passed.
 - `python3 games/forest-adventure/tools/validate_pack.py --check` passed and matches all 58 supplied runtime artifacts. The S01 bundle includes the existing art, the working entry and the MIT notices for Phaser and eventemitter3. Vite reports a large minified Phaser chunk, approximately 326 kB gzip.
 - Studio frozen install, lint, typecheck, `pnpm test` (35 Vitest and 6 Node tests), portal build, Pages assembly and verification, and the 5 Studio Chromium tests passed. The production assembly excluded the Forest Adventure development build.
+- The first PR Pages run exposed a clean-checkout 404 for the catalog cover. CI now builds Forest Adventure after the public artifact is verified and before the local development catalog smoke. The catalog still uses the supplied cover.
 - Gameplay screenshots `fernlight-trail.png`, `lantern-checkpoint.png`, `closed-gate.png`, `open-gate.png` and `trail-cleared.png` are retained with the SHA-stamped local candidate in `test-results/s01-evidence/`. Run the game browser tests to capture them again from the branch. The Producer directed the team to keep the preview local pending rights clearance.
-- Public Pages preview is blocked on redistribution rights. Trusted merge scope also awaits the exact-head Studio approval for the registry and lockfile paths. Representative laptop performance, browser audio, and the Producer playtest remain stage checks.
+- Public Pages preview is blocked on redistribution rights. Trusted merge scope also awaits the exact-head Studio approval for the registry, lockfile and CI build-order changes. Representative laptop performance, browser audio, and the Producer playtest remain stage checks.
 
 ## Implementation matrix
 

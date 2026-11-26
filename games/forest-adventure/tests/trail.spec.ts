@@ -31,13 +31,14 @@ test('launches from the development catalog, clears by keyboard and returns to S
   await page.clock.install();
   await page.goto(detail);
   await expect(page.getByRole('heading', { name: 'Forest Adventure 2D' })).toBeVisible();
+  await expect(page.getByText('In Development', { exact: true })).toBeVisible();
   await expect(page.locator('img[src$="/cover.webp"]')).toBeVisible();
   await page.getByRole('link', { name: 'Play preview' }).click();
   await expect(page).toHaveURL(game);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
-  expect([...new Set(media.filter((path) => path.endsWith('/cover.webp')))]).toEqual([
-    `${prefix}games/forest-adventure/cover.webp`,
-  ]);
+  const cover = await page.request.get(`${prefix}games/forest-adventure/cover.webp`);
+  expect(cover.ok()).toBe(true);
+  expect(cover.headers()['content-type']).toBe('image/webp');
   const runtimeMedia = media.filter((path) => path.includes('/games/forest-adventure/assets/'));
   expect(new Set(runtimeMedia).size).toBe(12);
   expect(runtimeMedia.every((path) => path.startsWith(prefix))).toBe(true);
