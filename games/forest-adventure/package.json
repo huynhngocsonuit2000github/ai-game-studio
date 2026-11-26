@@ -9,7 +9,7 @@
     "test": "node --test tests/session.test.mjs tests/save.test.mjs tools/validate_registry.test.mjs",
     "build": "vite build",
     "preview": "vite preview",
-    "test:browser": "pnpm run build && playwright test --config playwright.config.ts",
+    "test:browser": "pnpm -w build && pnpm -w assemble:pages && pnpm -w verify:pages && playwright test --config playwright.config.ts",
     "test:campaign": "pnpm -w build && pnpm -w assemble:pages && pnpm -w verify:pages && node tools/prepare_campaign.mjs && vite build --mode campaign && FOREST_CAMPAIGN_SITE=1 playwright test --config playwright.config.ts"
   },
   "dependencies": {

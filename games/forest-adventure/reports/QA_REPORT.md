@@ -141,3 +141,18 @@ Based on `95cdbb639594a0685490a16e3549589905c66375` (merged PR #16). The Pages d
 Studio lint, typecheck, 35 Vitest tests, six script tests, six Studio browser tests, the two public-preview game browser tests, Forest Adventure typecheck and all 19 game unit and registry checks passed. The pack validator passed. The 58 asset hashes and existing save schema are unchanged.
 
 For local campaign review, run `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventure test:campaign`. For an isolated packaging rehearsal, create a detached worktree, apply only the two proposed registry edits there, then build, assemble and verify Pages with the normal Studio commands. Test the assembled artifact at `/ai-game-studio/` and keep the rehearsal registry out of the release branch. [Release notes](../production/RELEASE_NOTES.md)
+
+## Public campaign development preview · 2026-11-27
+
+FA-PAGES-01 is based on `64ee8b555d895fd99fd210cabc61236c96044746`. The unmodified base assembled with 13 S01 media files. The repaired candidate ran against `deployment/dist`, assembled with the normal Studio build and verification commands from the canonical public In Development entry. Playwright served that output at `/ai-game-studio/` with Chromium 156.0.8078.79. The campaign test used real browser keyboard input and a controlled frame clock.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Public artifact campaign | PASS | Seven game browser cases passed. The keyboard run cleared Fernlight Trail → Willow Run → Lantern Oak and collected all 24 fireflies. Next Trail was focused after each of the first two clears. Only the third clear showed the Lantern Oak finale. The route finished with zero unexpected HTTP, request, console or page errors. |
+| Progression and recovery | PASS | The unlock list advanced to two then three trails, per-trail bests persisted, Replay reset the attempt, selection launched an unlocked earlier trail, and Continue after reload launched Lantern Oak. A pre-existing v1 save reopened Willow Run while Lantern Oak stayed unavailable. Corrupt and unavailable storage, texture retries, audio, keyboard settings, resize, pause and ten restarts were also covered. |
+| Runtime media and notices | PASS | The 50 files and hashes matched both the D14 list and existing asset manifest. The game output was 6,603,516 bytes with both MIT notices. A temporary unapproved file made a normal production game build fail with the D14 clearance error. The temporary file was removed. |
+| Other verification | PASS | Frozen workspace install, Studio lint, Studio and game typechecks, 35 Vitest tests, seven Studio Node checks, 19 game checks, 11 game-pack validator tests and validation of the 58 runtime exports passed. All six Studio browser cases passed, including public catalog launch and isolated package onboarding. |
+| Hosted campaign | NOT RUN | The candidate awaits manual merge and Pages deployment. A request for the existing live build marker from this environment received HTTP 403 from the network proxy. |
+| Formal release | BLOCKED | The remaining representative laptop, five unaided runs, compatibility and human listening checks, trusted registry authorization, and live verification remain open under the existing release checkpoint. |
+
+Reproduce the game suite from the repo root with `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventure test:browser`. Evidence under `games/forest-adventure/test-results/pages-browser/` includes the Fernlight result and Lantern Oak finale. The catalog continues to show In Development and Play preview. Its milestone label is registry metadata and still reads S01.
