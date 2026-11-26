@@ -4,8 +4,8 @@ Read one stage per Codex task. Stage files own individual work items and depende
 
 | Stage | Work IDs | Waits for | Outcome | State |
 | --- | --- | --- | --- | --- |
-| [S00](../stages/S00/STAGE.md) | S00-1/2 | Producer import + G0 | Confirm scope, approved import, dependency and CI path | candidate_ready |
-| [S01](../stages/S01/STAGE.md) | S01-1/2 | S00 accepted and dependency authorization | Playable L1 core loop in a browser (G1) | planned |
+| [S00](../stages/S00/STAGE.md) | S00-1/2 | Producer import + G0 | Confirm scope, approved import, dependency and CI path | accepted |
+| [S01](../stages/S01/STAGE.md) | S01-1/2 | S00 accepted and dependency authorization | Playable L1 core loop in a browser (G1) | candidate_ready |
 | [S02](../stages/S02/STAGE.md) | S02-1/2 | S01 accepted | L1 coherent art, UI, camera and animation | planned |
 | [S03](../stages/S03/STAGE.md) | S03-1/2 | S02 accepted | Polished L1 with accessible audio and Producer playtest (G2) | planned |
 | [S04](../stages/S04/STAGE.md) | S04-1/2 | S03 and G2 explicit approval | L2/L3, campaign, best records (G3 candidate) | planned |

@@ -4,22 +4,23 @@
 
 Verified at `main` commit `4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf` on 2026-11-26. Node 24.22.3 and pnpm 11.25.0 are pinned. The workspace includes `games/*`, and the schema v1 registry is empty. The Forest Adventure pack arrived through PR #9. Portal production filters for public releases, and the Pages PR job assembles a verification artifact.
 
-- Register the validated [draft](registry-entry.draft.json) via a separately reviewed Studio PR touching `registry/games.json`. Keep `entry` and `cover` null. The trusted `studio/production/registry-scope.json` has empty `registryFields` and `approvedHeads` maps. The checker rejects adding an ID in an ordinary game PR even with field grants because it requires the ID list to remain identical. The Studio can also approve an exact candidate SHA and path list on `main` via `approvedHeads`.
-- Before S01, obtain Studio approval for the stable Phaser version and required root `pnpm-lock.yaml` changes for `@studio/forest-adventure`. A mixed game and lockfile PR needs the reviewed `approvedHeads` exception on `main` for its exact head SHA and changed paths. Any extension of candidate verification in `.github/workflows/pages.yml` requires separate Studio scope or inclusion in that reviewed authorization. The existing Pages verification assembles public releases. A development candidate needs its own typecheck, tests, build and Chromium smoke under the project subpath, with evidence attached to the PR.
-- After the runtime is verified, request Studio approval for setting `entry` to `games/forest-adventure/index.html` and `cover` to `games/forest-adventure/cover.webp`. The Vite output needs a top-level `cover.webp` emitted from `assets/runtime/`, alongside `index.html`. Keep media URLs relative to the game.
+- The trusted `studio/production/registry-scope.json` has empty `registryFields` and `approvedHeads` maps at the S01 base. The checker rejects adding an ID in an ordinary game PR even with field grants, because its ID list must stay identical. A mixed game and lockfile PR also needs a reviewed exact-head exception.
 - The portal base is `/ai-game-studio/` with detail route `#/games/forest-adventure`. The planned game path is `/ai-game-studio/games/forest-adventure/index.html`. Use `../../#/` for return navigation. Test links and media at the project subpath when the game builds.
 - On Producer release approval set released/public with verified version/entry. Keep previously published games in full Pages assembly. Merge manually, verify HTTP, commit marker, direct entry, game assets and portal return. For rollback revert to last working package/build while preserving public IDs and routes. Run full assembly/smoke on rollback PR, and record actual deployed SHA and URL.
 
 ## Producer preview commands
 
-From a checked-out candidate with pinned dependencies installed:
+S01 registers Forest Adventure with `status: development` and `visibility: development`. The verified entry and supplied cover come from the local game build. The Pages workflow builds the game after verifying the public artifact and before the development catalog smoke test. The game preview stays outside the public artifact.
 
-    pnpm --dir games/forest-adventure run build
-    pnpm dev
+    pnpm install --frozen-lockfile
+    pnpm --filter @studio/forest-adventure build
+    pnpm --filter @studio/portal dev --host 127.0.0.1 --port 4181 --strictPort --base /ai-game-studio/
 
-After Studio authorizes the development entry and a build exists, open the local portal URL shown by Vite and go to `#/games/forest-adventure`. The portal renders Play preview when the registry entry path is non-null. Verify that it serves the built `dist/` output. Record the URL, branch, SHA and test run. If development registry integration is waiting on authorization, start the approved game package preview directly.
+Open `http://127.0.0.1:4181/ai-game-studio/#/games/forest-adventure` and choose Play preview. Build first so the portal can serve the game package's `dist/` files.
 
-    pnpm --dir games/forest-adventure run preview -- --host 127.0.0.1
+S01 changes `registry/games.json`, `pnpm-lock.yaml` and `.github/workflows/pages.yml` under the Producer's authorization. The companion Studio PR grants the S01 head and its complete changed path list under `approvedHeads`. Merge the reviewed policy into `main` before retesting scope on S01. The trusted workflow reads the policy from the PR event's base commit. A fresh PR edit event after the policy merge picks up that base without changing the authorized S01 head.
+
+Public Pages continues to select only public released games. The Producer directed S01 to keep the preview local pending D06 rights clearance. Any future public In Development build requires a reviewed Studio change that admits explicitly public development builds in the catalog and Pages assembly together. The S01 build and browser tests use the project subpath.
 
 Alternatively share a CI ZIP with the exact candidate layout under games/forest-adventure/, SHA marker and portal preview output when available, serve it on Producer machine using a regular HTTP static server, and specify the direct relative entry. Example if the artifact includes an ai-game-studio/ parent directory:
 

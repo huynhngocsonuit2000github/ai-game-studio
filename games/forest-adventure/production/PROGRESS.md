@@ -1,9 +1,8 @@
 # Production checkpoint
 
-- Target `forest-adventure`, pack 0.1.0. S00-1 and S00-2 are `candidate_ready` for Producer review, 2026-11-26.
-- Base and asset revision `4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf` from `origin/main`. PR #9 already imported the pack. Candidate branch `prod/forest-adventure/s00`. Use the PR head for the exact candidate SHA.
-- G0 scope approval recorded in [D03](DECISIONS.md). Initial release is Fernlight Trail, Willow Run and Lantern Oak. S00 candidate acceptance and D06 public redistribution approval are pending.
-- C01–C03 supplied the design, source masters, runtime exports and offline evidence. S00 reused all supplied media. The checked-in manifest hashes, sizes and source paths match all 58 runtime files (5,585,284 bytes). See the [QA report](../reports/QA_REPORT.md) for commands, versions and results.
-- The Studio parser accepts the development draft with null entry and cover. Live catalog registration requires a separately reviewed Studio registry change. The shared lockfile, Phaser version and candidate CI route are [documented](STUDIO_INTEGRATION.md).
-- [Static art targets](../assets/concept/README.md) are the S00 preview. S01 is the first playable stage.
-- Next action is Producer review of the S00 PR. Before starting S01, confirm S00 acceptance and get the Studio approvals documented above. S01 work has not started.
+- Target `forest-adventure`, pack 0.1.0. S00 is accepted at PR #10 candidate `ab9e6ccaea1e4de3434c6cdc7b7bfac55cf7a7fa`. S01-1 and S01-2 are `candidate_ready` for local G1 review. [Decisions D07 and D08](DECISIONS.md)
+- Base `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad` from `origin/main`. Candidate branch `prod/forest-adventure/s01`. Use the S01 PR head for the exact candidate SHA.
+- Fernlight Trail is playable with a keyboard. The shipped L1 geometry and atlases power movement, enemies, collectible routes, the lantern and gate. S01 adds no regenerated media.
+- The [QA report](../reports/QA_REPORT.md) records the Chromium clear, respawn and gate states, automated checks and screenshot locations. The build and screenshot bundle is under the ignored game `test-results/s01-evidence/` directory in the execution workspace.
+- The candidate registry entry shows In Development in Studio development mode. The Pages build excludes development entries. Public preview awaits verified redistribution rights under D06 and a Studio review of public development catalog and Pages admission. Merge the separately reviewed exact-head scope exception for the registry, lockfile and CI build order before retesting S01 scope. [Studio integration](STUDIO_INTEGRATION.md)
+- Next action is review and acceptance of the playable S01 candidate. S02 waits for explicit Producer acceptance.

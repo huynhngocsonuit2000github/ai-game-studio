@@ -1,0 +1,65 @@
+:root {
+  color-scheme: dark;
+  font-family: system-ui, sans-serif;
+  background: #0a1713;
+  color: #fff3d5;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; }
+#game { position: relative; isolation: isolate; height: 100vh; height: 100dvh; overflow: hidden; }
+#world { position: absolute; inset: 0; }
+#world canvas { display: block; }
+#playfield { position: absolute; width: 1px; height: 1px; overflow: hidden; }
+#hud {
+  position: absolute;
+  inset: max(14px, calc((100% - 56.25vw) / 2 + 14px)) max(14px, calc((100% - 177.77vh) / 2 + 14px)) auto;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+}
+.counts { display: flex; flex-wrap: wrap; gap: 6px; }
+.counts span, #hint:not(:empty) {
+  background: #102e25;
+  border: 1px solid #96a680;
+  border-radius: 6px;
+  padding: .46rem .75rem;
+  font-size: .875rem;
+  font-weight: 650;
+}
+#pause { pointer-events: auto; padding: .42rem .7rem; color: #fff3d5; background: #102e25; }
+#hint { position: absolute; top: 48px; left: 0; margin: 0; }
+dialog {
+  width: min(470px, calc(100% - 32px));
+  padding: clamp(24px, 5vw, 42px);
+  border: 1px solid #b9be92;
+  border-radius: 18px;
+  background: #123327;
+  color: #fff3d5;
+  box-shadow: 0 20px 70px #08180f96;
+}
+dialog::backdrop { background: #0a18135c; }
+h1 { margin: 0; font: 700 clamp(32px, 6vw, 52px)/1.02 Georgia, serif; text-wrap: balance; }
+p { line-height: 1.55; }
+.location { color: #f4ca7f; font-size: .85rem; font-weight: 650; margin: 0 0 .5rem; }
+.actions { display: flex; flex-wrap: wrap; align-items: center; margin-top: 1.15rem; gap: .65rem; }
+button, a { font: 650 .95rem/1.2 system-ui, sans-serif; }
+button {
+  border: 1px solid #b9be92;
+  border-radius: 6px;
+  background: #eed095;
+  color: #1c2c1f;
+  cursor: pointer;
+  padding: .65rem .9rem;
+}
+a { color: #fff3d5; padding: .4rem; text-underline-offset: .2em; }
+button:focus-visible, a:focus-visible { outline: 3px solid #fff3d5; outline-offset: 3px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+@media (max-width: 520px) {
+  .counts span { padding: .32rem .42rem; font-size: .72rem; }
+  #hud { gap: .3rem; inset-inline: 8px; }
+  #pause { padding: .32rem .44rem; font-size: .74rem; }
+}

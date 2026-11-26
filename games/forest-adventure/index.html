@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#101f1b">
+    <link rel="icon" href="./cover.webp">
+    <title>Forest Adventure · Fernlight Trail</title>
+  </head>
+  <body>
+    <main id="game" aria-label="Forest Adventure">
+      <div id="world" aria-hidden="true"></div>
+      <div id="hud" hidden>
+        <div class="counts">
+          <span id="hearts"></span>
+          <span id="seeds"></span>
+          <span id="fireflies"></span>
+        </div>
+        <button id="pause" type="button">Pause</button>
+        <p id="hint"></p>
+      </div>
+      <div id="playfield" role="region" tabindex="-1" aria-label="Fernlight Trail playfield"></div>
+      <div id="notice" class="sr-only" role="status"></div>
+      <dialog id="panel" aria-labelledby="panel-title"></dialog>
+      <noscript>Forest Adventure needs JavaScript. <a href="../../#/">Back to Studio</a></noscript>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "@studio/forest-adventure",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/session.test.mjs tools/validate_registry.test.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:browser": "pnpm run build && playwright test --config playwright.config.ts"
+  },
+  "dependencies": {
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "vite": "~8.3.8"
+  }
+}
