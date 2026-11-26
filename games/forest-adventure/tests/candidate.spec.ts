@@ -1,10 +1,12 @@
 import { expect, test } from '@playwright/test';
+import registry from '../../../registry/games.json' with { type: 'json' };
 import { SAVE_KEY } from '../src/save.ts';
 
-const candidate = Boolean(process.env.FOREST_CAMPAIGN_SITE);
+const campaign = Boolean(process.env.FOREST_CAMPAIGN_SITE) ||
+  registry.games.some(game => game.id === 'forest-adventure' && game.status === 'released');
 const game = '/ai-game-studio/games/forest-adventure/index.html';
 
-test.skip(!candidate, 'The campaign media and settings are only in the local review build.');
+test.skip(!campaign, 'This build only contains the S01 preview media.');
 
 test('recovers from a missing required texture and supports keyboard settings', async ({ page }, testInfo) => {
   const asset = /\/assets\/bg-fernlight-[^/]+\.webp$/;
@@ -142,7 +144,7 @@ test('retries a deferred backdrop, keeps saved progress and fits the supported d
   await expect(page.getByRole('region', { name: 'Willow Run playfield' })).toBeFocused();
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
 
-  for (const [width, height] of [[960, 540], [1366, 768], [1920, 1080]]) {
+  for (const [width, height] of [[960, 540], [1366, 768], [1920, 1080]] as const) {
     await page.setViewportSize({ width, height });
     const pause = page.getByRole('button', { name: 'Pause', exact: true });
     await expect(pause).toBeInViewport({ ratio: 1 });

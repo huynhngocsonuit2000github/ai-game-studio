@@ -7,9 +7,9 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "D12 authorizes combined S05–S06 preparation. Final manual playtesting and Producer acceptance are pending.",
+    "producerReview": "D13 records the Producer’s campaign gameplay acceptance and conditional release authorization. Exact tested deployment identity unverified.",
     "verticalSlice": "L1 Fernlight Trail",
-    "campaignAfterGate": "Three-trail campaign playable in the local review build. D06 governs public S01 media."
+    "campaignAfterGate": "Public Released registry status enables the full campaign in the default build. The current public preview keeps the S01 media."
   },
   "currentStage": "S06",
   "nextTask": "S06-2",
@@ -28,15 +28,17 @@
     "s04Campaign": "PASS (all three trails and 24 fireflies, final ending, replay and Continue)",
     "pages": "PASS (public assembly and project-subpath smoke)",
     "s05Polish": "PASS (seven Chromium campaign checks, all trails and 24 fireflies)",
-    "s05Compatibility": "PARTIAL (Chromium, Chrome and Edge suites and Firefox ESR smoke; target laptop and full matrix open)",
-    "s06Pages": "PASS locally (public entries preserved, existing preview media cleared, rollback baseline rebuilt)",
-    "s06LiveRelease": "BLOCKED (rights, trusted scope authorization, Producer acceptance and authorized merge)"
+    "s05Compatibility": "PARTIAL (Chromium, Chrome and Edge suites; Firefox ESR full campaign route and audio output; native Safari and target laptop open)",
+    "s06Pages": "PASS locally (S01 and Released artifact assembly, with public ID and entry preserved)",
+    "s06LiveRelease": "BLOCKED (representative laptop and unaided playtest evidence, trusted exact-head scope grant and authorized merge)",
+    "s06Rights": "PASS (58 runtime files reproduced and 50 prospective publication files checked against the manifest; D13 conditional authorization)"
   },
   "readNext": [
     "AGENTS.md",
     "production/PROGRESS.md",
     "stages/S05/STAGE.md",
     "stages/S06/STAGE.md",
+    "production/RELEASE_NOTES.md",
     "reports/QA_REPORT.md"
   ],
   "requiredTests": [
@@ -45,13 +47,13 @@
   ],
   "missingRequiredRuntimeMedia": [],
   "unverified": [
-    "Five unaided first-time playtests and manual Producer acceptance",
-    "Audible loop seams and full Firefox and Safari coverage",
-    "Representative integrated-device measurements",
-    "Public distribution clearance for campaign media and trusted registry authorization",
-    "Live candidate publication and smoke test after authorized merge"
+    "Exact URL and SHA of the campaign build tested by the Producer",
+    "Five unaided first-time playtests and representative laptop measurements",
+    "Complete Firefox and Safari coverage and human loop listening",
+    "Trusted exact-head registry scope grant",
+    "Live campaign release and post-merge verification"
   ],
-  "nextAction": "Review the private candidate, complete the remaining QA and rights checks, and obtain release acceptance before publishing. The draft PR head identifies the candidate.",
+  "nextAction": "Close the mandatory QA checks, obtain the trusted exact-head grant, and promote the existing release PR after manual review. See the release notes.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
@@ -145,6 +147,7 @@
     "games/forest-adventure/production/HANDOFF.json",
     "games/forest-adventure/production/PRODUCTION_PLAN.md",
     "games/forest-adventure/production/PROGRESS.md",
+    "games/forest-adventure/production/RELEASE_NOTES.md",
     "games/forest-adventure/production/STUDIO_INTEGRATION.md",
     "games/forest-adventure/production/registry-entry.draft.json",
     "games/forest-adventure/reports/QA_REPORT.md",
@@ -181,6 +184,6 @@
     "games/forest-adventure/tsconfig.json",
     "games/forest-adventure/vite.config.ts"
   ],
-  "baselineCommit": "e8c20fb6ed114d8e2a25177ad967b4b5deb2ca4c",
-  "candidateBranch": "prod/forest-adventure/s05-s06"
+  "baselineCommit": "95cdbb639594a0685490a16e3549589905c66375",
+  "candidateBranch": "prod/forest-adventure/s06-release"
 }

@@ -1,9 +1,11 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEP_MS } from '../src/session.ts';
+import registry from '../../../registry/games.json' with { type: 'json' };
 import { SAVE_KEY } from '../src/save.ts';
 import { oak, willow } from './campaign-routes.ts';
 
-const campaign = Boolean(process.env.FOREST_CAMPAIGN_SITE);
+const released = registry.games.some(game => game.id === 'forest-adventure' && game.status === 'released');
+const campaign = released || Boolean(process.env.FOREST_CAMPAIGN_SITE);
 
 const prefix = '/ai-game-studio/';
 const detail = `${prefix}#/games/forest-adventure`;
@@ -56,7 +58,7 @@ function watchErrors(page: Page) {
   return errors;
 }
 
-test('launches from the development catalog, clears by keyboard and returns to Studio', async ({ page }, testInfo) => {
+test('launches from the Studio catalog, clears by keyboard and returns to Studio', async ({ page }, testInfo) => {
   const errors = watchErrors(page);
   const media: string[] = [];
   page.on('response', (response) => {
@@ -65,9 +67,9 @@ test('launches from the development catalog, clears by keyboard and returns to S
   await page.clock.install();
   await page.goto(detail);
   await expect(page.getByRole('heading', { name: 'Forest Adventure 2D' })).toBeVisible();
-  await expect(page.getByText('In Development', { exact: true })).toBeVisible();
+  await expect(page.getByText(released ? 'Released' : 'In Development', { exact: true })).toBeVisible();
   await expect(page.locator('img[src$="/cover.webp"]')).toBeVisible();
-  await page.getByRole('link', { name: 'Play preview' }).click();
+  await page.getByRole('link', { name: released ? 'Play Now' : 'Play preview' }).click();
   await expect(page).toHaveURL(game);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
   const cover = await page.request.get(`${prefix}games/forest-adventure/cover.webp`);
