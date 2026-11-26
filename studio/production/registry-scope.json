@@ -1,4 +1,30 @@
 {
   "registryFields": {},
-  "approvedHeads": {}
+  "approvedHeads": {
+    "52c7c417b1553b9aca1043d2c8e4be89dc06ec5b": [
+      ".github/workflows/pages.yml",
+      "games/forest-adventure/index.html",
+      "games/forest-adventure/package.json",
+      "games/forest-adventure/playwright.config.ts",
+      "games/forest-adventure/production/DECISIONS.md",
+      "games/forest-adventure/production/HANDOFF.json",
+      "games/forest-adventure/production/PRODUCTION_PLAN.md",
+      "games/forest-adventure/production/PROGRESS.md",
+      "games/forest-adventure/production/STUDIO_INTEGRATION.md",
+      "games/forest-adventure/reports/QA_REPORT.md",
+      "games/forest-adventure/src/level.ts",
+      "games/forest-adventure/src/main.ts",
+      "games/forest-adventure/src/session.ts",
+      "games/forest-adventure/src/style.css",
+      "games/forest-adventure/src/trail-scene.ts",
+      "games/forest-adventure/stages/S00/STAGE.md",
+      "games/forest-adventure/stages/S01/STAGE.md",
+      "games/forest-adventure/tests/session.test.mjs",
+      "games/forest-adventure/tests/trail.spec.ts",
+      "games/forest-adventure/tsconfig.json",
+      "games/forest-adventure/vite.config.ts",
+      "pnpm-lock.yaml",
+      "registry/games.json"
+    ]
+  }
 }
