@@ -1,9 +1,43 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEP_MS } from '../src/session.ts';
+import { SAVE_KEY } from '../src/save.ts';
+import { oak, willow } from './campaign-routes.ts';
+
+const campaign = Boolean(process.env.FOREST_CAMPAIGN_SITE);
 
 const prefix = '/ai-game-studio/';
 const detail = `${prefix}#/games/forest-adventure`;
 const game = `${prefix}games/forest-adventure/index.html`;
+
+// Use an exact 60 Hz frame source for the campaign routes. This controls
+// elapsed time only. The browser still receives real keyboard events and
+// Phaser runs its normal scene, simulation and rendering on each frame.
+async function fixedFrameSource(page: Page) {
+  await page.evaluate(() => {
+    let timestamp = 0;
+    let id = 0;
+    const pending = new Map<number, FrameRequestCallback>();
+    requestAnimationFrame(time => { timestamp = time; });
+    window.requestAnimationFrame = callback => {
+      pending.set(++id, callback);
+      return id;
+    };
+    window.cancelAnimationFrame = request => { pending.delete(request); };
+    Object.assign(window, { advanceTrailFrames: (ticks: number, interval: number) => {
+      for (let tick = 0; tick < ticks; tick++) {
+        timestamp += interval;
+        const callbacks = [...pending.values()];
+        pending.clear();
+        for (const callback of callbacks) callback(timestamp);
+      }
+    } });
+  });
+  await page.clock.runFor(32);
+  return (count: number) => page.evaluate(({ count, interval }) => {
+    (window as unknown as { advanceTrailFrames: (ticks: number, step: number) => void })
+      .advanceTrailFrames(count, interval);
+  }, { count, interval: STEP_MS });
+}
 
 function watchErrors(page: Page) {
   const errors: string[] = [];
@@ -40,7 +74,7 @@ test('launches from the development catalog, clears by keyboard and returns to S
   expect(cover.ok()).toBe(true);
   expect(cover.headers()['content-type']).toBe('image/webp');
   const runtimeMedia = media.filter((path) => path.includes('/games/forest-adventure/assets/'));
-  expect(new Set(runtimeMedia).size).toBe(12);
+  expect(new Set(runtimeMedia).size).toBeGreaterThanOrEqual(12);
   expect(runtimeMedia.every((path) => path.startsWith(prefix))).toBe(true);
 
   // Advance an emulated frame clock while sending actual browser keyboard events.
@@ -56,6 +90,7 @@ test('launches from the development catalog, clears by keyboard and returns to S
   let clock = 0;
   let activeDirection: string | null = null;
   let jumpHeld = false;
+  let advance: ((count: number) => Promise<void>) | undefined;
   async function travel(count: number, direction = 1, jump = false) {
     const key = direction === 0 ? null : direction > 0 ? 'ArrowRight' : 'ArrowLeft';
     if (key !== activeDirection) {
@@ -68,6 +103,10 @@ test('launches from the development catalog, clears by keyboard and returns to S
       else await page.keyboard.up('Space');
       jumpHeld = jump;
     }
+    if (advance) {
+      await advance(count);
+      return;
+    }
     ticks += count;
     const until = Math.ceil(ticks * STEP_MS / 16) * 16;
     await page.clock.runFor(until - clock);
@@ -75,7 +114,10 @@ test('launches from the development catalog, clears by keyboard and returns to S
   }
 
   // First step, first gap, then the beetle approach and Seed 1.
-  await travel(41); await travel(44, 1, true); await travel(14, 0); await travel(11);
+  await page.screenshot({ path: testInfo.outputPath('trail-start.png') });
+  await travel(41); await travel(14, 1, true);
+  await page.screenshot({ path: testInfo.outputPath('trail-jump.png') });
+  await travel(30, 1, true); await travel(14, 0); await travel(11);
   await travel(44, 1, true); await travel(1);
   await travel(39, 1, true); await travel(54);
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 1/3');
@@ -123,21 +165,73 @@ test('launches from the development catalog, clears by keyboard and returns to S
   await expect(page.getByRole('button', { name: 'Replay' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('trail-cleared.png') });
   await page.keyboard.up('ArrowRight');
+  activeDirection = null;
 
-  await page.clock.resume();
+  if (campaign) {
+    advance = await fixedFrameSource(page);
+    const progress = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), SAVE_KEY);
+    expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run']);
+    await page.getByRole('button', { name: 'Next trail' }).click();
+    await expect(page.locator('#chapter-name')).toHaveText('Willow Run');
+    for (const [index, segment] of willow.entries()) {
+      await travel(...segment);
+      if (index === 14) {
+        await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
+        await page.screenshot({ path: testInfo.outputPath('willow-run.png') });
+      }
+    }
+    await travel(24);
+    await expect(page.getByRole('heading', { name: 'Trail cleared' })).toBeVisible();
+    await expect(page.getByText(/8\/8 fireflies/).first()).toBeVisible();
+    expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
+    await page.keyboard.up('ArrowRight');
+    activeDirection = null;
+    await page.getByRole('button', { name: 'Next trail' }).click();
+    await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
+    for (const [index, segment] of oak.entries()) {
+      await travel(...segment);
+      if (index === 30) {
+        await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
+        await page.screenshot({ path: testInfo.outputPath('lantern-oak.png') });
+      }
+    }
+    await travel(32);
+    await expect(page.getByRole('heading', { name: 'The Lantern Oak wakes' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Next trail' })).toHaveCount(0);
+    await page.screenshot({ path: testInfo.outputPath('oak-finale.png') });
+    const completed = await progress();
+    expect(Object.keys(completed.bestByLevel)).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
+    expect(completed.bestByLevel['lantern-oak'].fireflies).toBe(8);
+    await page.keyboard.up('ArrowRight');
+    await page.getByRole('button', { name: 'Replay' }).click();
+    await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+    expect(await progress()).toEqual(completed);
+    await page.clock.resume();
+    await page.reload();
+    await page.getByRole('button', { name: 'Continue' }).click();
+    await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
+    await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('heading', { name: 'Paused' })).toBeVisible();
+    await page.waitForLoadState('networkidle');
+  } else {
+    await page.clock.resume();
+  }
+
   await page.getByRole('link', { name: 'Back to Studio' }).click();
   await expect(page).toHaveURL(`${prefix}#/`);
   await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
   expect(errors).toEqual([]);
 });
 
-test('direct entry, resize, explicit pause and ten confirmed restarts', async ({ page }) => {
+test('direct entry, resize, explicit pause and ten confirmed restarts', async ({ page }, testInfo) => {
   const errors = watchErrors(page);
   expect((await page.goto(game))?.status()).toBe(200);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.setViewportSize({ width: 960, height: 540 });
   await expect(page.locator('canvas')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(960);
+  if (campaign) await page.screenshot({ path: testInfo.outputPath('fernlight-960.png') });
   await page.locator('canvas').click();
   await expect(page.locator('#playfield')).toBeFocused();
 

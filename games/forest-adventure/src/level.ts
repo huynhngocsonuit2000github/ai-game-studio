@@ -18,7 +18,15 @@ export type EnemySpec = Marker & (
   { readonly type: 'moth'; readonly phaseOffset: number }
 );
 
+const names: Record<string, string> = {
+  'fernlight-trail': 'Fernlight Trail',
+  'willow-run': 'Willow Run',
+  'lantern-oak': 'Lantern Oak',
+};
+
 export interface Level {
+  readonly id: string;
+  readonly name: string;
   readonly width: number;
   readonly height: number;
   readonly killY: number;
@@ -41,11 +49,9 @@ function rectangles(rows: number[][]): Rect[] {
   });
 }
 
-const layout = layouts.levels.find(({ id }) => id === 'fernlight-trail');
-if (!layout) throw new Error('Missing Fernlight Trail layout');
-
-export const fernlight: Level = {
+export const levels: readonly Level[] = layouts.levels.map((layout) => ({
   ...layout,
+  name: names[layout.id] ?? layout.id,
   solids: rectangles(layout.solids),
   hazards: rectangles(layout.hazards),
   enemies: layout.enemies.map((enemy): EnemySpec => {
@@ -58,4 +64,8 @@ export const fernlight: Level = {
     }
     throw new Error(`Invalid enemy layout: ${enemy.id}`);
   }),
-};
+}));
+
+const first = levels[0];
+if (!first) throw new Error('Missing Fernlight Trail layout');
+export const fernlight = first;

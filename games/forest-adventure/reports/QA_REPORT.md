@@ -67,3 +67,29 @@ Every case starts NOT_RUN. Store per-case result, command, environment, base/hea
 | Q17 | S06 | Run complete Pages assembly, compare all previous public game paths, rehearse revert, verify released commit marker and full playable live smoke after authorized merge. |
 
 Defect evidence: ID, severity (P0–P3), actual SHA, OS/browser/device, steps, actual/expected result, screenshot or trace and regression ID. Stage PR includes test evidence and exact preview instructions. Any unavailable infrastructure is recorded with commands to reproduce. Producer acceptance remains independent of technical acceptance.
+
+## S02–S04 combined candidate · 2026-11-26
+
+Base `fbb9e318b094562b92f42c466ecb1d50b0884d52`. The implementation PR head identifies the candidate. Local evidence uses Chromium 156.0.8078.79 on Debian 13 with Node 24.22.3 and pnpm 11.25.0.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| Q01–Q08 | PASS | Simulation checked movement windows, stomp priority, damage lockout, gate conditions and recovery. Chromium cleared Fernlight through the catalog with eight fireflies, a deliberate fall and backtracking from a closed gate. It paused, resumed, resized and performed ten confirmed restarts. Return to Studio and the required relative asset requests passed. |
+| Q09 | Checked in Chromium | In-game screenshots include Fernlight at 960×540, 1366×768 and 1920×1080. Reviewed the start, jump, run, lantern and gate, HUD fit and terrain. Integrated-device and monitor checks remain open. |
+| Q10 | PASS | Forced failure of the required Fernlight backdrop produced the focused Retry screen. The same route booted after restoring the file. Failure of optional foliage left Fernlight playable. |
+| Q11 | PASS (automated) | Chromium used Tab, Enter, Escape, Space and arrow keys in the modal settings, restored focus and persisted volume, mute and reduced motion on reload. HUD text and shape markers convey essential states independently of sound. |
+| Q12 | PASS | L1 gate logic at 0–3 seeds passed. Captures show both gate states, a lit lantern, pickups, a moth and reduced health. A 960×540 Chromium stress run sent 200 jump inputs and monitored the atlas draws. Each landing effect rendered for 30–31 frames, then stopped. The canvas count stayed at one and the renderer reused its 12 effect sprites. |
+| Q13 | PASS (automated Chromium) | Verified user-gesture AudioContext unlock, decoded loop sources and loop endpoints, pause fade, immediate mute, resume without duplicate loops and AAC request after induced Ogg decode failure. Audible loop wraps and Safari/Firefox playback were unrun. |
+| Q14 | PARTIAL | Scripted Fernlight was cleared before campaign expansion. Cloud Chromium transfer and frame measurements are below. Five unaided first-time runs and representative-device traces remain open. |
+| Q15 | PASS | Actual keyboard inputs completed the three maps in order, lit all lanterns, collected 24 fireflies and showed the finale. Checked each unlock, replay, Continue after reload, independent bests, invalid schema and blocked storage. |
+| Packed media | PASS | The read-only pack validator checked 58 runtime files and all three layouts. Used supplied artwork and audio. The default Pages artifact uses S01-cleared media. |
+
+`pnpm lint`, `pnpm typecheck`, `pnpm test` (35 Vitest and 6 script checks), Forest Adventure typecheck and unit suite (19 checks), and `python3 games/forest-adventure/tools/validate_pack.py --check` passed. Assembled and verified Pages under `/ai-game-studio/`; all six Portal Chromium checks passed, including public Forest Adventure launch. The local campaign suite passed six Chromium checks against a copy of the Pages artifact with the review build at the same game path. It uses real keyboard events and a controlled frame source for the later levels. Timing differences in the first automated replay were resolved in the test driver.
+
+Run `STUDIO_CHROMIUM_PATH=/usr/bin/chromium pnpm --filter @studio/forest-adventure test:campaign` from the repository root to rebuild the local candidate and recapture gameplay. The suite writes `fernlight-trail.png`, `willow-run.png`, `lantern-oak.png`, `oak-finale.png` and gate/checkpoint states under `games/forest-adventure/test-results/campaign-browser/`. The staged local review site is in `games/forest-adventure/test-results/campaign-site/dist/`. Serve it under the Pages prefix using the command in the game Playwright config. D06 limits public distribution to S01 media.
+
+### Cloud performance and artifact boundaries
+
+At 1920×1080, DPR 1, with the browser cache disabled and network emulated at 10 Mbps / 100 ms RTT, the final local review build reached Play in 2.62 s with 2.23 MB transferred. The campaign game files total about 6.60 MB on disk. An earlier two-minute Cloud Chromium traversal sample before deferring the optional foliage recorded 7,146 frames at 16.8 ms p95 and 8.13 MB JS heap. The final short sample also recorded 16.8 ms p95. These samples describe the Cloud environment. Target laptop traces and cold loads across target browsers remain open.
+
+The public artifact contained 13 game media files. Every file matched a SHA-256 entry cleared for S01 in the manifest. The full campaign and its evidence remain local.

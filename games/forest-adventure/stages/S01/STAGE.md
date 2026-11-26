@@ -15,3 +15,5 @@ Dependency: S00 accepted; approved dependency lockfile and CI paths. Player outc
 | S01-2 | PASS | Three required Heartseeds, eight fireflies, lantern recovery, pause, restart, clear results and Studio navigation. A keyboard run cleared the trail after backtracking from the locked gate and deliberately respawning at the lantern. [QA report](../../reports/QA_REPORT.md) |
 
 The local G1 candidate is ready for review. The S01 PR provides the exact candidate SHA. Public preview requires verified rights and Studio publication approval. The trusted scope checker requires the reviewed exact-head exception for this PR's catalog, lockfile and CI build-order changes. [Checkpoint](../../production/PROGRESS.md)
+
+The Producer accepted the deployed S01 preview after playing it. See [D10](../../production/DECISIONS.md).

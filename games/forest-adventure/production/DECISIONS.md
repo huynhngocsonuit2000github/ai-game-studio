@@ -11,3 +11,5 @@
 | D07 | Accepted, S00 | On 2026-11-26 the Producer approved S00 from PR #10, candidate `ab9e6ccaea1e4de3434c6cdc7b7bfac55cf7a7fa`. S01 starts from merged main `9b7ff0e9dd8e89b8d449587ed2cf197f303577ad`. |
 | D08 | Approved, S01 | The Producer authorized a Forest Adventure catalog registration as In Development and the Phaser workspace and lockfile changes needed for S01. Permission to publish the supplied media for public development previews depends on verified redistribution rights. The S01 visual clearance is recorded under D06. |
 | D09 | Superseded, S01 | The Producer initially kept S01 local pending rights clearance. D06 now authorizes the S01 visual assets for public preview. |
+| D10 | Accepted, S01 | On 2026-11-26 the Producer approved S01 after successfully playing the deployed prototype from the public preview integration in PR #14. The integration revision is `fbb9e31` on main. |
+| D11 | Approved, combined implementation | On 2026-11-26 the Producer authorized S02–S04 on one branch and PR, with internal Fernlight validation before campaign expansion and intermediate manual approvals deferred until combined review. D06 still governs public media. |
