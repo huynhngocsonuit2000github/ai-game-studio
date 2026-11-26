@@ -51,6 +51,35 @@ test('production handles direct links to unknown, malformed and development-only
   await expect(page.getByRole('listitem')).toHaveCount(expectedGames.length);
 });
 
+test('launches the Forest Adventure public preview from the assembled site', async ({ page }) => {
+  const preview = expectedGames.find(({ id }) => id === 'forest-adventure');
+  test.skip(!preview || preview.status !== 'development', 'Forest Adventure public preview is inactive');
+  if (!preview) throw new Error('Missing preview registry entry');
+
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  page.on('response', (response) => {
+    if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
+  });
+
+  await page.goto(pagesBase);
+  await page.getByRole('list', { name: 'Game results' }).getByRole('link', { name: preview.title }).click();
+  await expect(page.getByText('In Development', { exact: true })).toBeVisible();
+  const cover = page.locator('img[src="./games/forest-adventure/cover.webp"]');
+  await expect(cover).toBeVisible();
+  await expect.poll(() => cover.evaluate((image) => (image as HTMLImageElement).naturalWidth)).toBeGreaterThan(0);
+  await page.getByRole('link', { name: 'Play preview' }).click();
+  await expect(page).toHaveURL(`${pagesBase}${preview.entry}`);
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.getByText('Heartseeds 0/3', { exact: true })).toBeVisible();
+  await page.keyboard.press('Escape');
+  await page.getByRole('link', { name: 'Back to Studio' }).click();
+  await expect(page).toHaveURL(`${pagesBase}#/`);
+  await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
+  expect(errors).toEqual([]);
+});
+
 test('development catalog launches a standalone game and returns to the library', async ({ page }, testInfo) => {
   const failures: string[] = [];
   page.on('pageerror', (error) => failures.push(error.message));

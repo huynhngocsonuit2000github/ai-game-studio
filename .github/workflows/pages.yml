@@ -107,6 +107,16 @@ jobs:
             if published_sha="$(curl --fail --silent --show-error --location --max-time 10 "${url}build-sha.txt?sha=${GITHUB_SHA}")" &&
               [[ "$published_sha" == "$GITHUB_SHA" ]]; then
               printf 'Verified %s returned HTTP %s and published commit %s.\n' "$url" "$status" "$published_sha"
+              manifest="$(curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors "${url}release-manifest.json?sha=${GITHUB_SHA}")"
+              entries="$(jq -er '.games | map(.entry) | join("\n")' <<< "$manifest")"
+              while IFS= read -r entry; do
+                [[ -n "$entry" ]] || continue
+                game_url="${url}${entry}"
+                game_status="$(curl --fail --silent --show-error --location --max-time 15 --retry 4 --retry-all-errors \
+                  --output /dev/null --write-out '%{http_code}' "${game_url}?sha=${GITHUB_SHA}")"
+                [[ "$game_status" == '200' ]]
+                printf 'Verified published game URL %s returned HTTP %s.\n' "$game_url" "$game_status"
+              done <<< "$entries"
               exit 0
             fi
             sleep 5

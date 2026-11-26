@@ -23,6 +23,7 @@ function copyStaticTree(source, target) {
 export function requirePublishedGames(games, previouslyPublished) {
   const entries = new Map(games.map((game) => [game.id, game.entry]));
   for (const game of previouslyPublished) {
+    if (game.status === 'development') continue;
     if (entries.get(game.id) !== game.entry) {
       throw new Error(`Previously published game must preserve its entry: ${game.id} (${game.entry})`);
     }

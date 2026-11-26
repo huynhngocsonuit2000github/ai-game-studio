@@ -107,10 +107,18 @@ export function parseRegistry(value: unknown) {
   return { schemaVersion: 1 as const, games };
 }
 
-export function publicGames(registry: ReturnType<typeof parseRegistry>) {
-  return registry.games.filter((game) => game.status === 'released' && game.visibility === 'public');
+type Registry = ReturnType<typeof parseRegistry>;
+
+function isPublicGame(game: Registry['games'][number]) {
+  return game.visibility === 'public' && game.entry !== null &&
+    (game.status === 'released' || game.status === 'development');
 }
 
-export function developmentGames(registry: ReturnType<typeof parseRegistry>) {
-  return registry.games.filter((game) => game.status === 'development' || game.status === 'planned');
+export function publicGames(registry: Registry) {
+  return registry.games.filter(isPublicGame);
+}
+
+export function developmentGames(registry: Registry) {
+  return registry.games.filter((game) =>
+    (game.status === 'development' || game.status === 'planned') && !isPublicGame(game));
 }

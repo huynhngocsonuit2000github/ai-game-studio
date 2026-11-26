@@ -16,7 +16,7 @@ The root must have `schemaVersion` set to `1` and a `games` array. Each entry re
 
 Use letters, digits, dots, underscores and hyphens in path segments. The validator rejects empty segments, traversal, absolute paths and URL syntax. The ID `studio` is reserved. Portal routes are derived from IDs.
 
-The public library lists only public released entries. The production portal and Pages artifact include only public releases. Public entries and covers must resolve inside `games/<id>/`. Previously public entry paths are retained across builds. The production registry currently contains zero games.
+The public library and Pages artifact include releases and playable development previews with explicit public visibility. Public entries and covers must resolve inside `games/<id>/`. Released games retain their public entry paths across builds. Studio review can withdraw a development preview by changing its visibility.
 
 
 The Studio reviews editorial metadata under the existing change-scope policy. Entries with missing categories or format appear in the unfiltered library. The local portal also lists planned and development entries. Register a relative entry only once a playable build exists.
