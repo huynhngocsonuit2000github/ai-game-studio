@@ -1,13 +1,34 @@
 # Studio progress
 
+## M0-04 — Pages assembly, scope and rollback
+
+- Status: candidate_ready.
+- Main baseline: `2dc6530e64af9ad36cd18adc5de9e97b9d5143d2`. Tested candidate: `30d272fc5a70d3e921b11cb5fd38b4aaa4918cd8`.
+- Scope: trusted base-branch scope enforcement, whole-site assembly, released catalog and static output verification, Pages project-subpath browser regression, and rollback rehearsal.
+- Approval: M0-04 awaits explicit Producer approval. Next eligible task after acceptance: M0-05.
+
+| Check | Result | Evidence |
+| --- | --- | --- |
+| M0-03 public deployment | PASS | [Main Actions run](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45839032307) logged HTTP 200 and the exact main commit. Producer visually verified the site. |
+| Frozen setup, workflow lint, ESLint, TypeScript | PASS (0 each) | Node 24.22.3, pnpm 11.25.0, actionlint 1.7.12 |
+| `pnpm test` | PASS (0) | 29 registry tests and six pipeline regression tests. Actual Git diff tested with a cross-game rename. |
+| `pnpm build`, `pnpm assemble:pages`, `pnpm verify:pages` | PASS (0 each) | `deployment/dist/` contains the portal, all three required relative assets, and the release manifest. The current registry is empty. |
+| Assembled-site browser regression | PASS (0) | Four Chromium tests under `/ai-game-studio/`, including catalog, unavailable ID and fixture launch/return. [Mobile screenshot](evidence/m0-04/assembled-site-mobile.png). |
+| Rollback rehearsal | PASS (0) | Published two synthetic local games, rejected a broken candidate while preserving the artifact, updated one game, and restored its prior release with both game routes intact. |
+| M0-04 live deploy, live rollback and trusted base scope workflow | NOT_RUN | This PR validates its assembled artifact. A production deploy requires authorized merge. The trusted scope workflow begins checking PRs once it exists on main. |
+
+The independent workspace HTTP probe was blocked by the network proxy. The successful hosted run and Producer verification provide live M0-03 evidence. GitHub Actions and the local rollback rehearsal did not change the live site.
+
+Reproduce the candidate checks with the [deployment runbook](../../deployment/README.md). The local smoke used Chromium 156.0.8078.79 at `/usr/bin/chromium`.
+
 ## M0-03 — GitHub Actions and GitHub Pages
 
-- Status: candidate_ready for the recovery PR. Live acceptance remains blocked until the public site returns HTTP 200 with the expected commit.
+- Status: accepted. Producer approved and visually verified the public site on 2026-11-26. [Hosted verification](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45839032307) confirmed HTTP 200 and deployed commit `2dc6530e64af9ad36cd18adc5de9e97b9d5143d2`. [Public site](https://huynhngocsonuit2000github.github.io/ai-game-studio/).
 - Recovery: PR #3 merged into `studio/m0-02-catalog` at `2406516`. Current main `8a91e16` lacks `pages.yml`, so that merge did not trigger a main deployment. The recovery PR targets main directly and adds a manual deployment trigger restricted to current main. Pages source is reported as GitHub Actions. Recovery checks passed workflow lint, build, lint, typecheck, 29 unit tests, four Chromium tests under the project subpath, and artifact validation. The workspace HTTP client and Cloud browser were blocked by the network proxy before receiving an origin response.
 - Baseline: M0-02 PR #2 head `e1ca3c3530ca53ea8260b8f7b80c14586c5931b9`. Fetched current main `8a91e16107f498ccf124d059c5e17e26db83f69f` and verified its tree matches the M0-01 base of M0-02. Use the M0-02 branch as the review base while PR #2 remains open.
 - Tested candidate: `883bec2487b37afe0c7e747e8950358d40c3c876`.
 - Scope: GitHub Pages workflow, project-subpath tests, portal artifact validation, and hosting, onboarding and acceptance standards. Docker is optional.
-- Approval: M0-03 awaits live verification and explicit Producer approval. Next task after acceptance: M0-04, changed-path scope validation, full-site assembly and rollback verification.
+- Approval: Producer approved the published M0-03 revision. Next task: M0-04, changed-path scope validation, full-site assembly and rollback verification.
 
 | Check | Result | Evidence |
 | --- | --- | --- |
@@ -15,7 +36,7 @@
 | `pnpm setup`, `pnpm lint`, `pnpm typecheck`, `pnpm test` | PASS (0 each) | Frozen install and 29 unit tests |
 | `STUDIO_PAGES_BASE_PATH=/ai-game-studio/ pnpm test:browser` | PASS (0) | Production build and four local Chromium tests. Inspected [mobile screenshot](evidence/m0-03/pages-subpath.png). |
 | `pnpm verify:pages` | PASS (0) | Output index and three site-relative assets verified. In temporary copies, nonempty registry, fixture directory and root-relative asset each failed with the expected diagnostic. |
-| Hosted deployment and published commit check | NOT_RUN | Requires GitHub Pages source configuration and authorized merge into main. The platform response did not allow reading Pages settings from this workspace. |
+| Hosted deployment and published commit check | PASS | PR #4 merged into main. Hosted workflow reported HTTP 200 and the exact published revision. |
 
 Local checks used Linux, Node 24.22.3, pnpm 11.25.0, and Chromium 156.0.8078.79 at `/usr/bin/chromium` via `STUDIO_CHROMIUM_PATH`. Set `PNPM_CONFIG_STORE_DIR` to a writable directory in restricted environments. See the [deployment runbook](../../deployment/README.md) for setup and live verification.
 
