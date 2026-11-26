@@ -1,0 +1,65 @@
+import { describe, expect, it } from 'vitest';
+import catalog from '../../registry/games.json';
+import { parseRegistry, publicGames } from '../src/registry';
+
+const game = {
+  id: 'sample-game',
+  title: 'Sample Game',
+  description: 'Registry test fixture',
+  engine: 'other',
+  status: 'released',
+  entry: 'games/sample-game/index.html',
+  cover: null,
+  version: '1.0.0',
+  visibility: 'public',
+};
+
+function registry(...games: unknown[]) {
+  return { schemaVersion: 1, games };
+}
+
+describe('registry', () => {
+  it('validates the real registry and the empty catalog', () => {
+    expect(parseRegistry(catalog)).toEqual(catalog);
+    expect(parseRegistry(registry()).games).toEqual([]);
+  });
+
+  it.each([null, [], { schemaVersion: 2, games: [] }, { schemaVersion: 1, games: {} }])(
+    'rejects a malformed catalog (%j)',
+    (input) => expect(() => parseRegistry(input)).toThrow(),
+  );
+
+  it.each(['Invalid', 'two--words', '../game', 'studio'])('rejects ID %s', (id) => {
+    expect(() => parseRegistry(registry({ ...game, id }))).toThrow(/\.id/);
+  });
+
+  it('rejects duplicate IDs and entry paths', () => {
+    expect(() => parseRegistry(registry(game, game))).toThrow(/Duplicate game ID/);
+    expect(() => parseRegistry(registry(game, { ...game, id: 'second' }))).toThrow(/Duplicate game entry/);
+  });
+
+  it.each([
+    '/absolute.html', '../index.html', 'games/../index.html', 'games/./index.html',
+    '//example.com/index.html', 'https://example.com/index.html', 'games\\index.html',
+    'games/%2e%2e/index.html', 'games/index.html?x=1', 'games//index.html', 'games/index.html#fragment',
+  ])('rejects unsafe entry and cover path %s', (path) => {
+    expect(() => parseRegistry(registry({ ...game, entry: path }))).toThrow(/\.entry/);
+    expect(() => parseRegistry(registry({ ...game, cover: path }))).toThrow(/\.cover/);
+  });
+
+  it.each([
+    ['engine', 'unknown'], ['visibility', 'private'], ['status', 'live'],
+    ['title', ' '], ['version', 1], ['description', undefined], ['entry', null],
+  ])('rejects invalid %s', (field, value) => {
+    expect(() => parseRegistry(registry({ ...game, [field]: value }))).toThrow(field);
+  });
+
+  it('lists only public releases and accepts planned games without runtime paths', () => {
+    const parsed = parseRegistry(registry(
+      game,
+      { ...game, id: 'private-candidate', entry: 'games/private/index.html', visibility: 'development' },
+      { ...game, id: 'planned', entry: null, status: 'planned' },
+    ));
+    expect(publicGames(parsed)).toEqual([game]);
+  });
+});
