@@ -30,6 +30,13 @@ IMAGE_SPEC = {
 }
 ATLAS = {"pip":11,"creatures":6,"forest-props":7,"terrain":4,"forest-vfx":24,"hud":8}
 LICENSE = "Original pack asset; see assets/source/PROVENANCE.md; public release approval pending"
+S01_PREVIEW_LICENSE = "Producer-authorized for public S01 preview only (2026-11-26); see assets/source/PROVENANCE.md"
+S01_PREVIEW_ASSETS = {
+    "bg-fernlight.webp", "cover.webp", "soil-body.webp", "pip.png",
+    "pip.json", "pip-clips.json", "creatures.png", "creatures.json",
+    "creatures-clips.json", "forest-props.png", "forest-props.json", "terrain.png",
+    "terrain.json", "terrain-layout.json", "forest-vfx.png", "forest-vfx.json",
+}
 MANIFEST = ROOT / "production/ASSET_MANIFEST.csv"
 
 
@@ -147,7 +154,8 @@ def row(asset_id, kind, description, stage, by, src, path, dims="", frames="", c
           f"{path.name}: missing provenance path")
     return {
         "id":asset_id,"type":kind,"description":description,"stage":stage,"source":by,
-        "license":LICENSE,"source_path":src,"runtime_path":rel(path),
+        "license": S01_PREVIEW_LICENSE if path.parent == RUNTIME and path.name in S01_PREVIEW_ASSETS else LICENSE,
+        "source_path":src,"runtime_path":rel(path),
         "format":path.suffix[1:].upper(),"dimensions_or_media":dims,
         "frame_count":frames,"animation_clips":clips,"budget":f"{path.stat().st_size} bytes",
         "status":"verified","validation":validation,"sha256":checksum(path)

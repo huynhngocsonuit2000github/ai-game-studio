@@ -7,7 +7,7 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "G0 scope and S00 accepted. S01 local G1 candidate awaits Producer acceptance. Public preview rights remain pending.",
+    "producerReview": "G0 scope and S00 accepted. S01 visual assets cleared for the public development preview. S01 awaits Producer playtest and acceptance.",
     "verticalSlice": "L1 Fernlight Trail",
     "campaignAfterGate": "L2 and L3 after G2"
   },
@@ -38,9 +38,9 @@
   "unverified": [
     "In-browser audio playback and audible loop quality",
     "Representative device performance and Producer playtest",
-    "Public redistribution approval and public development preview"
+    "Live public development preview"
   ],
-  "nextAction": "Review the S01 PR, obtain the trusted Studio scope exception, and record the Producer’s acceptance before S02.",
+  "nextAction": "Merge the S01 rights record before the Studio publishing PR. Verify the deployed preview, then obtain Producer playtest and acceptance before S02.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
