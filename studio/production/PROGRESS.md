@@ -2,17 +2,17 @@
 
 ## M0-05 — Foundation Acceptance
 
-- Status: candidate_ready. Foundation acceptance awaits explicit Producer approval of M0-05.
-- Main baseline and verified public build: `cbd8998a82ee1f3af62866768d91d87059c18077`. Tested M0-05 source: `1fee88ce6ba0a14c244f2144117f73eb89a24a85`.
+- Status: accepted. The Producer explicitly approved M0-05 and accepted the Studio Foundation on 2026-11-26.
+- Accepted main and public build: `e1fa67f83b8340869309157a000de23167f044d8` ([PR #6](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/6)). The [main deployment](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45843689277) passed and logged HTTP 200 with the exact published commit.
 - Scope: production revision verification, full foundation regression, [game onboarding](../../games/README.md), and isolated release-path testing.
-- Next eligible work after acceptance requires a separate Producer-approved game or import. No production game or registry entry was added.
+- Readiness: the Studio can receive new production packs. Independent build, registration, Pages assembly, portal launch and return were verified with isolated synthetic packages. The production registry is empty. Starting or importing a game requires separate Producer approval of the pack and target.
 
 | Foundation requirement | Result | Evidence |
 | --- | --- | --- |
 | M0-01 — Toolchain, registry and portal | PASS (0) | Node 24.22.3, pnpm 11.25.0, frozen install, workflow lint, ESLint, strict typecheck, 29 registry tests and production build. |
 | M0-02 — Library, detail, and game navigation | PASS (0) | Chromium smoke under the Pages subpath, desktop and mobile catalog, invalid IDs, fixture launch and return. |
-| M0-03 — GitHub Pages and public revision | PASS | [Latest main deployment](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45842086513) logged HTTP 200 at the [public site](https://huynhngocsonuit2000github.github.io/ai-game-studio/) and exact commit `cbd8998`. Main-push deploy and build marker passed. Manual dispatch remains configured. |
-| M0-04 — Scope, assembly, and rollback | PASS (0) | Six pipeline regressions cover Git diff isolation, registry grants, complete artifact construction and local rollback preserving published routes. This PR activates the trusted scope check on current main. |
+| M0-03 — GitHub Pages and public revision | PASS | [Baseline main deployment](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45842086513) logged HTTP 200 at the [public site](https://huynhngocsonuit2000github.github.io/ai-game-studio/) and exact commit `cbd8998`. Main-push deploy and build marker passed. Manual dispatch remains configured. |
+| M0-04 — Scope, assembly, and rollback | PASS (0) | Six pipeline regressions cover Git diff isolation, registry grants, complete artifact construction and local rollback preserving published routes. The [trusted scope check](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45843349052) passed on PR #6. |
 | M0-05 — Independent onboarding | PASS (0) | Two synthetic packages installed and rebuilt independently in a temporary workspace. Both playable entries launched through the catalog and by direct URL, loaded their own assets, and returned to the portal. A third unpublished entry was absent from the artifact and catalog bundle. [Screenshot](evidence/m0-05/synthetic-catalog.png). |
 
 The final local run passed 35 automated tests and five Chromium tests, plus full-site assembly and artifact validation. The scratch install uses the normal frozen lockfile path with cache preference. Offline-only verification failed because the workspace lacked cached package metadata. The workspace proxy blocked a direct public HTTP request, so production status comes from GitHub's public-URL smoke check. Synthetic onboarding and rollback ran locally. No synthetic game was published.
