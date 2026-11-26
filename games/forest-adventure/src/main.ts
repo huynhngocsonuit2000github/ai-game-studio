@@ -114,12 +114,12 @@ function showResults(result: Result) {
   trail.setRunning(false);
   audio?.setActive(false, true);
   const next = playable[playable.indexOf(currentLevel) + 1];
-  const finale = campaignPreview && !next;
+  const finale = campaignPreview && currentLevel === levels.at(-1);
   const run = `${time(result.ticks)} · ${result.fireflies}/8 fireflies · ${result.deaths} ${result.deaths === 1 ? 'fall or defeat' : 'falls or defeats'}`;
   const summary = [run];
   if (result.fireflies === 8) summary.push('Firefly stamp');
   if (result.flawless) summary.push('Flawless');
-  const actions = next ? [{ label: 'Next trail', run: () => start(next) }] : [];
+  const actions = next ? [{ label: 'Next Trail', run: () => start(next) }] : [];
   actions.push({ label: 'Replay', run: () => start(currentLevel) });
   let record: HTMLElement | undefined;
   if (campaignPreview) {
@@ -128,7 +128,7 @@ function showResults(result: Result) {
     record = document.createElement('p');
     record.className = 'record';
     if (best) record.textContent = `Best time ${time(best.ticks)} · Best fireflies ${best.fireflies}/8`;
-    actions.push({ label: 'Trail selection', run: menu });
+    actions.push({ label: 'Trail selection', run: chooseTrail });
     if (finale) {
       const ending = document.createElement('p');
       ending.textContent = 'Pip returned the Heartseeds. Light has come back to the forest.';
@@ -169,6 +169,7 @@ function menu() {
 }
 
 function chooseTrail() {
+  screen = 'menu';
   const actions = playable
     .filter(({ id }) => save.data.unlockedLevelIds.includes(id))
     .map((level) => ({ label: level.name, run: () => start(level) }));
@@ -293,7 +294,7 @@ function start(level: Level) {
   }, () => {
     screen = 'error';
     display('Trail could not load', 'The trail backdrop could not be loaded. Check the connection and try again.',
-      [{ label: 'Retry', run: () => start(level) }, { label: 'Trail selection', run: menu }], level.name);
+      [{ label: 'Retry', run: () => start(level) }, { label: 'Trail selection', run: chooseTrail }], level.name);
   });
 }
 

@@ -5,7 +5,6 @@ import { SAVE_KEY } from '../src/save.ts';
 import { oak, willow } from './campaign-routes.ts';
 
 const released = registry.games.some(game => game.id === 'forest-adventure' && game.status === 'released');
-const campaign = released || Boolean(process.env.FOREST_CAMPAIGN_SITE);
 
 const prefix = '/ai-game-studio/';
 const detail = `${prefix}#/games/forest-adventure`;
@@ -58,7 +57,7 @@ function watchErrors(page: Page) {
   return errors;
 }
 
-test('launches from the Studio catalog, clears by keyboard and returns to Studio', async ({ page }, testInfo) => {
+test('clears all three trails by keyboard from the Studio catalog and returns to Studio', async ({ page }, testInfo) => {
   const errors = watchErrors(page);
   const media: string[] = [];
   page.on('response', (response) => {
@@ -92,7 +91,12 @@ test('launches from the Studio catalog, clears by keyboard and returns to Studio
   let clock = 0;
   let activeDirection: string | null = null;
   let jumpHeld = false;
-  let advance: ((count: number) => Promise<void>) | undefined;
+  let advance = async (count: number) => {
+    ticks += count;
+    const until = Math.ceil(ticks * STEP_MS / 16) * 16;
+    await page.clock.runFor(until - clock);
+    clock = until;
+  };
   async function travel(count: number, direction = 1, jump = false) {
     const key = direction === 0 ? null : direction > 0 ? 'ArrowRight' : 'ArrowLeft';
     if (key !== activeDirection) {
@@ -105,14 +109,7 @@ test('launches from the Studio catalog, clears by keyboard and returns to Studio
       else await page.keyboard.up('Space');
       jumpHeld = jump;
     }
-    if (advance) {
-      await advance(count);
-      return;
-    }
-    ticks += count;
-    const until = Math.ceil(ticks * STEP_MS / 16) * 16;
-    await page.clock.runFor(until - clock);
-    clock = until;
+    await advance(count);
   }
 
   // First step, first gap, then the beetle approach and Seed 1.
@@ -164,61 +161,66 @@ test('launches from the Studio catalog, clears by keyboard and returns to Studio
   await travel(42);
   await expect(page.getByRole('heading', { name: 'Trail cleared' })).toBeVisible();
   await expect(page.getByText(/20\.\d s · 8\/8 fireflies · 1 fall or defeat/)).toBeVisible();
-  await expect(page.getByRole('button', { name: campaign ? 'Next trail' : 'Replay' })).toBeFocused();
+  await expect(page.getByRole('button', { name: 'Next Trail' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('trail-cleared.png') });
   await page.keyboard.up('ArrowRight');
   activeDirection = null;
 
-  if (campaign) {
-    advance = await fixedFrameSource(page);
-    const progress = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), SAVE_KEY);
-    expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run']);
-    await page.getByRole('button', { name: 'Next trail' }).click();
-    await expect(page.locator('#chapter-name')).toHaveText('Willow Run');
-    for (const [index, segment] of willow.entries()) {
-      await travel(...segment);
-      if (index === 14) {
-        await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
-        await page.screenshot({ path: testInfo.outputPath('willow-run.png') });
-      }
+  advance = await fixedFrameSource(page);
+  const progress = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), SAVE_KEY);
+  expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run']);
+  await page.getByRole('button', { name: 'Next Trail' }).click();
+  await expect(page.locator('#chapter-name')).toHaveText('Willow Run');
+  for (const [index, segment] of willow.entries()) {
+    await travel(...segment);
+    if (index === 14) {
+      await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
+      await page.screenshot({ path: testInfo.outputPath('willow-run.png') });
     }
-    await travel(24);
-    await expect(page.getByRole('heading', { name: 'Trail cleared' })).toBeVisible();
-    await expect(page.getByText(/8\/8 fireflies/).first()).toBeVisible();
-    expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
-    await page.keyboard.up('ArrowRight');
-    activeDirection = null;
-    await page.getByRole('button', { name: 'Next trail' }).click();
-    await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
-    for (const [index, segment] of oak.entries()) {
-      await travel(...segment);
-      if (index === 30) {
-        await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
-        await page.screenshot({ path: testInfo.outputPath('lantern-oak.png') });
-      }
-    }
-    await travel(32);
-    await expect(page.getByRole('heading', { name: 'The Lantern Oak wakes' })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Next trail' })).toHaveCount(0);
-    await page.screenshot({ path: testInfo.outputPath('oak-finale.png') });
-    const completed = await progress();
-    expect(Object.keys(completed.bestByLevel)).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
-    expect(completed.bestByLevel['lantern-oak'].fireflies).toBe(8);
-    await page.keyboard.up('ArrowRight');
-    await page.getByRole('button', { name: 'Replay' }).click();
-    await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
-    expect(await progress()).toEqual(completed);
-    await page.clock.resume();
-    await page.reload();
-    await page.getByRole('button', { name: 'Continue' }).click();
-    await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
-    await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
-    await page.keyboard.press('Escape');
-    await expect(page.getByRole('heading', { name: 'Paused' })).toBeVisible();
-    await page.waitForLoadState('networkidle');
-  } else {
-    await page.clock.resume();
   }
+  await travel(24);
+  await expect(page.getByRole('heading', { name: 'Trail cleared' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next Trail' })).toBeFocused();
+  await expect(page.getByText(/8\/8 fireflies/).first()).toBeVisible();
+  expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
+  await page.keyboard.up('ArrowRight');
+  activeDirection = null;
+  await page.getByRole('button', { name: 'Next Trail' }).click();
+  await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
+  for (const [index, segment] of oak.entries()) {
+    await travel(...segment);
+    if (index === 30) {
+      await expect(page.getByRole('status')).toHaveText('Checkpoint lit.');
+      await page.screenshot({ path: testInfo.outputPath('lantern-oak.png') });
+    }
+  }
+  await travel(32);
+  await expect(page.getByRole('heading', { name: 'The Lantern Oak wakes' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next Trail' })).toHaveCount(0);
+  await page.screenshot({ path: testInfo.outputPath('oak-finale.png') });
+  const completed = await progress();
+  expect(Object.keys(completed.bestByLevel)).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
+  expect(completed.bestByLevel['lantern-oak'].fireflies).toBe(8);
+  await page.keyboard.up('ArrowRight');
+  await page.getByRole('button', { name: 'Replay' }).click();
+  await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+  expect(await progress()).toEqual(completed);
+  await page.clock.resume();
+  await page.reload();
+  await page.getByRole('button', { name: 'Choose a trail' }).click();
+  const choices = page.getByRole('dialog').getByRole('button');
+  await expect(choices).toHaveText(['Fernlight Trail', 'Willow Run', 'Lantern Oak', 'Title screen']);
+  await page.getByRole('button', { name: 'Fernlight Trail', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Fernlight Trail playfield' })).toBeFocused();
+  await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+  expect(await progress()).toEqual(completed);
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
+  await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { name: 'Paused' })).toBeVisible();
+  await page.waitForLoadState('networkidle');
 
   await page.getByRole('link', { name: 'Back to Studio' }).click();
   await expect(page).toHaveURL(`${prefix}#/`);
@@ -233,7 +235,7 @@ test('direct entry, resize, explicit pause and ten confirmed restarts', async ({
   await page.setViewportSize({ width: 960, height: 540 });
   await expect(page.locator('canvas')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(960);
-  if (campaign) await page.screenshot({ path: testInfo.outputPath('fernlight-960.png') });
+  await page.screenshot({ path: testInfo.outputPath('fernlight-960.png') });
   await page.locator('canvas').click();
   await expect(page.locator('#playfield')).toBeFocused();
 

@@ -1,12 +1,7 @@
 import { expect, test } from '@playwright/test';
-import registry from '../../../registry/games.json' with { type: 'json' };
 import { SAVE_KEY } from '../src/save.ts';
 
-const campaign = Boolean(process.env.FOREST_CAMPAIGN_SITE) ||
-  registry.games.some(game => game.id === 'forest-adventure' && game.status === 'released');
 const game = '/ai-game-studio/games/forest-adventure/index.html';
-
-test.skip(!campaign, 'This build only contains the S01 preview media.');
 
 test('recovers from a missing required texture and supports keyboard settings', async ({ page }, testInfo) => {
   const asset = /\/assets\/bg-fernlight-[^/]+\.webp$/;
@@ -138,6 +133,10 @@ test('retries a deferred backdrop, keeps saved progress and fits the supported d
   await page.goto(game);
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByRole('heading', { name: 'Trail could not load' })).toBeVisible();
+  await page.getByRole('button', { name: 'Trail selection' }).click();
+  await expect(page.getByRole('dialog').getByRole('button'))
+    .toHaveText(['Fernlight Trail', 'Willow Run', 'Title screen']);
+  await page.getByRole('button', { name: 'Willow Run', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Retry' })).toBeFocused();
   await page.unroute(backdrop);
   await page.keyboard.press('Enter');

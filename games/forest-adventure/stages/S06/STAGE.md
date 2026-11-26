@@ -16,3 +16,7 @@ S06-2 awaits campaign media clearance, trusted Studio authorization, Producer ap
 ## Final release checkpoint
 
 D13 records Producer gameplay acceptance and conditional publication authorization. Source reproduction and artifact media verification passed. The verified Studio Pages revision `95cdbb6` served the S01 preview. The full campaign passed local production assembly using a Released registry fixture. The final release PR remains blocked on the mandatory QA evidence and trusted exact-head scope grant. See the [release notes](../../production/RELEASE_NOTES.md) and [QA report](../../reports/QA_REPORT.md).
+
+## Public preview repair
+
+D14 clears the existing campaign for public In Development play. The default Pages artifact includes all three trails with checked runtime media and notices. S06-2 formal release still depends on the outstanding G4 evidence and trusted registry authorization. The development preview needs a manual merge and verification against the resulting live Pages SHA. [Public preview checkpoint](../../production/PROGRESS.md)

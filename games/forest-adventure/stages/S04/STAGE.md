@@ -10,3 +10,7 @@ Dependency: S03 and explicit G2 approval. Player outcome: play, unlock, replay a
 ## Combined candidate checkpoint
 
 The Chromium keyboard route cleared Fernlight Trail, Willow Run and Lantern Oak in order with all 24 fireflies. It lit all checkpoints, unlocked each next trail, reached the finale, replayed the final trail and reloaded into a fresh Lantern Oak attempt through Continue. Storage and independent best records were checked separately. The full campaign is ready for combined candidate review under D11. [Combined QA report](../../reports/QA_REPORT.md)
+
+## Public development preview
+
+FA-PAGES-01 applies D14 to the normal Pages build. The hosted catalog retains its In Development status. The browser regression clears all three trails from the assembled artifact using keyboard controls, checks both Next Trail transitions, unlock records, the finale, replay, trail selection and Continue after reload. [QA evidence](../../reports/QA_REPORT.md)
