@@ -1,6 +1,6 @@
 # Forest Adventure 2D
 
-Design candidate 0.1.0. The confirmed brief establishes an original browser 2D forest platformer. The detailed design below is a proposal, pending the G0 Producer decision recorded in [DECISIONS](../production/DECISIONS.md).
+Pack 0.1.0 defines an original browser 2D forest platformer. The Producer approved the reduced three-level initial release at G0. See [DECISIONS](../production/DECISIONS.md) for the approval and outstanding release rights.
 
 ## Experience
 

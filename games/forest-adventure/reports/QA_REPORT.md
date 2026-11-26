@@ -2,17 +2,23 @@
 
 Scope: design, checked-in runtime asset files and onboarding. Gameplay tests begin with Codex Cloud S01. Art targets are static compositions from exported assets. They do not establish in-game visual quality. Manifest verified refers to file integrity/metadata checks, unless explicitly supported by a later stage result.
 
-## Pack evidence
+## S00 evidence · 2026-11-26
+
+Tested in the candidate worktree based on `4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf`. Node 24.22.3, pnpm 11.25.0, Python 3.12.14, Pillow 13.0.0, NumPy 2.3.5, FFmpeg/ffprobe 7.1.5 and Chromium 156.0.8078.79 on Debian 13. The candidate SHA is the S00 PR head.
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| Asset decodes, dimensions, atlas geometry, pivots, transparency, clip mapping | PASS | tools/validate_pack.py and [asset validation](asset-validation.json) |
-| Both audio codec variants, decoded peak, duration and seam sample bounds | PASS | FFmpeg decode in asset-validation.json. Browser playback and audible loop quality pending. |
-| Level record counts, bounds, embedded anchors, gap and checkpoint spacing | PASS | Layout checks in asset-validation.json. Actual traversal and tuning pending. |
-| Registry draft parsed and intended public/development filter checked | PASS | [Registry verification](registry-validation.json) against inspected repository parser |
-| Art assembly inspection and title production | PASS | [Fernlight](../assets/concept/fernlight-target.webp), [Willow](../assets/concept/willow-target.webp), [Oak](../assets/concept/oak-target.webp); actual runtime files composed for offline review. |
-| Phaser import, frame stability during motion, gameplay budget, playability or live preview | NOT_RUN | Game implementation belongs to Codex Cloud. |
-| Producer G0 acceptance, public release rights and remote publication | BLOCKED | Awaiting approval and authorized implementation. |
+| Source, runtime and layout validation | PASS | `python3 games/forest-adventure/tools/validate_pack.py --check` matched 9 source masters and prompts and decoded 3 static targets. The manifest matched 58 files and 5,585,284 bytes. The validator checked 14 runtime images, 60 atlas frames, 32 audio bitstreams (codec, duration, peak and decoded loop seam bounds), and 3 layouts. Regenerating the evidence in a scratch copy yielded the original [asset report](asset-validation.json) and manifest byte-for-byte. |
+| Registry draft and scope | PASS | `node --test games/forest-adventure/tools/validate_registry.test.mjs` passed 7 assertions against the Studio parser and changed-path checker. [Registry verification](registry-validation.json) |
+| Static art inspection | PASS | Reviewed all three compositions, cover and sample Pip and terrain atlases. [Fernlight](../assets/concept/fernlight-target.webp), [Willow](../assets/concept/willow-target.webp), [Oak](../assets/concept/oak-target.webp), [cover](../assets/runtime/cover.webp) |
+| Studio frozen install, lint and typecheck | PASS | `pnpm install --frozen-lockfile`, `pnpm lint` and `pnpm typecheck`. Used the workspace-local pnpm store via the store-dir option. |
+| Studio unit and script tests | PASS | `pnpm test` passed 35 Vitest tests and 6 Node tests. |
+| Portal and Pages build | PASS | `pnpm build`, `STUDIO_PAGES_BASE_SHA=$(git rev-parse origin/main) pnpm assemble:pages` and `pnpm verify:pages`. Pages verification found the index and 3 site-relative assets. |
+| Studio browser smoke | PASS | `STUDIO_CHROMIUM_PATH=/usr/bin/chromium STUDIO_PAGES_BASE_PATH=/ai-game-studio/ STUDIO_TEST_ASSEMBLED_PAGES=1 pnpm exec playwright test` passed 5 tests. The first run passed 4 and hit an unwritable default pnpm data directory in the onboarding fixture. Rerunning all 5 with `XDG_DATA_HOME` set to a writable temporary directory resolved it. Screenshots are in the ignored `test-results/` directory. |
+| Studio registration | BLOCKED | Canonical registry has no Forest Adventure entry. Studio approval is required to add the validated draft. [Integration instructions](../production/STUDIO_INTEGRATION.md) |
+| G0 initial scope | PASS | The Producer approved the reduced three-level scope. [D03](../production/DECISIONS.md) |
+| Public redistribution | BLOCKED | Producer authorization is pending. [D06](../production/DECISIONS.md) |
+| Forest Adventure runtime, listening, playtest and deploy | NOT_RUN | S00 deliverables are the verified pack and static art targets. The Studio smoke used portal and isolated onboarding fixtures. S01 supplies the first playable game. |
 
 ## Implementation matrix
 

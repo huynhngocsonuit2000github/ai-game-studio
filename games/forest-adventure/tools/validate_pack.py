@@ -1,4 +1,5 @@
-"""Validate import data and exported media. Writes an evidence file and CSV manifest."""
+"""Validate import data and media. Check the manifest or refresh offline evidence."""
+import argparse
 import csv
 from hashlib import sha256
 import json
@@ -29,6 +30,7 @@ IMAGE_SPEC = {
 }
 ATLAS = {"pip":11,"creatures":6,"forest-props":7,"terrain":4,"forest-vfx":24,"hud":8}
 LICENSE = "Original pack asset; see assets/source/PROVENANCE.md; public release approval pending"
+MANIFEST = ROOT / "production/ASSET_MANIFEST.csv"
 
 
 def load(path):
@@ -141,6 +143,8 @@ def validate_levels():
 
 
 def row(asset_id, kind, description, stage, by, src, path, dims="", frames="", clips="", validation=""):
+    check(all((ROOT / source).is_file() for source in src.split(";")),
+          f"{path.name}: missing provenance path")
     return {
         "id":asset_id,"type":kind,"description":description,"stage":stage,"source":by,
         "license":LICENSE,"source_path":src,"runtime_path":rel(path),
@@ -150,7 +154,37 @@ def row(asset_id, kind, description, stage, by, src, path, dims="", frames="", c
     }
 
 
+def verify_source_art():
+    source = ASSETS / "source"
+    prompts = load(source / "artwork-prompts.json")
+    masters = {path.stem: path for path in source.glob("*.png")}
+    expected = {Path(name).stem for *_, sources in IMAGE_SPEC.values()
+                if sources for name in sources.split(";")}
+    check(set(masters) == set(prompts) == expected,
+          "Source artwork, generation prompts and runtime source references differ")
+    for stem, path in masters.items():
+        check(isinstance(prompts[stem], str) and prompts[stem].strip(),
+              f"{stem}: missing source prompt")
+        with Image.open(path) as image:
+            check(image.format == "PNG", f"{stem}: source must be PNG")
+            image.load()
+
+    targets = sorted((ASSETS / "concept").glob("*-target.webp"))
+    check({path.stem for path in targets} == {"fernlight-target", "willow-target", "oak-target"},
+          "Missing or unexpected static art target")
+    for path in targets:
+        with Image.open(path) as image:
+            check(image.format == "WEBP" and image.size == (960, 540),
+                  f"{path.name}: invalid static art target")
+            image.load()
+    print(f"{len(masters)} source masters matched to prompts; {len(targets)} static targets decoded.")
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--check", action="store_true", help="Verify the checked-in manifest without writing files.")
+    args = parser.parse_args()
+    verify_source_art()
     rows=[]
     evidence={"images":{},"audio":{},"levels":validate_levels()}
     art_source = ROOT/"tools/build_art.py"
@@ -164,7 +198,6 @@ def main():
             if stem in ATLAS or name in ("bg-near.webp","ui-panel.png"):
                 check(im.mode=="RGBA",f"{name}: missing alpha")
         src=";".join(f"assets/source/{s}" for s in sources.split(";")) if sources else rel(art_source)
-        check(all((ROOT/s).is_file() for s in src.split(";")),f"{name}: missing provenance path")
         evidence["images"][name]={"dimensions":dims,"frames":count,"frameDimensions":stride}
         validation="Decoded; atlas bounds/padding/pivots and clip references checked where applicable; Phaser import pending"
         rows.append(row(stem,kind,desc,stage,"Original AI artwork and local asset bake" if sources else "Local asset bake",
@@ -188,16 +221,31 @@ def main():
         rows.append(row(p.stem+"-data","metadata",p.name,"S03" if p.name=="cues.json" else "S01",
                    "Local data export",src,p,validation="Parsed; reference validation where applicable"))
     actual={rel(p) for p in RUNTIME.rglob("*") if p.is_file()}
-    check(actual=={r["runtime_path"] for r in rows},"Runtime manifest coverage differs")
-    with (ROOT/"production/ASSET_MANIFEST.csv").open("w",newline="",encoding="utf-8") as f:
-        writer=csv.DictWriter(f,fieldnames=list(rows[0]))
-        writer.writeheader()
-        writer.writerows(rows)
+    check(len(actual) == len(rows) and actual == {r["runtime_path"] for r in rows},
+          "Runtime manifest coverage differs")
     evidence["runtimeBytes"]=sum((ROOT/p).stat().st_size for p in actual)
     evidence["runtimeFiles"]=len(actual)
     evidence["structure"]="PASS"
     evidence["gameImportAndPlaytest"]="NOT_RUN: game code belongs to Codex Cloud stages"
-    (ROOT/"reports/asset-validation.json").write_text(json.dumps(evidence,indent=2)+"\n")
+    if args.check:
+        with MANIFEST.open(newline="", encoding="utf-8") as file:
+            existing = list(csv.DictReader(file))
+        check(len(existing) == len(rows), "Wrong number of checked-in manifest rows")
+        expected = {row["runtime_path"]: row for row in rows}
+        check({row["runtime_path"] for row in existing} == expected.keys(),
+              "Checked-in manifest has missing or duplicate runtime paths")
+        for recorded in existing:
+            measured = expected[recorded["runtime_path"]]
+            for field in ("id", "sha256", "budget", "source", "source_path", "license"):
+                check(recorded[field] == measured[field],
+                      f'{recorded["runtime_path"]}: manifest {field} differs')
+        print("Checked-in manifest paths, hashes, sizes and provenance match.")
+    else:
+        with MANIFEST.open("w", newline="", encoding="utf-8") as file:
+            writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+            writer.writeheader()
+            writer.writerows(rows)
+        (ROOT/"reports/asset-validation.json").write_text(json.dumps(evidence,indent=2)+"\n")
     print(f'{len(actual)} runtime files; {evidence["runtimeBytes"]} bytes; 3 level layouts validated.')
     print(f'{len(evidence["images"])} images, {sum(ATLAS.values())} atlas frames and {len(evidence["audio"])} audio bitstreams checked.')
 

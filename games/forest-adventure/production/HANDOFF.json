@@ -7,21 +7,21 @@
   "path": "games/forest-adventure",
   "scope": {
     "confirmed": "Original Phaser browser 2D forest platformer in the Studio monorepo",
-    "producerReview": "G0 required for the proposed creative design and source/licensing disposition",
+    "producerReview": "G0 three-level scope approved in D03. S00 candidate acceptance and D06 public redistribution approval pending.",
     "verticalSlice": "L1 Fernlight Trail",
     "campaignAfterGate": "L2 and L3 after G2"
   },
   "currentStage": "S00",
-  "nextTask": "S00-1",
-  "status": "design candidate; approval and import pending",
+  "nextTask": null,
+  "status": "candidate_ready",
   "commands": {
     "resumeHere": "Continue production",
     "resumeInStudio": "Continue production: forest-adventure"
   },
   "checks": {
     "assetOffline": "PASS",
-    "registryContract": "PASS",
-    "zipExpectedRoot": "games/forest-adventure"
+    "registryContract": "PASS (draft only)",
+    "studioVerification": "PASS (portal, Pages and isolated onboarding fixtures)"
   },
   "readNext": [
     "AGENTS.md",
@@ -30,18 +30,17 @@
     "START_CODEX.md"
   ],
   "requiredTests": [
-    "S00 manifest and registry assertions",
+    "S00 read-only manifest and provenance validation, registry draft and change-scope checks, Studio verification",
     "S01 through S06 QA cases Q01\u2013Q17"
   ],
   "missingRequiredRuntimeMedia": [],
   "unverified": [
-    "Browser and Phaser import",
-    "Listening and codec compatibility in-browser",
-    "Gameplay and performance",
-    "Live candidate preview, PR and deployed game",
-    "Public asset rights and release approval"
+    "Forest Adventure Phaser import, gameplay and performance",
+    "In-browser audio playback and audible loop quality",
+    "Forest Adventure playable preview and Pages deployment",
+    "Public redistribution approval"
   ],
-  "nextAction": "Record Producer G0 and import decision, then execute S00-1 in Codex Cloud.",
+  "nextAction": "Review the S00 PR. Record Producer acceptance and obtain Studio registry and dependency authorization before S01.",
   "runtimeFiles": 58,
   "runtimeBytes": 5585284,
   "files": [
@@ -148,6 +147,9 @@
     "games/forest-adventure/tools/build_art.py",
     "games/forest-adventure/tools/build_audio.py",
     "games/forest-adventure/tools/build_reference.py",
-    "games/forest-adventure/tools/validate_pack.py"
-  ]
+    "games/forest-adventure/tools/validate_pack.py",
+    "games/forest-adventure/tools/validate_registry.test.mjs"
+  ],
+  "baselineCommit": "4bfdb37c79b921ea63efdcdaf1e3c9e1185aeeaf",
+  "candidateBranch": "prod/forest-adventure/s00"
 }

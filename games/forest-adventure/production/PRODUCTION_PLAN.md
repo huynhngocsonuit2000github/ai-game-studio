@@ -2,9 +2,9 @@
 
 Read one stage per Codex task. Stage files own individual work items and dependencies. Review top risks early: creative scope G0, foot positions/terrain seams in S02, asset rights at S00/S06, Studio scope for lockfile and CI, audio on target browsers in S03/S05. A fixed stage budget is one coherent PR. If scope slips, cut L2/L3 variants or optional effects before responsiveness, readable hazards or final feedback.
 
-| Stage | Work IDs | Waits for | Outcome | State at handoff |
+| Stage | Work IDs | Waits for | Outcome | State |
 | --- | --- | --- | --- | --- |
-| [S00](../stages/S00/STAGE.md) | S00-1/2 | Producer import + G0 | Confirm scope, approved import, dependency and CI path | blocked on approval |
+| [S00](../stages/S00/STAGE.md) | S00-1/2 | Producer import + G0 | Confirm scope, approved import, dependency and CI path | candidate_ready |
 | [S01](../stages/S01/STAGE.md) | S01-1/2 | S00 accepted and dependency authorization | Playable L1 core loop in a browser (G1) | planned |
 | [S02](../stages/S02/STAGE.md) | S02-1/2 | S01 accepted | L1 coherent art, UI, camera and animation | planned |
 | [S03](../stages/S03/STAGE.md) | S03-1/2 | S02 accepted | Polished L1 with accessible audio and Producer playtest (G2) | planned |
