@@ -1,0 +1,11 @@
+{
+  "id": "forest-adventure",
+  "title": "Forest Adventure 2D",
+  "description": "Guide Pip through the woods and wake the Lantern Oak in a hand-painted platform adventure.",
+  "engine": "phaser",
+  "status": "development",
+  "visibility": "development",
+  "entry": null,
+  "cover": null,
+  "version": "0.1.0"
+}

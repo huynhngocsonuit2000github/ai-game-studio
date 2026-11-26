@@ -1,0 +1,114 @@
+{
+  "frames": [
+    {
+      "filename": "ground-left",
+      "frame": {
+        "x": 4,
+        "y": 4,
+        "w": 64,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "filename": "ground-middle",
+      "frame": {
+        "x": 76,
+        "y": 4,
+        "w": 64,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "filename": "ground-middle-reverse",
+      "frame": {
+        "x": 148,
+        "y": 4,
+        "w": 64,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "filename": "ground-right",
+      "frame": {
+        "x": 220,
+        "y": 4,
+        "w": 64,
+        "h": 128
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 64,
+        "h": 128
+      },
+      "sourceSize": {
+        "w": 64,
+        "h": 128
+      },
+      "pivot": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ],
+  "meta": {
+    "image": "terrain.png",
+    "size": {
+      "w": 360,
+      "h": 136
+    },
+    "scale": "1",
+    "format": "RGBA8888",
+    "gutterPixels": 4
+  }
+}
