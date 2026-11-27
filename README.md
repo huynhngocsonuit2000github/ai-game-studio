@@ -1,7 +1,7 @@
-# AI Game Studio V5.1
+# AI Game Studio V5.2
 A web-first monorepo for independent original 2D and 3D games, with a portal and static builds under the GitHub Pages project subpath.
 
-For an existing Studio, start with the [V5.1 prompt and ZIP workflow](studio/standards/WORKFLOW_V5_1.md). It covers import, feature and bug-fix handoffs, resume, and the Studio approval path for shared changes.
+Sync existing-game work using the [V5.2 context and evidence protocol](studio/standards/CONTEXT_V5_2.md). For imports, use the compatible [V5.1 prompt and ZIP workflow](studio/standards/WORKFLOW_V5_1.md). It covers import, feature and bug-fix handoffs, resume, and the Studio approval path for shared changes.
 
 ## Local development
 

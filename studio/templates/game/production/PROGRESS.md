@@ -9,3 +9,5 @@
 - PR and verified preview links, blockers and next exact task
 
 Start at S00 with G0 design approval pending. Append later checkpoints without rewriting accepted stage or release evidence.
+
+On state adoption, link `GAME_STATE.json`, the requirement evidence and the PR/CI revision. Record current main, approved scope, deviations and the last observed deployment separately.

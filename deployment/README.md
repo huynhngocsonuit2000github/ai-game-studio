@@ -38,3 +38,7 @@ CI uses trusted main registry history to protect previously public IDs and entry
 ## Failure and rollback
 
 A failed validation prevents a new deployment. If provisioning fails, check the Pages source and environment rules, then rerun the workflow for the current main commit. For a faulty release, open a revert PR for the offending changes. If a normal revert would remove a public game, restore the previous working version while preserving the published entry. Build and smoke-test the complete rollback artifact. After authorized merge, verify HTTP 200, the commit marker and the released routes. The local regression suite rehearses an update, a failed candidate and a rollback with two synthetic games. Deploying old runs is skipped once main has advanced.
+
+## Read a deployed verification result
+
+Open the Pages workflow summary for the inspected main SHA. Confirm the deployment URL, build marker, portal and manifest entry HTTP results. Compare the published SHA to current main. If live gameplay is NOT_RUN, open the verified URL in a browser, launch through the catalog, check direct entry and returning to the catalog, and exercise the affected player behavior. For a level expansion run fresh progression through the finale, next-level controls, save/reload and prior-save handling. Check runtime network and console errors. Record the SHA, time, browser, actual results and links to evidence during the authorized verification.

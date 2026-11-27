@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "gameId": "forest-adventure",
+  "baselineCommit": "e84935e4053fcc35ea7a8258559ce55a5e87f9bd",
+  "records": [
+    {
+      "id": "fernlight-trail",
+      "kind": "level",
+      "intendedBehavior": "Clear Fernlight Trail and unlock Willow Run through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "willow-run",
+      "kind": "level",
+      "intendedBehavior": "Clear Willow Run and unlock Lantern Oak through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "lantern-oak",
+      "kind": "level",
+      "intendedBehavior": "Clear Lantern Oak to complete the original campaign and unlock Acorn Causeway through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "accepted",
+      "evidence": [
+        "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+        "design/LEVELS.json",
+        "src/main.ts"
+      ],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md#d13"
+      ],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-01",
+      "kind": "level",
+      "intendedBehavior": "Clear Acorn Causeway and unlock Twinroot Fork through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-02",
+      "kind": "level",
+      "intendedBehavior": "Clear Twinroot Fork and unlock Stagfern Terrace through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-03",
+      "kind": "level",
+      "intendedBehavior": "Clear Stagfern Terrace and unlock Hollow Stump Drop through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-04",
+      "kind": "level",
+      "intendedBehavior": "Clear Hollow Stump Drop and unlock Mothwatch Rise through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-05",
+      "kind": "level",
+      "intendedBehavior": "Clear Mothwatch Rise and unlock Foxfire Bend through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-06",
+      "kind": "level",
+      "intendedBehavior": "Clear Foxfire Bend and unlock The First Lantern through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-07",
+      "kind": "level",
+      "intendedBehavior": "Clear The First Lantern and unlock Bracken Gallery through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-08",
+      "kind": "level",
+      "intendedBehavior": "Clear Bracken Gallery and unlock Ravine Switchbacks through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-09",
+      "kind": "level",
+      "intendedBehavior": "Clear Ravine Switchbacks and unlock Oaklight Finale through Next Trail.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-10",
+      "kind": "level",
+      "intendedBehavior": "Clear Oaklight Finale to complete the expanded campaign.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/level.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    },
+    {
+      "id": "trail-progression",
+      "kind": "feature",
+      "intendedBehavior": "Migrate eligible original campaign progress into the expansion preview save, preserve the original save bytes, and persist unlocks and best records across reloads.",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "unknown",
+      "evidence": [
+        "production/PROGRESS.md#exp-10-trails-expansion",
+        "src/save.ts",
+        "tests/save.test.mjs"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "production/PROGRESS.md#exp-10-trails-expansion",
+          "tests/trail.spec.ts"
+        ]
+      }
+    }
+  ],
+  "knownGaps": [
+    "D13 accepts campaign gameplay. The exact Producer-tested build and URL are unverified.",
+    "Producer playtest and acceptance for EXP-10-TRAILS are pending.",
+    "Live SHA and live gameplay could not be verified from this workspace because the Pages connection was blocked.",
+    "Formal release gates remain open in the QA report and S06 checkpoint."
+  ],
+  "save": {
+    "schema": "forest-adventure:exp-10-trails:preview:v1",
+    "version": 1,
+    "evidence": [
+      "src/save.ts",
+      "tests/save.test.mjs"
+    ]
+  },
+  "publication": {
+    "rights": "cleared",
+    "preview": "approved",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md#d14",
+      "production/PUBLIC_PREVIEW_MEDIA.json",
+      "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27",
+      "production/DECISIONS.md#d15",
+      "production/PROGRESS.md#exp-10-trails-expansion"
+    ]
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27"
+        ]
+      },
+      "http": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md#public-campaign-development-preview--2026-11-27"
+        ]
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  }
+}

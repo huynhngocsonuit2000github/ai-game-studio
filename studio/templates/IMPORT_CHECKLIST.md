@@ -1,5 +1,6 @@
-# Import checklist — V5.1
+# Import checklist — V5.2
 
+- Sync current main and [reconcile the pack baseline, approved scope and deviations](../standards/CONTEXT_V5_2.md).
 - Resolve the exact Producer-approved game ID and kind. Read the [handoff contract](../standards/WORKFLOW_V5_1.md) and the existing game checkpoint where applicable.
 - Confirm readable ZIP bytes and independently approved digest, destinations, replacements, stage batch, rights and public-repository scope. For unavailable bytes, use the manual transfer fallback and record the blocker.
 - Validate into scratch space. Inspect before/after, license provenance and the intended first task. Copy only reviewed files and inspect the actual Git diff. Record missing assets without substituting final placeholders.
