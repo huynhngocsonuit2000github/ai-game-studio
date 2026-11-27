@@ -135,6 +135,53 @@ test('gesture-unlocked rain, music and delayed combat effects survive a pause an
   } finally { await context.close(); }
 });
 
+test('keeps a legacy S03 result, unlocks only contiguous wins and loads the correct arena decks', async ({ page }) => {
+  const errors = clientErrors(page);
+  await page.goto(game);
+  await page.evaluate(() => localStorage.setItem('midnight-greenhouse.progress.v1', JSON.stringify({
+    version: 1, raincourt: { stars: 3, fastest: 429.5 }, 'lightning-dome': { stars: 3, fastest: 40 },
+  })));
+  await page.reload();
+  await expect(page.getByRole('button', { name: 'Chơi lại Sân Mưa' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Chọn Hầm Bơm' })).toBeVisible();
+  await expect(page.locator('[data-stage=lightning-dome]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Chọn Hầm Bơm' }).click();
+  await page.getByRole('button', { name: 'Bắt đầu ca trực' }).click();
+  await expect(page.locator('[data-arena=pump-gallery]')).toBeVisible();
+  await expect(page.locator('.seed-card')).toHaveCount(5);
+  await expect(page.getByRole('button', { name: /Rêu Thành/ })).toBeVisible();
+  await page.evaluate(() => {
+    const value = JSON.parse(localStorage.getItem('midnight-greenhouse.progress.v1') ?? '{}');
+    value['pump-gallery'] = { stars: 2, fastest: 449 };
+    delete value['lightning-dome'];
+    localStorage.setItem('midnight-greenhouse.progress.v1', JSON.stringify(value));
+  });
+  await page.reload();
+  await page.getByRole('button', { name: 'Chọn Đài Chớp' }).click();
+  await page.getByRole('button', { name: 'Bắt đầu ca trực' }).click();
+  await expect(page.locator('[data-arena=lightning-dome]')).toBeVisible();
+  await expect(page.locator('.seed-card')).toHaveCount(6);
+  await page.keyboard.press('6');
+  await expect(page.getByRole('button', { name: /Lựu Cầu Chì/ })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: /Luống 2, ô 3/ }).click();
+  await expect(page.getByRole('button', { name: /Luống 2, ô 3/ })).toHaveAccessibleName(/Lựu Cầu Chì/);
+  expect(errors).toEqual([]);
+});
+
+test('corrupt progress and denied writes keep the opening playable without unlocking later stages', async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem('midnight-greenhouse.progress.v1', '{broken');
+    Storage.prototype.setItem = () => { throw new DOMException('Denied', 'SecurityError'); };
+  });
+  await page.goto(game);
+  await page.getByRole('button', { name: 'Cài đặt' }).click();
+  await page.getByLabel('Tắt tiếng').check();
+  await expect(page.getByText(/Trình duyệt đang chặn lưu/)).toBeVisible();
+  await page.getByRole('button', { name: 'Xong' }).click();
+  await start(page);
+  await expect(page.locator('.seed-card')).toHaveCount(4);
+});
+
 // The temporary catalog worktree is removed by Studio after this suite.
 // Preserve the standalone playtest build in the workflow's browser-evidence paths.
 test.afterAll(async () => {
@@ -143,7 +190,7 @@ test.afterAll(async () => {
   const gameDirectory = fileURLToPath(new URL('../', import.meta.url));
   const gameBuild = resolve(gameDirectory, '../../deployment/dist/games/midnight-greenhouse');
   const artifact = resolve(GITHUB_WORKSPACE,
-    'games/midnight-greenhouse/test-results/pages-browser/midnight-greenhouse-s03.zip');
+    'games/midnight-greenhouse/test-results/pages-browser/midnight-greenhouse-campaign.zip');
   execFileSync(process.execPath, [resolve(gameDirectory, 'tests/playtest-artifact.mjs'),
     gameBuild, artifact, GITHUB_EVENT_PATH], { cwd: gameDirectory, stdio: 'inherit' });
 });

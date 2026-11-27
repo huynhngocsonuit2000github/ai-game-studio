@@ -2,7 +2,7 @@
 
 Game `midnight-greenhouse` · Batch `GH-THREE-LEVELS` · Pack `midnight-greenhouse-gh-three-levels-v1`.
 
-**Current stage S03 / GH-30 / candidate_ready.** Technical G2 passed for Sân Mưa. Producer G2 acceptance is pending. Runtime candidate `5b34762f240f93e8b1b4892fd116430d9e7e3dea`, on `midnight-greenhouse/gh-three-levels` and [draft PR #35](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35). This checkpoint adds evidence on that branch. The playable runtime is identical to the listed candidate.
+**S03 historical handoff / GH-30.** Technical G2 passed for Sân Mưa. Producer G2 acceptance is pending. Runtime candidate `5b34762f240f93e8b1b4892fd116430d9e7e3dea`, on `midnight-greenhouse/gh-three-levels` and [draft PR #35](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35). This checkpoint adds evidence on that branch. The playable runtime is identical to the listed candidate.
 
 Approved campaign scope is Sân Mưa, Hầm Bơm and Đài Chớp, six plants, five regular enemies and one boss. The current build opens Sân Mưa with its four starter plants and four enemy types. Both later encounters remain designed and gated. G0, repository asset rights and the pending G2/G4 and Pages decisions are in [DECISIONS.md](DECISIONS.md).
 
@@ -26,4 +26,18 @@ The exact-candidate trusted catalog preflight passed all 36 browser checks under
 
 Remaining G2 device evidence includes real mobile, Firefox/Safari, real tab switch and listening for loop transitions. Full campaign timing, progression, pump closures, boss phases/locks and late-game performance wait for S04–S05. Pages registration, live publication and G4 require separate approval. No live deployment claim.
 
-**Next task GH-41 after recorded Producer G2.** Continue S04–S05 on the same branch and draft PR. Test Hầm Bơm pump/immune pressure and Đài Chớp boss lock dodge and completed locks before full-campaign verification.
+Historical next task was GH-41 after a Producer decision. Continue S04–S05 on the same branch and draft PR. Test Hầm Bơm pump/immune pressure and Đài Chớp boss lock dodge and completed locks before full-campaign verification.
+
+## S04 resumption
+
+Trusted main refreshed at `3d4624d018a4b69ec47a74bb042c887376b25e84`. Existing draft head `7f848b795938d34deb9b154a7929054f7dad4170` and the validated import remain the basis of this game-local batch. GH-D05 defers human G2 for this batch. GH-41 and GH-42 are implemented. GH-50 verifies the assembled campaign and the scoped PR.
+
+## S04 — GH-41 and GH-42
+
+The three-level build uses the approved arenas, wave timings, five ordinary opponents and Keeper. Hầm Bơm uses independent timed pump closures, armored and shock-immune pressure, Nấm Vá and wet Rêu Thành recovery. Đài Chớp adds the arming and single-use blast of Lựu Cầu Chì, two boss phases, targeted warnings, rerouting before closure and late cleanup. Campaign progression, map, replay, separate records and the skippable finale share the original local save keys. The contiguous-win check preserves valid S03 saves.
+
+The 13 game tests cover the new simulation rules and both new authored clear routes. Five focused browser tests from the production layout passed, including a valid S03 save, locked stage access, denied storage, new seed decks and keyboard placement. The [S05 report](../reports/QA_REPORT.md#three-level-candidate) records the broader verification and points to exact-head runtime, timed plays and hosted checks on PR #35.
+
+## S05 — GH-50
+
+The game remains game-local and private to the temporary catalog. Candidate review requires all three end-to-end clears and green CI. The [PR verification record](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35) carries those results, current head and the standalone three-level archive. Physical mobile, Firefox, Safari, assistive technology and subjective audio review are separate checks. Producer retains merge, Pages registration/publication and G4.

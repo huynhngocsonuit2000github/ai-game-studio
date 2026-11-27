@@ -1,5 +1,8 @@
+import { levels } from './content.js';
+import type { LevelId } from './content.js';
+
 export type Settings = { master: number; music: number; sfx: number; mute: boolean; reduced: boolean };
-type Record = { stars: number; fastest: number };
+type Win = { stars: number; fastest: number };
 const prefix = 'midnight-greenhouse.';
 const settingsKey = prefix + 'settings.v1';
 const progressKey = prefix + 'progress.v1';
@@ -16,7 +19,7 @@ const volume = (value: unknown, fallback: number) =>
 export class Save {
   readonly settings: Settings = { master: 0.7, music: 0.35, sfx: 0.65, mute: false,
     reduced: matchMedia('(prefers-reduced-motion: reduce)').matches };
-  record: Record | null = null;
+  private readonly wins: Partial<Record<LevelId, Win>> = {};
   unavailable = false;
 
   constructor() {
@@ -28,11 +31,14 @@ export class Save {
         if (typeof settings.reduced === 'boolean') this.settings.reduced = settings.reduced;
       }
       const progress = read(progressKey);
-      if (isObject(progress) && progress.version === 1 && isObject(progress.raincourt)) {
-        const { stars, fastest } = progress.raincourt;
-        if (typeof stars === 'number' && Number.isInteger(stars) && stars >= 1 && stars <= 3
-          && typeof fastest === 'number' && Number.isFinite(fastest) && fastest > 0) {
-          this.record = { stars, fastest };
+      if (isObject(progress) && progress.version === 1) {
+        for (const id of levels) {
+          const value = progress[id];
+          if (!isObject(value)) break;
+          const { stars, fastest } = value;
+          if (typeof stars !== 'number' || !Number.isInteger(stars) || stars < 1 || stars > 3
+            || typeof fastest !== 'number' || !Number.isFinite(fastest) || fastest <= 0) break;
+          this.wins[id] = { stars, fastest };
         }
       }
     } catch {
@@ -52,9 +58,16 @@ export class Save {
     this.write(settingsKey, { version: 1, ...this.settings });
   }
 
-  win(stars: number, time: number) {
-    this.record = { stars: Math.max(stars, this.record?.stars ?? 0),
-      fastest: Math.min(time, this.record?.fastest ?? Infinity) };
-    this.write(progressKey, { version: 1, raincourt: this.record });
+  record(id: LevelId) { return this.wins[id]; }
+
+  unlocked(id: LevelId) {
+    return levels.slice(0, levels.indexOf(id)).every((prior) => Boolean(this.wins[prior]));
+  }
+
+  win(id: LevelId, stars: number, time: number) {
+    if (!this.unlocked(id)) return;
+    this.wins[id] = { stars: Math.max(stars, this.wins[id]?.stars ?? 0),
+      fastest: Math.min(time, this.wins[id]?.fastest ?? Infinity) };
+    this.write(progressKey, { version: 1, ...this.wins });
   }
 }

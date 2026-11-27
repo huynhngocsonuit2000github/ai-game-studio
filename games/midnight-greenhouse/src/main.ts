@@ -1,5 +1,5 @@
-import { COLUMNS, descriptions, HZ, LANES } from './content.js';
-import type { CardId, Content } from './content.js';
+import { COLUMNS, descriptions, HZ, LANES, levels } from './content.js';
+import type { Campaign, CardId, Content, LevelId } from './content.js';
 import { Garden } from './simulation.js';
 import type { Command, Cue } from './simulation.js';
 import { loadArena, Painter } from './renderer.js';
@@ -16,15 +16,27 @@ const renderText = (node: HTMLElement, value: string) => { if (node.textContent 
 
 const save = new Save();
 const sound = new Sound(save.settings);
-const stages = [
-  ['Sân Mưa', 'Giữ đèn lên', 'Tập chuyển nước giữa Bình Hứng và Lan Sét.'],
-  ['Hầm Bơm', 'Bơm chạy lại', 'Vượt sự cố van và giữ thế trận khi máy bơm ngừng.'],
-  ['Đài Chớp', 'Hạt Tim nảy mầm', 'Đón Thợ Vườn Gốm trên mái nhà kính.'],
-] as const;
+const stages = {
+  raincourt: {
+    beat: 'Giữ đèn lên', description: 'Tập chuyển nước giữa Bình Hứng và Lan Sét.',
+    tip: 'Tưới Bình Hứng khi cần Ánh Hạt, rồi chuyển nước sang Lan Sét lúc địch tụ lại.',
+  },
+  'pump-gallery': {
+    beat: 'Bơm chạy lại', description: 'Giữ thế trận khi van bơm gặp sự cố.',
+    tip: 'Khi van báo đóng, chuyển nước sang luống khác. Dùng Rêu Thành giữ chân địch để Dương Xỉ bắn qua giáp.',
+  },
+  'lightning-dome': {
+    beat: 'Hạt Tim nảy mầm', description: 'Đón Thợ Vườn Gốm trên mái nhà kính.',
+    tip: 'Đợi Thợ Vườn Gốm đánh dấu luống rồi đổi hướng nước. Dùng Lựu Cầu Chì khi địch đi sát nhau.',
+  },
+} satisfies Record<LevelId, { beat: string; description: string; tip: string }>;
 
-let view: 'title' | 'map' | 'brief' | 'play' = 'title';
+let view: 'title' | 'map' | 'brief' | 'play' | 'ending' = 'title';
+let campaign: Campaign;
 let content: Content;
-let arenaPromise: ReturnType<typeof loadArena> | undefined;
+const arenaPromises = new Map<LevelId, ReturnType<typeof loadArena>>();
+let activeTip = '';
+const introduced = new Set<LevelId>();
 let garden: Garden | undefined;
 let painter: Painter | undefined;
 let selection: CardId | 'remove' | null = null;
@@ -74,17 +86,24 @@ function map() {
   leaveBoard();
   view = 'map';
   app.innerHTML = `<section class="map"><p class="kicker">Ca trực đêm</p><h1 tabindex="-1">Chiến dịch</h1>
-    <div class="stage-list">${stages.map(([name, beat, description], index) => `
-      <article class="stage ${index === 0 ? 'playable' : 'locked'}">
-        ${index === 0 ? '<img src="./cover.webp" alt="">' : ''}
-        <p class="kicker">Màn 0${index + 1} · ${index === 0 ? 'Có thể chơi' : 'Chưa mở'}</p>
-        <h2>${name}</h2><p>${beat}. ${description}</p>
-        ${index === 0 ? `${save.record ? `<p>${'★'.repeat(save.record.stars)} · Nhanh nhất ${clock(Math.round(save.record.fastest))}</p>` : ''}
-        <button id="open-stage" class="primary">${save.record ? 'Chơi lại Sân Mưa' : 'Chọn Sân Mưa'}</button>`
-        : '<p>Sau đợt playtest Sân Mưa</p>'}
-      </article>`).join('')}</div>
+    <div class="stage-list">${levels.map((id, index) => {
+      const { level, arena } = campaign[id];
+      const record = save.record(id);
+      const available = save.unlocked(id);
+      return `<article class="stage ${available ? 'playable' : 'locked'}">
+        <img src="./art/${arena.boardAsset}" alt="">
+        <p class="kicker">Màn 0${index + 1} · ${record ? 'Đã qua' : available ? 'Có thể chơi' : 'Chưa mở'}</p>
+        <h2>${level.title}</h2><p>${stages[id].description}</p>
+        ${record ? `<p>${'★'.repeat(record.stars)} · Nhanh nhất ${clock(Math.round(record.fastest))}</p>` : ''}
+        ${available ? `<button data-stage="${id}" class="primary">${record ? 'Chơi lại' : 'Chọn'} ${level.title}</button>`
+          : `<p>Hoàn thành ${campaign[levels[index - 1]].level.title} để mở.</p>`}
+      </article>`;
+    }).join('')}</div>
     <p class="map-note">${storageMessage()}</p></section>`;
-  byId('open-stage').onclick = briefing;
+  for (const id of levels) {
+    const button = app.querySelector<HTMLButtonElement>(`[data-stage="${id}"]`);
+    if (button) button.onclick = () => briefing(id);
+  }
   head();
 }
 
@@ -95,27 +114,40 @@ const tutorial = `<ol>
   <li>Dùng Dương Xỉ khi gặp Chậu Giáp hoặc Áo Mưa.</li>
 </ol>`;
 
-function briefing() {
+function briefing(id: LevelId) {
+  if (!save.unlocked(id)) return;
+  closeDialog();
+  leaveBoard();
+  content = campaign[id];
+  const { level, arena } = content;
+  const stage = stages[id];
+  const chapter = levels.indexOf(id) + 1;
   view = 'brief';
   sound.setScene('brief');
-  app.innerHTML = `<section class="brief"><img src="./art/boards/raincourt.webp" alt="">
-    <div><p class="kicker">Màn 01 · Giữ đèn lên</p><h1 tabindex="-1">Sân Mưa</h1>
-    <p>Giữ Hạt Tim qua 6 đợt nấm. Bạn có 20 giây để trồng trước khi vào ca trực.</p>
-    ${tutorial}<div class="actions"><button id="start" class="primary">Bắt đầu ca trực</button>
+  app.innerHTML = `<section class="brief"><img src="./art/${arena.boardAsset}" alt="Các luống và bộ van ở ${level.title}">
+    <div><p class="kicker">Màn 0${chapter} · ${stage.beat}</p><h1 tabindex="-1">${level.title}</h1>
+    <p>Giữ Hạt Tim qua ${level.waves.length} đợt nấm. Bạn có ${content.preparationSeconds} giây chuẩn bị.</p>
+    <p class="brief-tip">${stage.tip}</p>
+    <details><summary>Ôn cách chơi</summary>${tutorial}</details>
+    <div class="actions"><button id="start" class="primary">Bắt đầu ca trực</button>
     <button id="back" class="secondary">Bản đồ</button></div></div></section>`;
   byId('start').onclick = () => { void start(); };
   byId('back').onclick = map;
   head();
-  // Load while the player reads. On failure the Start action offers a retry.
-  void getArena().catch(() => {});
+  void getArena(content).catch(() => {});
 }
 
-function getArena() {
-  arenaPromise ??= loadArena(content).catch((error: unknown) => {
-    arenaPromise = undefined;
-    throw error;
-  });
-  return arenaPromise;
+function getArena(stage: Content) {
+  const id = stage.level.id;
+  let promise = arenaPromises.get(id);
+  if (!promise) {
+    promise = loadArena(stage).catch((error: unknown) => {
+      arenaPromises.delete(id);
+      throw error;
+    });
+    arenaPromises.set(id, promise);
+  }
+  return promise;
 }
 
 function openDialog(title: string, body: string, bind: () => void, lock = false) {
@@ -129,6 +161,7 @@ function openDialog(title: string, body: string, bind: () => void, lock = false)
 }
 
 function closeDialog() {
+  if (!dialog.open) return;
   dialog.close();
   previous?.focus();
   previous = null;
@@ -194,7 +227,7 @@ function settings() {
 }
 
 function showHelp() {
-  openDialog('Cách giữ nhà kính', `${tutorial}<p>Phím 1–4 chọn cây. Phím mũi tên di chuyển trong luống, Enter hoặc Space đặt cây, Esc bỏ chọn hoặc tạm dừng.</p>
+  openDialog('Cách giữ nhà kính', `${tutorial}<p>${stages[content.level.id].tip}</p><p>Phím 1–6 chọn cây đang có. Phím mũi tên di chuyển trong luống, Enter hoặc Space đặt cây, Esc bỏ chọn hoặc tạm dừng.</p>
     <button id="help-done" class="primary">Tiếp tục</button>`, () => { byId('help-done').onclick = resume; });
 }
 
@@ -244,7 +277,14 @@ function paintPreview() {
   node.dataset.invalid = String(command ? Boolean(garden.check(command)) : false);
   if (command?.kind !== 'plant' || node.dataset.invalid === 'true') return;
   const card = garden.cards.get(command.card);
-  if (!card || !('rangeTiles' in card)) return;
+  if (!card) return;
+  if (card.id === 'pod') {
+    for (const offset of [-1, 1]) {
+      if (command.col + offset >= 0 && command.col + offset < COLUMNS) tileNodes[selectedTile + offset].dataset.preview = 'true';
+    }
+    return;
+  }
+  if (!('rangeTiles' in card)) return;
   for (let i = 1; i <= Math.min(Math.floor(card.rangeTiles), COLUMNS - 1 - command.col); i++) {
     tileNodes[selectedTile + i].dataset.preview = 'true';
   }
@@ -254,9 +294,10 @@ async function start() {
   if (busy) return;
   busy = true;
   const source = view;
+  const chosen = content;
   try {
-    const media = await getArena();
-    if (view !== source) return;
+    const media = await getArena(chosen);
+    if (view !== source || content !== chosen) return;
     closeDialog();
     leaveBoard();
     view = 'play';
@@ -265,8 +306,11 @@ async function start() {
     selectedTile = null;
     lastFeedback = '';
     garden = new Garden(content);
-    app.innerHTML = `<section class="game" aria-label="Sân Mưa">
-      <header class="game-header"><div><p class="kicker">Màn 01 · Giữ đèn lên</p><h1 tabindex="-1">Sân Mưa</h1></div>
+    const { id, title } = content.level;
+    activeTip = save.record(id) || introduced.has(id) ? '' : stages[id].tip;
+    introduced.add(id);
+    app.innerHTML = `<section class="game" data-arena="${id}" aria-label="${title}">
+      <header class="game-header"><div><p class="kicker">Màn 0${levels.indexOf(id) + 1} · ${stages[id].beat}</p><h1 tabindex="-1">${title}</h1></div>
       <div class="badges"><div id="stock" class="badge">Ánh Hạt <strong></strong></div>
       <div id="core" class="badge">Hạt Tim <strong></strong></div><div id="time" class="badge"></div><button id="help" class="plain">Cách chơi</button></div></header>
       <p class="rotate">Xoay ngang màn hình để có ô trồng và chữ lớn hơn.</p>
@@ -274,10 +318,13 @@ async function start() {
         <div id="board" class="board">${boardMarkup()}</div><div id="threat" class="threat">
           <div><strong id="wave"></strong><span id="next-threat"></span></div><progress id="wave-progress" aria-label="Tiến độ đợt"></progress>
         </div>
+        <div id="keeper-hud" class="keeper-hud" hidden>
+          <span id="keeper-status"></span><meter id="keeper-health" min="0" aria-label="Sức bền Thợ Vườn Gốm"></meter>
+        </div>
         <p id="readout" class="readout" role="status"></p>
       </div><aside class="deck" aria-label="Hạt giống và công cụ">
       ${content.cards.map((card, index) => `<button class="seed-card" data-card="${card.id}" aria-pressed="false" aria-describedby="card-help">
-        <img src="./art/${content.sprites[card.id].asset}" alt=""><span><strong><span class="shortcut">${index + 1} · </span>${card.label}</strong><span class="cost">${card.cost} Ánh Hạt</span></span></button>`).join('')}
+        <img src="./art/${content.sprites[card.id].asset}" alt=""><span><strong><span class="shortcut">${index + 1} · </span>${card.label}</strong><span class="cost">${card.cost}<span class="cost-unit"> Ánh Hạt</span></span></span></button>`).join('')}
         <div class="toolbelt"><button id="remove" class="secondary" aria-pressed="false">Tháo cây</button>
           <button id="pause" class="secondary">Tạm dừng</button></div>
         <p id="card-help" class="help"></p>
@@ -325,11 +372,13 @@ async function start() {
     updateHud(garden);
     painter.draw(garden, save.settings.reduced);
     head();
+    lastHudTick = -1;
     lastFrame = 0;
     accumulated = 0;
     sound.setScene('watch');
     animation = requestAnimationFrame(frame);
   } catch (error) {
+    if (content !== chosen || (view !== source && view !== 'play')) return;
     console.error('Greenhouse arena failed to load', error);
     openDialog('Không tải được nhà kính', '<p>Hãy thử tải lại hình ảnh và vào ca trực.</p><button id="retry-assets" class="primary">Thử lại</button>', () => {
       byId('retry-assets').onclick = () => { void start(); };
@@ -346,10 +395,22 @@ function updateHud(game: Garden) {
     : 'Ca trực · ' + clock(Math.floor((game.now - game.prep) / HZ)));
   renderText(byId('wave'), game.wave === 0 ? 'Đợt đầu' : 'Đợt ' + game.wave + '/' + content.level.waves.length);
   const next = game.nextThreat;
-  const warning = Boolean(next && next.at - game.now <= 6 * HZ);
+  const valves = valveNodes.map((_, lane) => game.valveState(lane));
+  const hazardLane = valves.findIndex((valve) => Number.isFinite(valve.closesAt));
+  const hazard = valves[hazardLane];
+  const warning = Boolean(hazard || (next && next.at - game.now <= 6 * HZ));
   byId('threat').dataset.warning = String(warning);
-  const forecast = next ? `Luống ${next.lane + 1} · ${next.count} ${next.spec.label} sau ${seconds(next.at - game.now)} giây` : 'Dọn địch còn lại';
+  const forecast = hazard ? `Luống ${hazardLane + 1} sắp đóng · ${seconds(hazard.closesAt - game.now)} giây`
+    : next ? `Luống ${next.lane + 1} · ${next.count} ${next.spec.label} sau ${seconds(next.at - game.now)} giây` : 'Dọn địch còn lại';
   renderText(byId('next-threat'), ' · ' + forecast);
+  const keeper = game.keeper;
+  byId('keeper-hud').hidden = !keeper;
+  if (keeper) {
+    renderText(byId('keeper-status'), `Thợ Vườn Gốm · Pha ${game.keeperPhase} · ${Math.ceil(keeper.hp)} HP`);
+    const health = byId<HTMLMeterElement>('keeper-health');
+    health.max = keeper.spec.hp;
+    health.value = keeper.hp;
+  }
   const progress = byId<HTMLProgressElement>('wave-progress');
   const from = content.level.waves[game.wave - 1]?.atSeconds ?? 0;
   const to = content.level.waves[game.wave]?.atSeconds ?? content.level.waves.at(-1)!.atSeconds + 72;
@@ -359,12 +420,21 @@ function updateHud(game: Garden) {
   const lock = seconds(game.waterReady - game.now);
   valveNodes.forEach((button, lane) => {
     const wet = lane === game.wet;
-    const label = `Tưới luống ${lane + 1}. ${wet ? 'Đang có nước' : lock ? 'Van hồi sau ' + lock + ' giây' : 'Luống khô'}.`;
+    const state = valves[lane];
+    const closed = seconds(state.opensAt - game.now);
+    const warning = Number.isFinite(state.closesAt) ? seconds(state.closesAt - game.now) : 0;
+    const cause = state.sources.includes('keeper') && state.sources.includes('pump') ? 'Bơm và Thợ Vườn Gốm'
+      : state.sources.includes('keeper') ? 'Thợ Vườn Gốm' : 'Sự cố bơm';
+    const status = closed ? `${cause} · Van đóng ${closed} giây`
+      : warning ? `${cause} · Sắp đóng van sau ${warning} giây`
+      : wet ? 'Đang có nước' : lock ? 'Van hồi sau ' + lock + ' giây' : 'Luống khô';
+    const label = `Tưới luống ${lane + 1}. ${status}.`;
     if (button.getAttribute('aria-label') !== label) {
+      button.dataset.valve = closed ? 'closed' : warning ? 'warning' : 'open';
       button.setAttribute('aria-label', label);
       button.setAttribute('aria-pressed', String(wet));
       button.title = label;
-      renderText(button.querySelector('span')!, wet ? '≈' : lock ? String(lock) + 's' : '◇');
+      renderText(button.querySelector('span')!, closed ? '×' + closed : warning ? '!' + warning : wet ? '≈' : lock ? String(lock) + 's' : '◇');
     }
   });
   cardNodes.forEach((button) => {
@@ -385,7 +455,9 @@ function updateHud(game: Garden) {
   } else if (!game.feedback) {
     lastFeedback = '';
     const water = game.wet === null ? 'Mọi luống đang khô.' : `Đang tưới luống ${game.wet + 1}.`;
-    renderText(byId('readout'), water + (lock ? ' Van hồi sau ' + lock + ' giây.' : ' Có thể chuyển nước.'));
+    const status = game.now < game.prep && activeTip ? activeTip
+      : water + (lock ? ' Van hồi sau ' + lock + ' giây.' : ' Có thể chuyển nước.');
+    renderText(byId('readout'), status);
   }
 }
 
@@ -394,18 +466,57 @@ function results(game: Garden) {
   const win = game.result === 'victory';
   const duration = (game.now - game.prep) / HZ;
   const stars = 1 + Number(game.core >= 2) + Number(game.bestChain >= 3);
-  if (win) save.win(stars, duration);
-  const summary = win ? `<p>${'★'.repeat(stars)}${'☆'.repeat(3 - stars)} · ${clock(Math.round(duration))} · Hạt Tim ${game.core}/${content.level.coreHealth}</p>
-    <p>Tia Lan Sét nối nhiều nhất ${game.bestChain} mục tiêu. Sân Mưa an toàn qua đêm.</p>`
-    : `<p>Địch vượt qua luống ${(game.firstBreach ?? 0) + 1} đầu tiên. Luống ${(game.lastBreach ?? 0) + 1} mất Hạt Tim ở cú cuối.</p>`;
-  openDialog(win ? 'Giữ đèn lên!' : 'Hạt Tim đã tắt', `${summary}<p>${storageMessage()}</p>
-    <div class="actions"><button id="retry" class="primary">Chơi lại</button><button id="result-map" class="secondary">Bản đồ</button></div>`, () => {
+  const { id, title, coreHealth } = content.level;
+  const next = levels[levels.indexOf(id) + 1];
+  if (win) save.win(id, stars, duration);
+  const summary = win ? `<p>${'★'.repeat(stars)}${'☆'.repeat(3 - stars)} · ${clock(Math.round(duration))} · Hạt Tim ${game.core}/${coreHealth}</p>
+    <p>Tia Lan Sét nối nhiều nhất ${game.bestChain} mục tiêu. ${title} an toàn qua đêm.</p>`
+    : `<p>Địch vượt qua luống ${(game.firstBreach ?? 0) + 1} đầu tiên. Hạt Tim tắt khi địch tràn qua luống ${(game.lastBreach ?? 0) + 1}.</p>`;
+  const advance = (next ? 'Tiếp tục · ' + campaign[next].level.title : 'Xem kết thúc');
+  openDialog(win ? stages[id].beat + '!' : 'Hạt Tim đã tắt', `${summary}<p>${storageMessage()}</p>
+    <div class="actions">${win ? `<button id="advance" class="primary">${advance}</button>` : ''}
+    <button id="retry" class="${win ? 'secondary' : 'primary'}">Chơi lại</button>
+    <button id="result-map" class="secondary">Bản đồ</button></div>`, () => {
+    if (win) byId('advance').onclick = () => { if (next) briefing(next); else ending(); };
     byId('retry').onclick = () => { void start(); };
     byId('result-map').onclick = () => { closeDialog(); map(); };
   }, true);
 }
 
-const cues = new Set<string>(['plant', 'fern', 'root', 'shock', 'water', 'warning', 'breach', 'victory', 'defeat']);
+function ending() {
+  closeDialog();
+  leaveBoard();
+  view = 'ending';
+  app.innerHTML = `<section class="ending">
+    <div id="bloom" class="bloom ${save.settings.reduced ? 'still' : ''}" aria-hidden="true">✿</div>
+    <h1 tabindex="-1">Hạt Tim nảy mầm</h1>
+    <p>Ba ca trực đã qua. Bình minh rọi qua mái kính, và Hạt Tim đâm chồi.</p>
+    <ul class="ending-records">${levels.map((id) => {
+      const record = save.record(id);
+      return `<li>${campaign[id].level.title} · ${'★'.repeat(record?.stars ?? 0)} · ${clock(Math.round(record?.fastest ?? 0))}</li>`;
+    }).join('')}</ul>
+    <p>Tác phẩm của AI Game Studio. Hình ảnh và âm thanh gốc của dự án.</p>
+    <div class="actions">
+      <button id="skip-bloom" class="secondary" ${save.settings.reduced ? 'hidden' : ''}>Bỏ qua hiệu ứng</button>
+      <button id="ending-map" class="primary">Về bản đồ</button>
+    </div>
+  </section>`;
+  const skip = byId<HTMLButtonElement>('skip-bloom');
+  skip.onclick = () => {
+    byId('bloom').classList.add('still');
+    skip.hidden = true;
+    byId('ending-map').focus();
+  };
+  byId('bloom').onanimationend = () => {
+    if (document.activeElement === skip) byId('ending-map').focus();
+    skip.hidden = true;
+  };
+  byId('ending-map').onclick = map;
+  head();
+}
+
+const cues = new Set<string>(['plant', 'fern', 'root', 'shock', 'water', 'warning', 'breach', 'victory', 'defeat', 'pod', 'valve-lock']);
+
 function frame(timestamp: number) {
   const game = garden;
   if (!game || !painter) return;
@@ -416,10 +527,14 @@ function frame(timestamp: number) {
       game.step();
       accumulated -= interval;
       for (const effect of game.effects) {
-        if (effect.at !== game.now || !cues.has(effect.kind)) continue;
-        void sound.cue(effect.kind as Cue);
+        if (effect.at !== game.now) continue;
+        if (cues.has(effect.kind)) void sound.cue(effect.kind as Cue);
+        if (effect.kind === 'phase') announce.textContent = 'Thợ Vườn Gốm bước vào pha hai.';
+        if (effect.kind === 'keeper-down') announce.textContent = 'Thợ Vườn Gốm đã gục. Hãy dọn địch còn lại.';
+        if (effect.kind === 'valve-lock') announce.textContent = `Van luống ${effect.lane + 1} đã đóng.`;
         if (effect.kind === 'breach') announce.textContent = `Địch đã lọt qua luống ${effect.lane + 1}. Hạt Tim còn ${game.core}.`;
-        if (effect.kind === 'warning') announce.textContent = `Đợt mới sắp đến luống ${effect.lane + 1}.`;
+        if (effect.kind === 'warning') announce.textContent = effect.x === 0
+          ? `Van luống ${effect.lane + 1} sắp đóng.` : `Đợt mới sắp đến luống ${effect.lane + 1}.`;
       }
     }
     if (lastHudTick !== game.now) {
@@ -447,7 +562,7 @@ document.addEventListener('keydown', (event) => {
   }
   const target = event.target;
   if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable]')) return;
-  if (!/^[1-4]$/.test(event.key)) return;
+  if (!/^[1-6]$/.test(event.key)) return;
   const card = content.cards[Number(event.key) - 1];
   if (card) { select(card.id); event.preventDefault(); }
 });
@@ -483,8 +598,8 @@ async function init() {
   try {
     const response = await fetch('./content.json');
     if (!response.ok) throw new Error('Content fetch: ' + response.status);
-    content = await response.json() as Content;
-    if (save.record || settingExists) map();
+    campaign = await response.json() as Campaign;
+    if (save.record('raincourt') || settingExists) map();
     else title();
   } catch (error) {
     console.error('Greenhouse content failed to load', error);

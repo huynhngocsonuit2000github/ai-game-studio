@@ -63,3 +63,28 @@ The shipped Sân Mưa waves and plant values match the approved tuning. The runs
 - Build and run the focused unit suite with `pnpm --filter @studio/midnight-greenhouse typecheck` and `pnpm --filter @studio/midnight-greenhouse test`.
 - Run `STUDIO_PAGES_BASE_SHA=$(git rev-parse origin/main) node scripts/catalog-preflight.mjs` from the committed candidate. Set `STUDIO_CHROMIUM_PATH` only when using a system Chromium.
 - For the long game-local run, serve the built game on the project subpath, set `GREENHOUSE_PLAYTEST_URL` to its entry and run `node games/midnight-greenhouse/tests/playtest.mjs`. This runner sends regular browser inputs and takes about eight minutes. See the [standalone launch and Producer checklist](../README.md#s03-playtest).
+
+## Three-level candidate
+
+GH-D05 expressly deferred the Producer G2 playtest for GH-THREE-LEVELS. See [PR #35](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35) for the exact tested head, full normal-speed browser results, hosted check outcomes and artifact link. The approved tuning and three authored schedules are retained.
+
+| Checks | Evidence |
+| --- | --- |
+| Q01–Q09 | Five production-layout Playwright tests passed, including direct and catalog entry, return, keyboard and touch input, pause and strict-autoplay audio. Existing S03 behavior is also covered by simulation regressions. |
+| Q10 | Unit tests cover authored warnings, forced flow cut, preserved cooldown, blocked reroutes, reopening, healing selection, shock immunity, Moss recovery and the full Hầm Bơm route. The normal-speed browser runner checks the live warning, cutoff, closed-lane rejection and restored route. |
+| Q11 | Tests cover the two boss phases, Bramble slowdown, overlapping lock sources, pump preservation after boss death, completed lock, dodge, post-boss cleanup, Pod timing and lethal boss breach. The browser route checks the fixed warning target, successful dodge, later forced flow cut and phase-two HUD. |
+| Q12–Q14 | The production browser runner starts with a fresh profile, plays via the ordinary seed/valve/tile controls, uses Next, reloads earned unlocks and checks victory, defeat, retry and record persistence. Unit tests and seeded browser cases cover S03 saves, corrupt saves, denied writes, invalid gaps and independent best-time and star updates. |
+| Q15 | Chromium 156, Linux, cold title and illustration decode completed in 1,308 ms under CDP at 10 Mbps / 100 ms. JS used heap after collection was 1,871,352 B after one attempt and 2,146,108 B after ten additional abandon/start cycles. This excludes decoded media and GPU memory. Cached arena reuse and four intentionally blocked Ogg requests left gameplay and controls usable. The exact-head PR records frame measurements from the 30-second boss interval. |
+| Q16 | Canonical registry and publication remain separate. The trusted preflight assembles a temporary catalog, exercises the project subpath and builds the test-only standalone ZIP. The game runtime contains 40 files totaling 2,236,463 B before transfer compression. Source sheets, concept artwork and test code are outside the runtime. |
+| Q17 | BLOCKED pending a separate Producer release decision and Studio registration. |
+
+Physical phone and Firefox/Safari verification, assistive technology, an unaided human clear and subjective audio review remain pending. Frame samples are browser requestAnimationFrame intervals on Cloud Chromium and desktop touch emulation.
+
+The normal-speed runs use a fresh Chromium context with no pacing override. Serve the build under the Pages project subpath, set `GREENHOUSE_PLAYTEST_URL` to the game entry and run:
+
+```sh
+node games/midnight-greenhouse/tests/playtest.mjs campaign
+node games/midnight-greenhouse/tests/playtest.mjs dome-touch
+```
+
+The main run verifies end-to-end campaign progression. The separate touch replay starts Đài Chớp from a fixture with Sân Mưa and Hầm Bơm completed. [Exact input routes](../tests/campaign-routes.json)

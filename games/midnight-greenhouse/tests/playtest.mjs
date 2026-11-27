@@ -4,7 +4,7 @@ import console from "node:console";
 import { URL } from "node:url";
 import { chromium } from '@playwright/test';
 import assert from 'node:assert/strict';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import process from 'node:process';
 const origin = process.env.GREENHOUSE_PLAYTEST_URL ?? 'http://127.0.0.1:4189/ai-game-studio/games/midnight-greenhouse/';
 const results = new URL('../test-results/normal-speed/', import.meta.url).pathname;
@@ -26,26 +26,65 @@ const clock = async (page, t) => {
     return !!combat && 20 + Number(combat[1])*60 + Number(combat[2]) >= t;
   }, { t }, { timeout: 490000, polling: 150 });
 };
-async function profile(name, viewport, touch, run) {
-  const device = await browser.newContext({viewport, hasTouch: touch, isMobile: touch});
+const readSave = (page) => page.evaluate(() => localStorage.getItem('midnight-greenhouse.progress.v1'));
+const heardAudio = (page) => page.evaluate(() =>
+  [...new Set(window.greenhouseAudio.starts.map(({ url }) => url?.split('/').at(-1)))].sort());
+
+async function profile(name, viewport, touch, run, prepare) {
+  const device = await browser.newContext({ viewport, hasTouch: touch, isMobile: touch });
   await device.addInitScript(observeWebAudio);
   const page = await device.newPage();
   const issues = [];
-  page.on('pageerror', error => issues.push(error.message));
-  page.on('console', message => { if (message.type() === 'error' || message.type() === 'warning') issues.push(message.text()); });
-  page.on('response', response => { if (response.status() >= 400) issues.push(response.status() + ' ' + response.url()); });
-  page.on('requestfailed', request => { if (!request.failure()?.errorText.includes('ERR_ABORTED')) issues.push(request.url() + ' ' + request.failure()?.errorText); });
-  await page.goto(origin);
-  await page.locator('#enter').click();
-  await page.locator('#open-stage').click();
-  await page.locator('#start').click();
-  const start = Date.now();
+  page.on('pageerror', (error) => issues.push(error.message));
+  page.on('console', (message) => {
+    if (message.type() === 'error' || message.type() === 'warning') issues.push(message.text());
+  });
+  page.on('response', (response) => {
+    if (response.status() >= 400) issues.push(response.status() + ' ' + response.url());
+  });
+  page.on('requestfailed', (request) => {
+    if (!request.failure()?.errorText.includes('ERR_ABORTED')) issues.push(request.url() + ' ' + request.failure()?.errorText);
+  });
   try {
-    const heardBeforeReload = await run(page, touch ? 'tap' : 'click');
-    const heard = heardBeforeReload ?? await page.evaluate(() => [...new Set(window.greenhouseAudio.starts.map(({ url }) => url?.split('/').at(-1)))].sort());
-    console.log(name, 'elapsedSeconds', (Date.now()-start)/1000, 'audio advancing', JSON.stringify(heard), 'issues', JSON.stringify(issues));
+    if (prepare) await prepare(device);
+    await page.goto(origin);
+    if (!prepare) {
+      await page.locator('#enter').click();
+      assert.equal(await page.locator('[data-stage]').count(), 1);
+      await page.locator('[data-stage=raincourt]').click();
+    } else {
+      await page.locator('[data-stage=lightning-dome]').click();
+    }
+    await page.locator('#start').click();
+    const start = Date.now();
+    const heard = await run(page, touch ? 'tap' : 'click') ?? await heardAudio(page);
+    console.log(name, 'elapsedSeconds', (Date.now() - start) / 1000,
+      'audio', JSON.stringify(heard), 'issues', JSON.stringify(issues));
     assert.deepEqual(issues, []);
   } finally { await device.close(); }
+}
+
+async function action(page, use, card, lane, col) {
+  if (card === 'water') {
+    await water(page, lane)[use]();
+    await water(page, lane).and(page.locator('[aria-pressed=true]')).waitFor({ timeout: 2300 });
+    return;
+  }
+  const tool = page.locator(card === 'remove' ? '#remove' : `[data-card="${card}"]`);
+  if (await tool.getAttribute('aria-pressed') !== 'true') await tool[use]();
+  const tile = page.locator('.tile').nth(lane * 8 + col);
+  const label = await tile.getAttribute('aria-label');
+  await tile[use]();
+  await page.waitForFunction(({ lane, col, label }) => {
+    const node = document.querySelectorAll('.tile')[lane * 8 + col];
+    return node?.getAttribute('aria-label') !== label;
+  }, { lane, col, label }, { timeout: 2300 });
+  if (card === 'remove') {
+    assert.doesNotMatch(await tile.getAttribute('aria-label') ?? '', /Bình Hứng|Dương Xỉ|Gai Cuộn|Lan Sét|Rêu Thành|Lựu Cầu/);
+  } else {
+    const title = (await tool.locator('strong').innerText()).split(' · ').at(-1);
+    assert.ok((await tile.getAttribute('aria-label'))?.includes(title), title);
+  }
 }
 async function clear(name, route, touch) {
   return profile(name, touch ? {width:844,height:390} : {width:1280,height:720}, touch, async (page, use) => {
@@ -63,19 +102,7 @@ async function clear(name, route, touch) {
         tookSecond = true;
       }
       await clock(page,t);
-      if (card === 'water') {
-        await water(page,lane)[use]();
-        await water(page,lane).and(page.locator('[aria-pressed=true]')).waitFor({timeout:1500});
-      } else {
-        const seed = page.locator('[data-card="' + card + '"]');
-        if (await seed.getAttribute('aria-pressed') !== 'true') await seed[use]();
-        const tile = page.locator('.tile').nth(lane*8+col);
-        await tile[use]();
-        await page.waitForFunction(({lane,col}) => {
-          const node = document.querySelectorAll('.tile')[lane*8+col];
-          return /Bình Hứng|Dương Xỉ|Gai Cuộn|Lan Sét/.test(node?.getAttribute('aria-label') ?? '');
-        }, {lane,col}, {timeout:1500});
-      }
+      await action(page, use, card, lane, col);
     }
     await page.getByRole('heading',{ name:'Giữ đèn lên!' }).waitFor({timeout:510000});
     const summary = await page.locator('dialog').innerText();
@@ -107,13 +134,152 @@ async function lose() {
     assert.equal(await page.locator('.valve[aria-pressed=true]').count(),0);
   });
 }
-const selected = process.argv[2];
-const jobs = [
-  ['desktop', () => clear('desktop-collector',routes[0],false)],
-  ['touch', () => clear('touch-fern',routes[1],true)],
+const laterRoutes = async () => JSON.parse(await readFile(new URL('./campaign-routes.json', import.meta.url), 'utf8'));
+const watch = (page, lane, state) => water(page, lane).and(page.locator(`[data-valve="${state}"]`));
+const capture = (page, name) => page.screenshot({ path: results + '/' + name + '.png' });
+
+async function playLevel(page, use, id, route, captures = []) {
+  const entries = [...route, ...captures].sort(([a], [b]) => a - b);
+  for (const [t, command, lane, col] of entries) {
+    await clock(page, t);
+    if (typeof command === 'function') await command();
+    else await action(page, use, command, lane, col);
+  }
+  await page.locator('#advance').waitFor({ timeout: 520000 });
+  const text = await page.locator('dialog').innerText();
+  const saved = JSON.parse(await readSave(page));
+  assert.ok(saved[id], 'Missing result for ' + id);
+  console.log(id, text.replaceAll('\n', ' '), JSON.stringify(saved[id]));
+  await capture(page, id + '-result');
+  return saved[id];
+}
+
+function domeChecks(page, key) {
+  return [
+    [439, async () => {
+      await watch(page, 0, 'warning').waitFor({ timeout: 2000 });
+      assert.match(await page.locator('#keeper-status').innerText(), /Pha 1/);
+      await capture(page, key + '-dodge-warning');
+      await page.evaluate(() => {
+        const deltas = [];
+        let previous = 0;
+        const sample = (time) => {
+          if (previous) deltas.push(time - previous);
+          previous = time;
+          if (deltas.reduce((total, frame) => total + frame, 0) < 30000) window.requestAnimationFrame(sample);
+          else window.greenhouseFrameTimes = deltas;
+        };
+        window.requestAnimationFrame(sample);
+      });
+    }],
+    [443, async () => {
+      await watch(page, 0, 'closed').waitFor({ timeout: 2000 });
+      assert.equal(await water(page, 1).getAttribute('aria-pressed'), 'true');
+    }],
+    [470, async () => {
+      await watch(page, 1, 'closed').waitFor({ timeout: 2500 });
+      assert.equal(await page.locator('.valve[aria-pressed=true]').count(), 0);
+      assert.match(await page.locator('#keeper-status').innerText(), /Pha 2/);
+      await capture(page, key + '-phase-two-lock');
+      const deltas = await page.evaluate(() => window.greenhouseFrameTimes);
+      assert.ok(deltas?.length);
+      deltas.sort((a, b) => a - b);
+      console.log(key, 'frames', deltas.length, 'median-ms', deltas[Math.floor(deltas.length / 2)],
+        'p95-ms', deltas[Math.floor(deltas.length * .95)]);
+    }],
+  ];
+}
+
+async function campaign() {
+  return profile('campaign', { width: 1280, height: 720 }, false, async (page, use) => {
+    const first = await playLevel(page, use, 'raincourt', routes[0], [
+      [168, () => capture(page, 'campaign-raincourt')],
+    ]);
+    assert.equal((await page.locator('#advance').innerText()).trim(), 'Tiếp tục · Hầm Bơm');
+    await page.locator('#advance').click();
+    await page.getByRole('heading', { name: 'Hầm Bơm' }).waitFor();
+    await page.reload();
+    await page.locator('[data-stage=pump-gallery]').waitFor();
+    assert.equal(await page.locator('[data-stage=lightning-dome]').count(), 0);
+    await page.locator('[data-stage=pump-gallery]').click();
+    await page.locator('#start').click();
+    const later = await laterRoutes();
+    const second = await playLevel(page, use, 'pump-gallery', later['pump-gallery'], [
+      [120, async () => {
+        await watch(page, 2, 'warning').waitFor({ timeout: 1500 });
+        assert.equal(await water(page, 2).getAttribute('aria-pressed'), 'true');
+        await capture(page, 'campaign-pump-warning');
+      }],
+      [124, async () => {
+        assert.equal(await watch(page, 2, 'closed').count(), 1);
+        assert.equal(await water(page, 0).getAttribute('aria-pressed'), 'true');
+        await water(page, 2).click();
+        await page.getByText('Van luống này đang đóng.', { exact: true }).waitFor();
+      }],
+      [141, async () => {
+        assert.equal(await watch(page, 2, 'open').count(), 1);
+        assert.equal(await water(page, 2).getAttribute('aria-pressed'), 'true');
+        await capture(page, 'campaign-pump-reopened');
+      }],
+    ]);
+    assert.equal((await page.locator('#advance').innerText()).trim(), 'Tiếp tục · Đài Chớp');
+    await page.locator('#advance').click();
+    await page.getByRole('heading', { name: 'Đài Chớp' }).waitFor();
+    await page.reload();
+    await page.locator('[data-stage=lightning-dome]').click();
+    await page.locator('#start').click();
+    const third = await playLevel(page, use, 'lightning-dome', later['lightning-dome'], domeChecks(page, 'campaign-dome'));
+    await page.locator('#advance').click();
+    await page.getByRole('heading', { name: 'Hạt Tim nảy mầm', exact: true }).waitFor();
+    assert.equal(await page.locator('.ending-records li').count(), 3);
+    await page.locator('#skip-bloom').click();
+    await capture(page, 'campaign-ending');
+    await page.locator('#ending-map').click();
+    const audio = await heardAudio(page);
+    await page.reload();
+    await page.locator("[data-stage=lightning-dome]").waitFor();
+    assert.equal(await page.locator('[data-stage]').count(), 3);
+    const complete = await readSave(page);
+    assert.deepEqual(JSON.parse(complete), { version: 1, raincourt: first, 'pump-gallery': second, 'lightning-dome': third });
+    // Earlier-stage loss preserves all earned records and Retry starts dry with full core.
+    await page.locator('[data-stage=raincourt]').click();
+    await page.locator('#start').click();
+    await page.getByRole('heading', { name: 'Hạt Tim đã tắt' }).waitFor({ timeout: 120000 });
+    assert.equal(await readSave(page), complete);
+    await page.locator('#retry').click();
+    await page.waitForFunction(() => document.getElementById('time')?.textContent?.startsWith('Chuẩn bị'));
+    assert.equal(await page.locator('#core strong').textContent(), '3/3');
+    assert.equal(await page.locator('#stock strong').textContent(), '150');
+    assert.equal(await page.locator('.valve[aria-pressed=true]').count(), 0);
+    return audio;
+  });
+}
+
+async function domeOnTouch() {
+  return profile('dome-touch', { width: 844, height: 390 }, true, async (page, use) => {
+    const routes = await laterRoutes();
+    await playLevel(page, use, 'lightning-dome', routes['lightning-dome'], domeChecks(page, 'touch-dome'));
+    await page.locator('#retry').tap();
+    await page.getByRole('heading', { name: 'Đài Chớp' }).waitFor();
+    assert.equal(await page.locator('#stock strong').innerText(), '200');
+    assert.equal(await page.locator('.valve[aria-pressed=true]').count(), 0);
+  }, (context) => context.addInitScript(() => {
+    localStorage.setItem('midnight-greenhouse.progress.v1', JSON.stringify({
+      version: 1, raincourt: { stars: 2, fastest: 430 }, 'pump-gallery': { stars: 2, fastest: 449 },
+    }));
+  }));
+}
+
+const selected = process.argv[2] ?? 'campaign';
+const jobs = new Map([
+  ['campaign', campaign],
+  ['dome-touch', domeOnTouch],
+  ['desktop', () => clear('desktop-collector', routes[0], false)],
+  ['touch', () => clear('touch-fern', routes[1], true)],
   ['loss', lose],
-].filter(([name]) => !selected || name === selected).map(([,run]) => run());
-const all = await Promise.allSettled(jobs);
-for (const item of all) if (item.status === 'rejected') console.error(item.reason);
-await browser.close();
-if (all.some(item => item.status === 'rejected')) process.exitCode = 1;
+]);
+try {
+  const run = jobs.get(selected);
+  if (!run) throw new Error('Unknown route: ' + selected);
+  await run();
+} finally { await browser.close(); }

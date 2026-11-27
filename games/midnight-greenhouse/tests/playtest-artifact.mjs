@@ -24,15 +24,15 @@ try {
 <html lang="vi">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Nhà Kính Sau Nửa Đêm · Sân Mưa</title>
+<title>Nhà Kính Sau Nửa Đêm · Chiến dịch</title>
 <body style="color:#e6f1df;background:#102023;font:1rem system-ui;padding:1.5rem">
 <h1>Nhà Kính Sau Nửa Đêm</h1>
-<p><a style="color:#f6cf85" href="./games/midnight-greenhouse/index.html">Chơi Sân Mưa</a></p>
+<p><a style="color:#f6cf85" href="./games/midnight-greenhouse/index.html">Chơi chiến dịch</a></p>
 <p>Ứng viên <code>${head}</code></p>
 </body>
 </html>
 `);
-  await writeFile(join(staging, 'PLAYTEST.txt'), `SÂN MƯA · S03
+  await writeFile(join(staging, 'PLAYTEST.txt'), `NHÀ KÍNH SAU NỬA ĐÊM · BA MÀN
 PR head: ${head}
 Built from: ${revision}
 
@@ -40,10 +40,10 @@ Built from: ${revision}
 2. Open a terminal in the extracted folder and run:
    python3 -m http.server 8089 --bind 127.0.0.1
    On Windows with the Python launcher, use py -m http.server 8089 --bind 127.0.0.1
-3. Open http://127.0.0.1:8089 and select Chơi Sân Mưa.
+3. Open http://127.0.0.1:8089 and select Chơi chiến dịch.
 `);
   await mkdir(dirname(output), { recursive: true });
-  const archive = join(staging, 'midnight-greenhouse-s03.zip');
+  const archive = join(staging, 'midnight-greenhouse-campaign.zip');
   execFileSync('zip', ['-q', '-r', archive, 'index.html', 'PLAYTEST.txt', 'games'], { cwd: staging });
   await cp(archive, output);
 } finally {

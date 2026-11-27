@@ -18,26 +18,50 @@
       "id": "pump-gallery",
       "kind": "level",
       "intendedBehavior": "Handle pump faults and mixed raincoat and healer waves with Rêu Thành.",
-      "implementation": "planned",
+      "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
-      "evidence": ["design/GDD.md"],
+      "evidence": [
+        "tests/simulation.test.mjs",
+        "tests/pages.spec.ts",
+        "tests/playtest.mjs",
+        "reports/QA_REPORT.md"
+      ],
       "acceptanceEvidence": [],
-      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "tests/pages.spec.ts",
+          "reports/QA_REPORT.md"
+        ]
+      }
     },
     {
       "id": "lightning-dome",
       "kind": "level",
       "intendedBehavior": "Defend the Heart Seed through both keeper phases and respond to lane locks.",
-      "implementation": "planned",
+      "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
-      "evidence": ["design/GDD.md"],
+      "evidence": [
+        "tests/simulation.test.mjs",
+        "tests/pages.spec.ts",
+        "tests/playtest.mjs",
+        "reports/QA_REPORT.md"
+      ],
       "acceptanceEvidence": [],
-      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "tests/pages.spec.ts",
+          "reports/QA_REPORT.md"
+        ]
+      }
     }
   ],
-  "knownGaps": ["S04 and S05 await Producer G2", "Real phone, Firefox, Safari and subjective mix await review", "reports/QA_REPORT.md"],
+  "knownGaps": ["Physical phones, Firefox, Safari, assistive technology and human mix review pending", "reports/QA_REPORT.md"],
   "save": { "schema": "midnight-greenhouse.progress", "version": 1, "evidence": ["src/save.ts"] },
   "publication": { "rights": "cleared", "preview": "pending", "release": "blocked", "evidence": ["production/DECISIONS.md"] },
   "deployment": {

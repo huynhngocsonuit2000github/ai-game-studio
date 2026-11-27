@@ -47,7 +47,7 @@ export class Painter {
     const image = this.art.images.get(id);
     if (!image) return;
     const foot = this.feet[lane];
-    const scale = (this.edges[lane + 1] - this.edges[lane]) * (hostile ? 0.83 : 0.74) / sprite.size[1];
+    const scale = (this.edges[lane + 1] - this.edges[lane]) * (id === 'keeper' ? 1.18 : hostile ? 0.83 : 0.74) / sprite.size[1];
     const phase = stamp * (id === 'courier' ? 0.42 : 0.19) + x;
     const stride = motion && !rooted ? Math.sin(phase) * (hostile ? 3 : 1.7) : 0;
     const impulse = motion ? Math.max(0, 1 - (stamp - acted) / 9) : 0;
@@ -98,7 +98,7 @@ export class Painter {
     const y = this.feet[effect.lane];
     const x = this.x(effect.x);
     if (effect.kind === 'warning') return;
-    if (effect.kind === 'income') {
+    if (effect.kind === 'income' || effect.kind === 'heal') {
       if (age > 0.95) return;
       ctx.save();
       ctx.globalAlpha = Math.min(1, (0.95 - age) * 4);
@@ -106,16 +106,26 @@ export class Painter {
       ctx.textAlign = 'center';
       ctx.lineWidth = 6;
       ctx.strokeStyle = '#102023';
-      ctx.fillStyle = '#ffe8ab';
+      ctx.fillStyle = effect.kind === 'heal' ? '#bdf3ac' : '#ffe8ab';
       const height = y - 107 - (motion ? age * 34 : 0);
-      ctx.strokeText('+' + effect.value, x, height);
-      ctx.fillText('+' + effect.value, x, height);
+      const target = this.x(effect.targets?.[0] ?? effect.x);
+      const label = effect.value === undefined ? '+' : '+' + Math.round(effect.value);
+      ctx.strokeText(label, target, height);
+      ctx.fillText(label, target, height);
       ctx.restore();
       return;
     }
     if (effect.kind === 'breach' && age < 0.65) {
       ctx.fillStyle = 'rgba(241,105,71,' + (0.4 * (1 - age / 0.65)) + ')';
       ctx.fillRect(this.left - 26, this.edges[effect.lane], 73, this.edges[effect.lane + 1] - this.edges[effect.lane]);
+    }
+    if (effect.kind === 'pod' && age <= 0.42) {
+      const spread = motion ? Math.min(1, 0.35 + age * 3) : 1;
+      ctx.strokeStyle = '#ffe5a9';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.ellipse(x, y - 32, this.tile * 1.35 * spread, 31 * spread, 0, 0, Math.PI * 2);
+      ctx.stroke();
     }
     if (age > 0.17) return;
     if (effect.kind === 'shock' && effect.targets) {
@@ -164,6 +174,22 @@ export class Painter {
           this.line([[px, top + height - 12], [px + 9, top + height - 8], [px + 17, top + height - 12]], '#b8fff0a0', 2);
         }
       }
+      const valve = game.valveState(lane);
+      const closed = valve.opensAt > game.now;
+      if (closed || Number.isFinite(valve.closesAt)) {
+        ctx.save();
+        const extent = this.tile * COLUMNS;
+        ctx.beginPath();
+        ctx.rect(this.left, top, extent, height);
+        ctx.clip();
+        ctx.fillStyle = closed ? '#661e254d' : '#7c541f3b';
+        ctx.fillRect(this.left, top, extent, height);
+        for (let offset = -height; offset < extent; offset += 50) {
+          const stripe = this.left + offset;
+          this.line([[stripe, top + height], [stripe + height, top]], closed ? '#ff817d5e' : '#ffdc845c', closed ? 6 : 3);
+        }
+        ctx.restore();
+      }
       if (warning) {
         const right = this.x(COLUMNS);
         ctx.fillStyle = '#622a22a6';
@@ -175,17 +201,24 @@ export class Painter {
       }
       const units = [
         ...game.plants.filter((unit) => unit.lane === lane).map((unit) => ({
+          arming: unit.card.id === 'pod' && unit.ready > game.now,
           id: unit.card.id, x: unit.x, acted: unit.acted, hurt: unit.hurt, ratio: unit.hp / unit.card.hp, hostile: false, rooted: false,
         })),
         ...game.enemies.filter((unit) => unit.lane === lane).map((unit) => ({
-          id: unit.spec.id, x: unit.x + (unit.id % 3 - 1) * 0.075, acted: unit.acted,
+          arming: false, id: unit.spec.id, x: unit.x + (unit.id % 3 - 1) * 0.075, acted: unit.acted,
           hurt: unit.hurt, ratio: unit.hp / unit.spec.hp, hostile: true, rooted: unit.rootedUntil > game.now,
         })),
       ].sort((a, b) => a.x - b.x);
       for (const unit of units) {
         this.sprite(unit.id, unit.x, lane, game.now, motion, unit.acted, unit.hurt, unit.hostile, unit.rooted);
         if (unit.rooted) this.line([[this.x(unit.x) - 22, this.feet[lane]], [this.x(unit.x) + 22, this.feet[lane]]], '#d5f5a3', 5);
-        this.health(unit.x, lane, unit.ratio, unit.hostile, unit.id === 'raincoat');
+        if (unit.id !== 'keeper') this.health(unit.x, lane, unit.ratio, unit.hostile, unit.id === 'raincoat');
+        if (unit.arming) {
+          ctx.fillStyle = '#ffce86';
+          ctx.beginPath();
+          ctx.arc(this.x(unit.x), this.feet[lane] - 104, motion ? 4 + 2 * Math.sin(game.now / 5) : 5, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
     }
     for (const shot of game.shots) {

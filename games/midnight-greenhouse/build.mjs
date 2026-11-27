@@ -14,26 +14,28 @@ try {
   await cp('assets/runtime/art/cover.webp', join(temporary, 'cover.webp'));
 
   const tuning = await readJson('design/TUNING.json');
-  const raincourt = tuning.levels.find(({ id }) => id === 'raincourt');
-  const cards = tuning.plants.filter(({ id }) => raincourt.cardIds.includes(id));
-  const hostileIds = new Set(raincourt.waves.flatMap(({ groups }) => groups.map(({ enemy }) => enemy)));
-  const hostiles = tuning.enemies.filter(({ id }) => hostileIds.has(id));
   const layout = await readJson('assets/runtime/art/layout.json');
-  const arena = layout.arenas.raincourt;
-  const sprites = Object.fromEntries([...cards, ...hostiles].map(({ id }) => [id, layout.sprites[id]]));
-  await writeFile(join(temporary, 'content.json'), JSON.stringify({
-    level: raincourt, cards, hostiles, arena, sprites,
-    preparationSeconds: tuning.preparationSeconds,
-    baselinePayoutSeconds: tuning.baselinePayoutSeconds,
-    rerouteCooldownSeconds: tuning.rerouteCooldownSeconds,
+  const media = new Set(['campaign-card.webp']);
+  const campaign = Object.fromEntries(tuning.levels.map((level) => {
+    const cards = tuning.plants.filter(({ id }) => level.cardIds.includes(id));
+    const hostileIds = new Set(level.waves.flatMap(({ groups }) => groups.map(({ enemy }) => enemy)));
+    const hostiles = tuning.enemies.filter(({ id }) => hostileIds.has(id));
+    const arena = layout.arenas[level.id];
+    const sprites = Object.fromEntries([...cards, ...hostiles].map(({ id }) => [id, layout.sprites[id]]));
+    media.add(arena.boardAsset);
+    for (const { asset } of Object.values(sprites)) media.add(asset);
+    return [level.id, {
+      level, cards, hostiles, arena, sprites,
+      preparationSeconds: tuning.preparationSeconds,
+      baselinePayoutSeconds: tuning.baselinePayoutSeconds,
+      rerouteCooldownSeconds: tuning.rerouteCooldownSeconds,
+    }];
   }));
-  for (const name of [arena.boardAsset, 'campaign-card.webp', ...Object.values(sprites).map(({ asset }) => asset)]) {
+  await writeFile(join(temporary, 'content.json'), JSON.stringify(campaign));
+  for (const name of media) {
     await cp(join('assets/runtime/art', name), join(temporary, 'art', name));
   }
-  await cp('assets/runtime/audio', join(temporary, 'audio'), {
-    recursive: true,
-    filter: (path) => !/\/(pod|valve-lock)\.ogg$/.test(path),
-  });
+  await cp('assets/runtime/audio', join(temporary, 'audio'), { recursive: true });
   await rm('dist', { recursive: true, force: true });
   await rename(temporary, 'dist');
 } finally {

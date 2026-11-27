@@ -145,3 +145,36 @@ dialog input { accent-color: #edc686; }
   .brief img { max-height: 26dvh; object-fit: cover; }
   .valve { min-width: 38px; min-height: 38px; }
 }
+h1[tabindex="-1"]:focus:not(:focus-visible) { outline: none; }
+.brief-tip { border-left: 3px solid var(--gold); padding-left: 10px; }
+.brief details { margin: 0 0 12px; }
+.brief summary { cursor: pointer; padding-block: 5px; }
+.stage.locked img { filter: saturate(.5) brightness(.72); }
+.valve[data-valve='warning'] { border: 2px dashed #ffce7c; color: #fff0bf; background: #552c25; }
+.valve[data-valve='closed'] { border: 2px solid #ffae9c; color: #ffe5db; background: #641f29; }
+.keeper-hud { position: absolute; right: 14px; bottom: 38px; z-index: 3; display: grid; gap: 3px; min-width: 190px; padding: 6px 9px; border: 1px solid #e7a89c; border-radius: 7px; background: #2c1824f5; pointer-events: none; color: #ffe6df; font-size: .82rem; }
+.keeper-hud meter { width: 100%; height: 7px; accent-color: #f5aa9f; }
+.keeper-hud meter::-webkit-meter-optimum-value { background: #f5aa9f; }
+.ending { min-height: min(570px, 82dvh); display: grid; align-content: center; justify-items: center; gap: 14px; text-align: center; border-radius: 16px; border: 1px solid #767f63; padding: 24px; background: linear-gradient(#142a2bee,#102421e8), url('./art/campaign-card.webp') center / cover; }
+.ending h1 { color: #ffe4a5; font-size: clamp(1.9rem, 5vw, 4rem); }
+.ending-records { text-align: left; padding-left: 21px; margin: 0; }
+.bloom { font-size: 4rem; color: #fae4a3; line-height: 1; text-shadow: 0 0 28px #f7d9859c; animation: bloom 3s ease-out both; }
+.bloom.still { animation: none; }
+@keyframes bloom { from { transform: scale(.3) rotate(-20deg); opacity: .15; } to { transform: scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .bloom { animation-duration: .01ms; } }
+@media (max-width: 950px) and (orientation: landscape) {
+  .map h1 { margin-bottom: 8px; }
+  .stage { padding: 10px; }
+  .stage img { height: min(72px, 20dvh); }
+  .game[data-arena='lightning-dome'] .deck { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .game[data-arena='lightning-dome'] .seed-card { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 1px; min-height: 71px; font-size: .70rem; line-height: 1.1; }
+  .game[data-arena='lightning-dome'] .seed-card img { width: 26px; height: 27px; }
+  .game[data-arena='lightning-dome'] .toolbelt, .game[data-arena='lightning-dome'] .help { grid-column: span 2; }
+  .game[data-arena='lightning-dome'] .cost-unit { display: none; }
+  .keeper-hud { right: 9px; bottom: auto; top: 7px; min-width: 158px; font-size: .7rem; padding: 3px 6px; }
+}
+@media (min-width: 800px) and (max-width: 950px) and (orientation: landscape) {
+  .game[data-arena='pump-gallery'] .board-layer { bottom: -14.8%; }
+  .game[data-arena='lightning-dome'] .board-layer { bottom: -13.5%; }
+  .game:not([data-arena='raincourt']) .threat { left: 127px; width: min(36vw, 310px); }
+}

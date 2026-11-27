@@ -6,7 +6,7 @@ type Track = 'ambient-rain' | 'music-watch' | 'music-storm';
 type Voice = { source: AudioBufferSourceNode; cue: Cue };
 type Loop = { source: AudioBufferSourceNode; gain: GainNode };
 
-const priority: Partial<Record<Cue, number>> = { breach: 2, warning: 1, victory: 3, defeat: 3 };
+const priority: Partial<Record<Cue, number>> = { breach: 2, warning: 1, "valve-lock": 2, victory: 3, defeat: 3 };
 const tracks: Track[] = ['ambient-rain', 'music-watch', 'music-storm'];
 
 export class Sound {
