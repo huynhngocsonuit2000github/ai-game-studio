@@ -29,3 +29,7 @@ Keep the authored spawn schedule, enemy HP bands, rites, recipe ranks and Warden
 ## Campaign v1 batch authorization
 
 The Producer approved expansion design and the exact five additive payload files with zero replacements in pack `monster-survivor-campaign-v2`. The approved external request names MSC-10, MSC-20 and MSC-30 as one batch with intermediate reviews deferred. The candidate uses the game’s existing media grant and preview entry. Final acceptance and manual merge remain with the Producer. [Campaign brief](features/ms-campaign-v1/BRIEF.md) · [Campaign QA](../reports/CAMPAIGN_QA.md).
+
+## Campaign Polish design and art grant
+
+**MSCP-AP01 — Producer external handoff prompt** approves the Campaign Polish design and six exact additive payload files with zero replacements. It covers the four verified lantern portraits in the public repository and in the existing Pages preview after manual merge. The external request authorizes MSCP-10, MSCP-20 and MSCP-30 as one batch with intermediate Producer reviews deferred. Producer playtest and candidate acceptance remain pending. [Approved brief](features/ms-campaign-polish-1/BRIEF.md) · [Art rights](features/ms-campaign-polish-1/ASSET_RIGHTS.md).

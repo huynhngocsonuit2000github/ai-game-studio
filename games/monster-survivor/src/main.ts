@@ -1,4 +1,5 @@
 import './style.css';
+import './armory.css';
 import { enemies, garden, rules, skills, validateContent } from './content.ts';
 import { GardenRun } from './slice.ts';
 import { CampaignRun } from './campaign.ts';
@@ -6,8 +7,8 @@ import { gear, items, slots, stages } from './campaign-content.ts';
 import type { Slot } from './campaign-content.ts';
 import { CampaignRecords, campaignKey } from './campaign-save.ts';
 import type { Settlement } from './campaign-save.ts';
-import { campHtml, campaignResult, quoteHtml } from './camp-view.ts';
-import type { CampPanel, CampSelection, Quote } from './camp-view.ts';
+import { campHtml, campaignResult } from './camp-view.ts';
+import type { CampSelection, Quote } from './camp-view.ts';
 import { Clock, distance, heading } from './sim.ts';
 import { Renderer, loadArt, skillIcon } from './render.ts';
 import { Records } from './save.ts';
@@ -280,8 +281,10 @@ function view(next: Mode) {
   screen.removeAttribute('aria-modal');
   screen.removeAttribute('aria-labelledby');
   if (next === 'title') screen.innerHTML = titleView();
-  if (next === 'camp') screen.innerHTML = `<div class="panel wide camp">${campHtml(camp, campaignRecords, time)}</div>`;
-  if (next === 'upgrade' && quote) screen.innerHTML = headingPanel('Confirm upgrade', quoteHtml(quote));
+  if (next === 'camp' || next === 'upgrade') {
+    const style = camp.panel === 'armory' ? ' armory-panel' : ' stage-panel';
+    screen.innerHTML = `<div class="panel wide camp${style}">${campHtml(camp, campaignRecords, time, next === 'upgrade' ? quote : undefined)}</div>`;
+  }
   if (next === 'paused' || next === 'result') renderer?.clearEffects();
   if (next !== 'running') run?.clearSpellEffects();
   if (next === 'settings') screen.innerHTML = settingsView();
@@ -359,6 +362,8 @@ function openCamp(keepSelection = false) {
   camp.slot = 'weapon';
   camp.item = undefined;
   camp.message = '';
+  camp.forged = false;
+  camp.demo = false;
   sound.clearEffects();
   sound.theme('moonlit-gate');
   view('camp');
@@ -420,20 +425,24 @@ async function campAction(action: string) {
       const { item, rank } = quote;
       quote = undefined;
       const upgraded = await campaignWrite(() => campaignRecords.upgrade(item.id, rank));
+      camp.forged = upgraded;
       camp.message = upgraded ? item.name + ' upgraded to +' + (rank + 1) : 'The price or rank changed. Check your equipment.';
       if (mode !== 'upgrade') return;
     }
     if (action === 'upgrade-confirm' || action === 'upgrade-cancel') {
       quote = undefined;
       view('camp');
-      screen.querySelector<HTMLElement>('[data-action="upgrade-item"]')?.focus();
+      const focus = action === 'upgrade-confirm' ? '.forge [role="status"]' : '[data-action="upgrade-item"]';
+      screen.querySelector<HTMLElement>(focus)?.focus();
     }
     return;
   }
   camp.message = '';
+  camp.forged = false;
+  camp.demo = action === 'demo-shot';
   campaignRecords.refresh();
   if (action.startsWith('camp-panel-')) {
-    camp.panel = action.slice(11) as CampPanel;
+    camp.panel = action === 'camp-panel-armory' ? 'armory' : 'stages';
     camp.item = undefined;
   } else if (action.startsWith('stage-')) {
     const selected = stages.find(stage => stage.id === action.slice(6));
@@ -466,6 +475,7 @@ screen.addEventListener('click', event => {
   if (!target) return;
   if (target.dataset.card !== undefined) { select(Number(target.dataset.card)); return; }
   const action = target.dataset.action;
+  if (action && mode === 'upgrade' && action === 'camp-panel-stages') return;
   if (action && (mode === 'camp' || mode === 'upgrade') && !['title', 'campaign-start'].includes(action)) {
     void campAction(action);
     return;

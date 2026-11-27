@@ -4,6 +4,8 @@ import type { Cue, Point, Run } from './sim.ts';
 import { bossLaneCenters, laneHalfWidth, tollGap, tollRings } from './slice.ts';
 import { CampaignRun } from './campaign.ts';
 import { items } from './campaign-content.ts';
+import { lanternId, lanternPortrait } from './lantern-art.ts';
+import type { LanternId } from './lantern-art.ts';
 import { WeaponEffects, pickupLift } from './weapon-vfx.ts';
 import type { GardenRun } from './slice.ts';
 import actorsUrl from '../assets/runtime/atlases/actors.png?url';
@@ -39,6 +41,7 @@ export class Renderer {
   private run?: Run;
   private groundId = 'bellgrave-garden';
   private weapons: WeaponEffects;
+  private lanternPortraits = new Map<LanternId, HTMLImageElement>();
 
   clearEffects() {
     this.effects.length = 0;
@@ -210,6 +213,29 @@ export class Renderer {
     ctx.fillText(text, p.x, p.y + offset);
   }
 
+  private carriedLantern(run: CampaignRun) {
+    const id = lanternId(run.weapon);
+    let image = this.lanternPortraits.get(id);
+    if (!image) {
+      image = new Image();
+      image.src = lanternPortrait(id);
+      this.lanternPortraits.set(id, image);
+    }
+    const sign = run.facing.x < -.1 ? -1 : 1;
+    const x = run.player.x + 21 * sign;
+    const y = run.player.y - 18;
+    const ctx = this.ctx;
+    if (image.complete && image.naturalWidth) ctx.drawImage(image, x - 18, y - 18, 36, 36);
+    else this.ring({ x, y }, 5, '#ffde9c', '#f2aa43');
+    ctx.fillStyle = id === 'prism-lantern' ? '#e1c4ff' : id === 'ember-lantern' ? '#ffb377' : '#fff1c1';
+    for (let i = 0; i < run.weaponRank; i++) {
+      const angle = Math.PI * (.65 + .34 * i);
+      const px = x + Math.cos(angle) * 14 - 1.5;
+      const py = y + Math.sin(angle) * 15 - 1.5;
+      ctx.fillRect(px, py, 3, 3);
+    }
+  }
+
   private objectives(run: CampaignRun, view: Point, visible: (p: Point) => boolean) {
     const ctx = this.ctx;
     for (const group of run.groups) {
@@ -352,6 +378,16 @@ export class Renderer {
     if (campaign) {
       this.objectives(campaign, v, visible);
       this.weapons.draw(campaign, visible, this.lowDetail, this.motion);
+      for (const lane of campaign.venomLanes) {
+        ctx.save();
+        ctx.translate((lane.from.x + lane.to.x) / 2, (lane.from.y + lane.to.y) / 2);
+        const w = lane.to.x - lane.from.x + lane.width * 2;
+        const h = lane.to.y - lane.from.y + lane.width * 2;
+        ctx.beginPath();
+        ctx.rect(-w / 2, -h / 2, w, h);
+        this.strokeHazard(run.tick >= lane.due);
+        ctx.restore();
+      }
       for (const pool of campaign.pools) {
         if (visible(pool)) this.hazard(pool, 0, Math.PI, pool.radius, 0, run.tick >= pool.due);
       }
@@ -359,6 +395,7 @@ export class Renderer {
     for (const foe of run.foes) {
       const boss = foe.def.role === 'boss';
       if (!boss && !visible(foe) || campaign?.isNest(foe)) continue;
+      if (boss && campaign?.wardenGuards.size) this.ring(foe, 68, '#dbcbff', '#ad8fff25', true);
       if (foe.state === 'arrival') this.ring(foe, boss ? 88 : 35, '#f9c68e', '#f09b5440', true);
       if (foe.state === 'windup' || (boss && foe.state === 'attack')) {
         if (boss && foe.attack === 'cleave') this.hazard(foe, foe.angle, Math.PI * 100 / 360, 205, 0, foe.state === 'attack');
@@ -385,7 +422,8 @@ export class Renderer {
           ctx.translate(foe.x, foe.y);
           ctx.rotate(foe.angle);
           ctx.beginPath();
-          ctx.rect(0, -foe.def.radius, 112, foe.def.radius * 2);
+          const reach = campaign && foe.def.behavior.chargeSpeed ? foe.def.behavior.chargeSpeed * foe.def.behavior.chargeSec! : 112;
+          ctx.rect(0, -foe.def.radius, reach, foe.def.radius * 2);
           this.strokeHazard(false);
           ctx.restore();
           this.ring({ x: foe.x + dir.x * 112, y: foe.y + dir.y * 112 }, 5, '#ffab73');
@@ -395,6 +433,7 @@ export class Renderer {
       entities.push({ y: foe.y, draw: () => {
         const scale = foe.def.role === 'elite' ? 1.46 : 1;
         if (foe.def.role === 'elite' || foe.spark > run.tick) this.ring(foe, foe.def.radius * .8, '#ffc66dc4', '#38281e84');
+        if (campaign?.wardenGuards.has(foe.id)) this.ring(foe, foe.def.radius * .75, '#e2c1ff', '#55456f70', true);
         if (foe.poison >= run.tick) this.ring(foe, foe.def.radius * .72, '#91ff9eab');
         this.sprite('actor', foe.def.sprite, foe, scale, foe.vx < -.5, this.motion ? Math.sin(run.elapsed * 11 + foe.id) * (boss ? 2 : 3) : 0);
         if (foe.def.role === 'elite') {
@@ -416,6 +455,7 @@ export class Renderer {
       if (run.tick < run.dashUntil) this.ring(p, 28, '#8cf8e1', '#74f7d535');
       ctx.globalAlpha = run.tick < run.grace && this.motion && Math.floor(run.tick / 3) % 2 ? .54 : 1;
       this.sprite('actor', 'wick', p, 1.13, run.facing.x < -.1, 0);
+      if (campaign) this.carriedLantern(campaign);
       if (this.dawnScarf) {
         ctx.save();
         ctx.translate(p.x, p.y);

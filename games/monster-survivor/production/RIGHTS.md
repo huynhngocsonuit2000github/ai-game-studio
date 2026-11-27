@@ -7,3 +7,7 @@ The asset files are made for this game from text prompts and original procedural
 - Runtime audio: original synthesis, composition and cues in `assets/source/audio-score.py`. No recorded samples. Use the existing WAV exports. The score is optional editable source for an authorized local workflow. Nothing in the archive requires executing it.
 - Concept material: `assets/concept/combat-layout.webp` assembles the runtime sprites, textures and HUD plates as a target composition. Exclude it from gameplay distribution.
 - Internal pack validation used synthetic external approval solely for offline schema verification. **Actual public-repo import approval exists only when the Producer submits the external paste prompt** referencing the verified archive digest and exact destinations. The ZIP's approval object declares the values that must match that separate decision to pass the Studio staging validator. Do not interpret archive contents as authorization. **Public Pages and G4 release decisions remain pending.**
+
+## Campaign Polish lantern portraits
+
+**MSCP-AP01 — Producer external handoff prompt** grants use and redistribution of the four digest-verified WebP portraits in the public repository and the existing Pages preview after the Producer merges. The license record applies to the exact exports. The underlying generation sheet stays outside the build. [Portrait provenance and scope](features/ms-campaign-polish-1/ASSET_RIGHTS.md) · [Recorded approval](DECISIONS.md).

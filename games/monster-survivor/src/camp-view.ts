@@ -1,82 +1,119 @@
 import { gear, items, slots, stages, statLabels, statsFor } from './campaign-content.ts';
+import { lanternId, lanternPortrait } from './lantern-art.ts';
 import type { Gear, Slot, Stage, Stats } from './campaign-content.ts';
 import type { CampaignRecords, Settlement } from './campaign-save.ts';
 
-const starter = { weapon: 'Wick’s Lantern', armor: 'Wick’s Coat', boots: 'Garden Boots', charm: 'Empty Charm Slot' };
+const starter = { weapon: 'Wick’s Lantern', armor: 'Wick’s Coat', boots: 'Garden Boots', charm: 'Empty charm slot' };
+const slotPaths = {
+  armor: 'M5 6 12 3l3 3h2l3-3 7 3 4 9-6 3-3-4v14H10V14l-3 4-6-3Z',
+  boots: 'M10 4h10v13l9 4 1 6H3v-5l7-4Z',
+  charm: 'M7 7a13 13 0 0 1 18 0l-9 10ZM16 17l6 6-6 7-6-7Z',
+};
 const button = (text: string, action: string, attrs = '') => `<button type="button" data-action="${action}" ${attrs}>${text}</button>`;
 const selected = (on: boolean) => `aria-pressed="${on}"`;
-const panels = ['stages', 'equipment', 'upgrades'] as const;
-export type CampPanel = typeof panels[number];
-export type CampSelection = { stage: Stage; panel: CampPanel; slot: Slot; item?: string; message: string };
+export type CampSelection = { stage: Stage; panel: 'stages' | 'armory'; slot: Slot; item?: string; message: string; forged?: boolean; demo?: boolean };
 export type Quote = { item: Gear; rank: number; cost: number };
 
-function deltas(to: Stats, from = statsFor()) {
-  return (Object.keys(statLabels) as (keyof Stats)[]).flatMap(key => {
-    const delta = Number((to[key] - from[key]).toFixed(2));
-    const [label, unit] = statLabels[key];
-    return delta ? [`<li>${delta > 0 ? '+' : '−'}${Math.abs(delta)}${unit} ${label}</li>`] : [];
-  }).join('');
-}
-
-function level(item: Gear | undefined, records: CampaignRecords) {
+function rankOf(item: Gear | undefined, records: CampaignRecords) {
   return item ? records.data.ranks[item.id] ?? 0 : 0;
 }
 
-export function campHtml(state: CampSelection, records: CampaignRecords, time: (seconds: number) => string) {
-  const { stage, panel, slot } = state;
-  const wallet = records.data.wallet;
-  const current = items.get(records.data.equipment[slot] ?? '');
-  const item = state.item === 'starter' ? undefined : items.get(state.item ?? '') ?? current;
-  const rank = level(item, records);
-  const wearing = item?.id === current?.id;
-  const stock = [...items.values()].filter(candidate => candidate.slot === slot && Object.hasOwn(records.data.ranks, candidate.id));
-  const cost = gear.upgradeCostByTargetRank[(rank + 1) as 1 | 2 | 3];
-  const weapon = panel === 'equipment' && slot === 'weapon' ? item : items.get(records.data.equipment.weapon ?? '');
-  const chosen = item?.name ?? starter[slot];
-  const exact = item ? deltas(statsFor(item, rank)) : '';
-  const next = item && cost ? deltas(statsFor(item, rank + 1), statsFor(item, rank)) : '';
-  const comparison = item && !wearing ? deltas(statsFor(item, rank), statsFor(current, level(current, records))) : '';
-  return `<div class="camp-head"><h2 id="screen-title">Lantern Camp</h2><div class="camp-gold" aria-label="${wallet} gold">◉ ${wallet} gold</div></div>
-    <div class="actions camp-tabs" aria-label="Camp sections">${panels.map((key, index) =>
-      button(['Stage Select', 'Equipment', 'Upgrades'][index], 'camp-panel-' + key, selected(panel === key))).join('')}</div>
-    ${panel === 'stages' ? `<div class="camp-stages" aria-label="Campaign stages">${stages.map((entry, index) => {
-      const best = records.data.bestMs[entry.id];
-      const open = records.unlocked(entry.id);
-      const subtitle = open ? best === undefined ? 'Ready' : 'Cleared · ' + time(best / 1000) : 'Clear ' + stages[index - 1].name;
-      return button(`<span>${entry.order}. ${entry.name}</span><small>${subtitle}</small>`, 'stage-' + entry.id,
-        `${selected(stage.id === entry.id)} class="stage-choice" ${open ? '' : 'disabled'}`);
-    }).join('')}</div>
-    <p class="stage-look">${stage.look}</p>
-    <div class="actions">${button('Enter ' + stage.name, 'campaign-start', 'class="primary" data-focus')}
-      ${button('Title', 'title')}</div>` : `<div class="camp-slots" aria-label="Equipment slots">${slots.map(key => {
-      const worn = items.get(records.data.equipment[key] ?? '');
-      return button(`<small>${key}</small><span>${worn ? worn.name + ' +' + level(worn, records) : starter[key]}</span>`,
-        'slot-' + key, `${selected(slot === key)} class="slot-choice" data-rarity="${worn?.rarity ?? 'common'}"`);
-    }).join('')}</div>
-    <div class="camp-inventory"><div class="camp-items actions" aria-label="Owned items">
-      ${panel === 'equipment' ? button(starter[slot], 'item-starter', selected(!item)) : ''}
-      ${stock.map(candidate => button(`${candidate.name} +${level(candidate, records)}`, 'item-' + candidate.id, selected(item?.id === candidate.id))).join('')}
-      ${!stock.length ? '<p>Find gear in chests and elite drops.</p>' : ''}
-    </div><div class="camp-compare">
-      <strong data-rarity="${item?.rarity ?? 'common'}">${chosen}${item ? ' +' + rank : ''}</strong>
-      <small>${wearing && panel === 'equipment' ? 'Equipped' : item?.rarity ?? 'Beginner gear'}</small>
-      ${item ? `<p>${item.effect}</p><ul>${exact}</ul>` : ''}
-      ${comparison ? `<p>Compared with equipped</p><ul>${comparison}</ul>` : ''}
-      ${panel === 'upgrades' && item ? cost ? `<p>At +${rank + 1}</p><ul>${next}</ul>` : '<p>Maximum rank</p>' : ''}
-    </div>${slot === 'weapon' ? `<div class="camp-weapon" role="img" aria-label="${weapon?.name ?? starter.weapon} shot preview" data-weapon="${weapon?.id ?? 'starter'}" data-rank="${level(weapon, records)}"><i></i><b></b></div>` : ''}</div>
-    <div class="actions">
-      ${panel === 'equipment' && !wearing && item ? button('Equip ' + item.name, 'equip-item', 'class="primary"') : ''}
-      ${panel === 'equipment' && !item && current ? button('Equip ' + starter[slot], 'equip-starter', 'class="primary"') : ''}
-      ${panel === 'upgrades' && item && cost ? button(`Upgrade · ${cost} gold`, 'upgrade-item', wallet >= cost ? 'class="primary"' : 'disabled title="More gold required"') : ''}
-      ${button('Back to stages', 'camp-panel-stages', 'data-focus')}</div>`}
-    <p class="camp-note" role="status">${[state.message, records.status].filter(Boolean).join(' ')}</p>`;
+function ornament(slot: Slot, item?: Gear) {
+  return slot === 'weapon'
+    ? `<img src="${lanternPortrait(item?.id)}" alt="" width="384" height="384" decoding="async">`
+    : `<svg viewBox="0 0 32 32" aria-hidden="true"><path d="${slotPaths[slot]}"/></svg>`;
 }
 
-export function quoteHtml(quote: Quote) {
-  return `<p>Spend ${quote.cost} gold to upgrade ${quote.item.name} to +${quote.rank + 1}?</p>
-    <ul>${deltas(statsFor(quote.item, quote.rank + 1), statsFor(quote.item, quote.rank))}</ul>
-    <div class="actions">${button('Confirm upgrade', 'upgrade-confirm', 'class="primary"')}
-      ${button('Cancel', 'upgrade-cancel', 'data-focus')}</div>`;
+function statsRows(item: Gear, rank: number, next?: number) {
+  const current = statsFor(item, rank);
+  const following = next === undefined ? undefined : statsFor(item, next);
+  return (Object.keys(item.stats) as (keyof Stats)[]).map(key => {
+    const [label, unit] = statLabels[key];
+    return `<div><dt>${label}</dt><dd>+${current[key]}${unit}${following ? ` <span aria-hidden="true">→</span><b>+${following[key]}${unit}</b>` : ''}</dd></div>`;
+  }).join('');
+}
+
+function stageMap(state: CampSelection, records: CampaignRecords, time: (seconds: number) => string) {
+  const { stage } = state;
+  return `<div class="camp-route" aria-label="Campaign stages">${stages.map((entry, index) => {
+    const best = records.data.bestMs[entry.id];
+    const open = records.unlocked(entry.id);
+    const status = open ? best === undefined ? 'Ready' : 'Best · ' + time(best / 1000) : 'Clear ' + stages[index - 1].name;
+    return button(`<i aria-hidden="true">${entry.order}</i><span>${entry.name}</span><small>${status}</small>`, 'stage-' + entry.id,
+      `${selected(stage.id === entry.id)} class="stage-choice" ${open ? '' : 'disabled'}`);
+  }).join('')}</div>
+  <div class="stage-summary"><h3>${stage.name}</h3><p>${stage.look}</p><ol>${stage.sweeps.map(sweep => '<li>' + sweep.label + '</li>').join('')}</ol></div>
+  <div class="actions">${button('Enter ' + stage.name, 'campaign-start', 'class="primary" data-focus')}${button('Title', 'title')}</div>`;
+}
+
+function armory(state: CampSelection, records: CampaignRecords, quote?: Quote) {
+  const { slot } = state;
+  const current = items.get(records.data.equipment[slot] ?? '');
+  const selectedItem = items.get(state.item ?? '');
+  const owned = (item: Gear) => Object.hasOwn(records.data.ranks, item.id);
+  const item = state.item === 'starter' ? undefined : selectedItem?.slot === slot && owned(selectedItem) ? selectedItem : current;
+  const rank = rankOf(item, records);
+  const wearing = item?.id === current?.id;
+  const name = item?.name ?? starter[slot];
+  const stock = [...items.values()].filter(candidate => candidate.slot === slot && owned(candidate));
+  const next = rank < gear.rankCap ? rank + 1 as 1 | 2 | 3 : undefined;
+  const cost = next && gear.upgradeCostByTargetRank[next];
+  const enough = Boolean(cost && records.data.wallet >= cost);
+  const cards = [undefined, ...stock].map(candidate => {
+    const equipped = candidate?.id === current?.id;
+    const active = candidate?.id === item?.id;
+    const grade = candidate?.rarity ?? 'common';
+    const level = rankOf(candidate, records);
+    const text = `<span class="gear-card-art">${ornament(slot, candidate)}</span>
+      <span class="gear-card-copy"><strong>${candidate?.name ?? starter[slot]}</strong>
+      <small><span class="rarity-mark" aria-hidden="true"></span>${candidate ? grade : slot === 'charm' ? 'Empty' : 'Starter'}${candidate ? ' · +' + level : ''}</small>
+      ${equipped ? '<span class="equipped-flag">Equipped</span>' : ''}</span>
+      ${candidate ? `<span class="gear-pips" aria-label="Rank ${level} of 3">${[1, 2, 3].map(value => `<i data-filled="${value <= level}"></i>`).join('')}</span>` : ''}`;
+    return button(text, 'item-' + (candidate?.id ?? 'starter'), `class="gear-card" data-rarity="${grade}" ${selected(active)}`);
+  }).join('');
+  return `<div class="armory" aria-label="Lantern Camp Armory">
+    <section class="armory-inventory" aria-label="Gear inventory">
+      <div class="armory-slots" aria-label="Equipment slots">${slots.map(key => {
+        const equipped = items.get(records.data.equipment[key] ?? '');
+        return button(`<span>${key}</span><small>${equipped ? '+' + rankOf(equipped, records) : key === 'charm' ? 'Empty' : 'Starter'}</small>`,
+          'slot-' + key, `class="slot-choice" ${selected(key === slot)}`);
+      }).join('')}</div>
+      <div class="armory-cards">${cards}</div>
+      ${stock.length ? '' : '<p class="armory-hint">Find gear in chests and elite drops.</p>'}
+    </section>
+    <section class="armory-showcase" aria-label="Selected equipment" data-rarity="${item?.rarity ?? 'common'}"
+      data-weapon="${lanternId(item?.id)}" data-rank="${rank}" data-slot="${slot}">
+      <div class="showcase-portrait" aria-hidden="true">${ornament(slot, item)}</div>
+      <div class="showcase-caption"><h3>${name}${item ? ' <span>+' + rank + '</span>' : ''}</h3>
+      <p>${item?.effect ?? (slot === 'weapon' ? 'Wick’s warm brass starting lantern.' : slot === 'charm' ? 'Choose a charm to fill this slot.' : 'Wick’s starting kit.')}</p>
+      ${wearing ? '<span class="equipped-flag">Equipped</span>' :
+        button('Equip ' + name, item ? 'equip-item' : 'equip-starter', 'class="primary"')}</div>
+      ${slot === 'weapon' ? `<div class="attack-demo" data-playing="${Boolean(state.demo)}">
+        <span class="test-projectile" aria-hidden="true"></span><span class="test-impact" aria-hidden="true"></span>
+      </div>${button('Test shot', 'demo-shot', 'class="demo-button"')}` : ''}
+    </section>
+    <section class="forge" aria-labelledby="forge-title" data-forged="${Boolean(state.forged)}">
+      <div class="forge-header"><h3 id="forge-title">Forge</h3><span class="forge-anvil" aria-hidden="true">◆</span></div>
+      ${item ? `<div class="forge-path" aria-label="Upgrade path">${[0, 1, 2, 3].map(value =>
+        `<span data-rank-state="${value === rank ? 'current' : value < rank ? 'complete' : 'upcoming'}" ${value === rank ? 'aria-current="step"' : ''}>+${value}</span>`).join('')}</div>
+        <dl class="forge-stats">${statsRows(item, rank, next)}</dl>
+        ${quote ? `<div class="forge-quote"><p>Spend ${quote.cost} gold to forge ${quote.item.name} +${quote.rank + 1}?</p>
+          ${button('Confirm upgrade', 'upgrade-confirm', 'class="primary"')}${button('Cancel', 'upgrade-cancel', 'data-focus')}</div>` :
+          next && cost ? `<p class="forge-cost">${enough ? `+${rank} to +${next} · ${cost} gold` : `Needs ${cost - records.data.wallet} more gold`}</p>
+          ${button(`Forge +${next} · ${cost} gold`, 'upgrade-item', enough ? 'class="primary"' : 'disabled')}` : '<p class="forge-cost">Maximum rank</p>'}` :
+        `<p class="forge-cost">${slot === 'charm' ? 'Select a charm to forge.' : 'Select collectible gear to forge.'}</p>`}
+      <div class="forge-sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+      <p class="camp-note" role="status" tabindex="-1">${[state.message, records.status].filter(Boolean).join(' ')}</p>
+    </section>
+  </div>`;
+}
+
+export function campHtml(state: CampSelection, records: CampaignRecords, time: (seconds: number) => string, quote?: Quote) {
+  return `<div class="camp-head"><div class="camp-heading"><h2 id="screen-title">${quote ? 'Confirm upgrade' : state.panel === 'armory' ? 'Lantern Armory' : 'Lantern Camp'}</h2>
+    ${state.panel === 'armory' ? quote ? '' : button('Back to stages', 'camp-panel-stages', 'data-focus') : button('Armory', 'camp-panel-armory')}</div>
+    <div class="camp-gold" aria-label="${records.data.wallet} gold">◉ ${records.data.wallet} gold</div></div>
+    ${state.panel === 'stages' ? stageMap(state, records, time) : armory(state, records, quote)}
+    ${state.panel === 'stages' && records.status ? `<p class="camp-note" role="status">${records.status}</p>` : ''}`;
 }
 
 export function campaignResult(stage: Stage, result: string, elapsed: string, earned: Settlement | undefined, lanternLost: boolean) {
