@@ -397,7 +397,7 @@
       "kind": "feature",
       "intendedBehavior": "Equip and feed one Lantern Kin companion, add one engraving to the active lantern, replay cleared Campaign maps at harder tiers, and choose English or Vietnamese.",
       "implementation": "implemented",
-      "publicAvailability": "unknown",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/kin-save.ts",
@@ -407,8 +407,8 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
+        "target": "assembled-pages",
+        "result": "PASS",
         "evidence": [
           "reports/LANTERN_KIN_QA.md"
         ]
@@ -419,7 +419,7 @@
       "kind": "level",
       "intendedBehavior": "Light three sequential waymarks, defeat the Fog Keeper, and exit to unlock Moon Owl.",
       "implementation": "implemented",
-      "publicAvailability": "unknown",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/kin-maps.ts",
@@ -428,8 +428,8 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
+        "target": "assembled-pages",
+        "result": "PASS",
         "evidence": [
           "reports/LANTERN_KIN_QA.md"
         ]
@@ -440,7 +440,7 @@
       "kind": "level",
       "intendedBehavior": "Defeat both guards in either order and defeat the Furnace Overseer. Rescue Moss Turtle by opening its cage and reaching the exit.",
       "implementation": "implemented",
-      "publicAvailability": "unknown",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/kin-maps.ts",
@@ -449,8 +449,8 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
+        "target": "assembled-pages",
+        "result": "PASS",
         "evidence": [
           "reports/LANTERN_KIN_QA.md"
         ]
@@ -461,7 +461,7 @@
       "kind": "level",
       "intendedBehavior": "Break both pillars and defeat the Eclipse Warden across its three phases. Confirm exit to earn the chapter trophy.",
       "implementation": "implemented",
-      "publicAvailability": "unknown",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/kin-maps.ts",
@@ -470,8 +470,8 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
+        "target": "assembled-pages",
+        "result": "PASS",
         "evidence": [
           "reports/LANTERN_KIN_QA.md"
         ]

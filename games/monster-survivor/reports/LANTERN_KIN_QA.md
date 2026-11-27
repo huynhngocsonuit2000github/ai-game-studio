@@ -17,13 +17,30 @@ The three Normal base-gear simulation clears with seed 1807 took 171.88 s, 204.6
 
 ## LKN-30 assembled Pages
 
+Runtime source `95a9f5fc0a10f9ee5a00be0b784ea4650d414dec`. Chromium 156 at 1366×768 and emulated landscape at 844×390. The browser driver advances the fixed clock and submits ordinary keyboard events and draft choices to the built game. All three chapter clears used starter gear with no equipped pet. The historical save remained byte-identical after progression, and a fresh save kept Mistwood locked.
+
 | Check | Result |
 | --- | --- |
 | Frozen install, root lint, root typecheck, root tests, pack validator tests | PASS |
 | Monster Survivor typecheck and 36 game tests | PASS |
 | Catalog assembled with all three public games, Pages verification and project-subpath portal suites | PASS. Nine portal tests cover known and unknown entries, direct entry and returns, including Mỏ Vàng Náo Loạn. |
+| Monster Survivor browser suite | PASS. Nine checks cover the original campaign, Survival, forge, stage 6–8 progression, VI dialogs and HUD, pet adoption, feed, equip and reload, Elite and Nightmare, earning and spending shards, and landscape touch. Zero HTTP or page errors in the story pass. |
+| Mỏ Vàng Náo Loạn browser suite | PASS. Nine checks including the mine, shop, saves, touch and replay. |
+| Trusted changed-path scope and adopted state validator | PASS. Every changed path is under the Monster Survivor game directory. |
 | Forest Adventure browser suite | PASS. Eight checks including full campaign and save handling. |
 | Rollback rehearsal | PASS. Served the actual candidate and pinned artifacts on the same Chromium origin in sequence. The baseline loaded five Campaign stages, legacy equipment and wallet, and Survival. Returning to the candidate restored Vietnamese and the expansion unlock. All four storage values matched byte for byte. |
 | Hosted Pages | Pending manual merge and workflow deploy. The baseline marker request from the execution environment returned an HTTP 403 from the connection proxy. |
+
+### Captured gameplay
+
+| Capture | Observed play |
+| --- | --- |
+| [Mistwood waymark](evidence/lantern-kin/mistwood-normal-waymark.webp) · [Fog Keeper](evidence/lantern-kin/mistwood-normal-fog-keeper-1.webp) | VI HUD, lighting and cone tell. The exit was confirmed at 02:51.88 with 112 HP. |
+| [Ember Fox habitat](evidence/lantern-kin/habitat-vi-ember-fox.webp) | Adopted after historical Bell Orchard clear, fed to bond 2, equipped, then checked again after browser reload. |
+| [Ash Mine rescue](evidence/lantern-kin/ash-mine-normal-side-trip.webp) · [Furnace Overseer](evidence/lantern-kin/ash-mine-normal-furnace-overseer-1.webp) | Both guard encounters, rescue cage and furnace lanes. Exit at 02:50.43 unlocked Moss Turtle. |
+| [Eclipse lanes](evidence/lantern-kin/eclipse-temple-normal-eclipse-warden-1.webp) · [Ward adds](evidence/lantern-kin/eclipse-temple-normal-ward-guard.webp) · [Final sequence](evidence/lantern-kin/eclipse-temple-normal-eclipse-warden-3.webp) · [Victory](evidence/lantern-kin/eclipse-temple-victory-vi.webp) | All three phases and exit at 03:34.15 with 93 HP. Trophy appeared in the VI result. |
+| [Cinder Chain active](evidence/lantern-kin/bell-orchard-nightmare-engraving.webp) · [Nightmare hazard](evidence/lantern-kin/bell-orchard-nightmare-nightmare.webp) | Earned the first Elite shards on Bell Orchard at 02:19.18 with Ember +3. Learned Cinder Chain in camp, then cleared Nightmare at 02:40.73 with the same armor and weapon rank. |
+
+[Story timeline, seeds and peak foe counts](evidence/lantern-kin/lantern-kin-timelines.json) · [Tier timelines](evidence/lantern-kin/lantern-kin-tier-timelines.json). Five other engraving effects and the Owl and Turtle behaviors were exercised in simulation.
 
 Candidate acceptance is open for the Producer. Keep merge manual. After deploy, compare `build-sha.txt` against the verified deployment SHA, launch Campaign and Survival at the existing Monster Survivor route, and confirm the three catalog links. If rollback is required, revert only the Lantern Kin pull request and re-run the public smoke. The extra save keys remain available if the feature is restored.
