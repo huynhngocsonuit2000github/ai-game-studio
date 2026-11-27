@@ -51,3 +51,10 @@ Pack `monster-survivor-production-v1` · design and assets staged for handoff. S
 - Reused spatial buckets, cached the lantern glow, culled offscreen effects and added a persistent low-detail option. Complete Chromium replay cleared at 12:28.85 with 1,782 kills, old v1 save compatibility, all three boss phases and three clean restarts. Desktop/touch emulation, all settings, audio unlock/mute and atlas recovery passed.
 - In the Chromium dense 90-second segment, median 59.9 FPS and p95 16.73 ms over 4,949 sampled frame intervals. Initial transfer 1,475,458 bytes, input ready in 1.74 s at 10 Mbps/150 ms, 3.11 MB dense JS heap, 23,796 bytes drift over three restarts. Local Chromium measurements passed the numeric targets for that environment.
 - Firefox and WebKit installs were blocked by HTTP 403. Physical Android and iOS, representative desktop hardware, and human balance/audio review remain open. No device exception was granted. Seal available evidence and proceed with the independent S06 assembly and rollback checks. Release approval remains pending.
+
+### S06 · MS-610 · G4 candidate
+
+- Candidate assembled with the canonical registry at commit `ff54db362cc29e6e7f3796eaae04d695dbdd639c`. Both public game paths and the release manifest are preserved. Normal and Forest Adventure passed the assembled launch and return checks. See [release verification](RELEASE.md) for the test matrix, retry and rollback evidence.
+- Rebuilt and tested the S03 rollback artifact independently. Forest Adventure’s output is identical. v1 preferences, results, discoveries and sibling save isolation survive the rollback. The optional Normal detail flag defaults safely if S03 rewrites the save.
+- Candidate playtest archive uses the existing PR browser-evidence job. Runtime test evidence is tied to `04338c6ea786b5b46652c14cd82c1537b7d8b54e`. The G4 review documents the remaining device and balance coverage and the separate Released registry proposal.
+- Stop at G4 for the Producer’s playtest and explicit approval. Merge remains manual. The live S03 route remains active pending that decision.

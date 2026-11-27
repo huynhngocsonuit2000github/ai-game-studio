@@ -1,25 +1,26 @@
 {
   "schemaVersion": 1,
   "gameId": "monster-survivor",
-  "baselineCommit": "c790f520f96f6702fc2014f1c1524d2b01f341fa",
+  "baselineCommit": "ff54db362cc29e6e7f3796eaae04d695dbdd639c",
   "records": [
     {
       "id": "bellgrave-garden",
       "kind": "level",
-      "intendedBehavior": "Survive four minutes, light the Orchard Ward and defeat the Hollow Warden before the final toll.",
+      "intendedBehavior": "In the Normal candidate, light any two wards and defeat the three-phase Hollow Warden before 15:30.",
       "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
       "evidence": [
-        "src/slice.ts",
-        "reports/QA_REPORT.md"
+        "reports/RELEASE_QA.md",
+        "src/main.ts",
+        "src/slice.ts"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
         "target": "private-fixture",
         "result": "PASS",
         "evidence": [
-          "reports/QA_REPORT.md"
+          "reports/RELEASE_QA.md"
         ]
       }
     },
@@ -49,12 +50,14 @@
       "intendedBehavior": "Light the Orchard Ward and select a boon while the run is paused.",
       "implementation": "implemented",
       "publicAvailability": "private",
-      "acceptance": "pending",
+      "acceptance": "accepted",
       "evidence": [
         "src/slice.ts",
         "reports/QA_REPORT.md"
       ],
-      "acceptanceEvidence": [],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md"
+      ],
       "artifactCheck": {
         "target": "private-fixture",
         "result": "PASS",
@@ -69,12 +72,14 @@
       "intendedBehavior": "Defeat Thornback, collect its catalyst and evolve Wick Dart V with Thread Lens II.",
       "implementation": "implemented",
       "publicAvailability": "private",
-      "acceptance": "pending",
+      "acceptance": "accepted",
       "evidence": [
         "src/slice.ts",
         "reports/QA_REPORT.md"
       ],
-      "acceptanceEvidence": [],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md"
+      ],
       "artifactCheck": {
         "target": "private-fixture",
         "result": "PASS",
@@ -89,12 +94,14 @@
       "intendedBehavior": "Dodge Cleave and Toll across Sentinel and Briar phases and see the reason for either ending.",
       "implementation": "implemented",
       "publicAvailability": "private",
-      "acceptance": "pending",
+      "acceptance": "accepted",
       "evidence": [
         "src/slice.ts",
         "reports/QA_REPORT.md"
       ],
-      "acceptanceEvidence": [],
+      "acceptanceEvidence": [
+        "production/DECISIONS.md"
+      ],
       "artifactCheck": {
         "target": "private-fixture",
         "result": "PASS",
@@ -126,44 +133,50 @@
     {
       "id": "ms-normal-campaign",
       "kind": "feature",
-      "intendedBehavior": "Play the full Normal schedule with three wards and all authored skills, evolutions and Warden phases.",
-      "implementation": "planned",
+      "intendedBehavior": "Play the full Normal schedule with three wards, 16 skills, two elites, all four evolutions and all Warden phases.",
+      "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
       "evidence": [
-        "production/PRODUCTION_PLAN.md"
+        "reports/RELEASE_QA.md",
+        "src/main.ts",
+        "src/slice.ts"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
-        "evidence": []
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/RELEASE_QA.md"
+        ]
       }
     },
     {
       "id": "ms-records-expansion",
       "kind": "feature",
-      "intendedBehavior": "Review expanded records and use cosmetic rewards.",
-      "implementation": "planned",
+      "intendedBehavior": "Review lifetime records and the skill collection in the Field Guide and equip the unlocked Dawn Scarf.",
+      "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
       "evidence": [
-        "production/PRODUCTION_PLAN.md"
+        "reports/RELEASE_QA.md",
+        "src/main.ts",
+        "src/slice.ts"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": null,
-        "result": "NOT_RUN",
-        "evidence": []
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/RELEASE_QA.md"
+        ]
       }
     }
   ],
   "knownGaps": [
-    "G2 Producer playtest pending. The next task is MS-410 after approval.",
-    "S04–S06, Normal and later game systems are pending.",
-    "Physical touch device, additional browsers and the producer audio listening pass are unverified.",
-    "Studio registry registration and Pages publication require separate approval.",
-    "Direct observation of the live Pages marker was blocked by the workspace network."
+    "G4 Normal Producer playtest and explicit release approval are pending.",
+    "Firefox and WebKit installation was blocked. Physical Android and iOS and representative desktop hardware remain unchecked.",
+    "Normal is a candidate. S03 is the observed published preview. Studio approval is required for Released catalog metadata."
   ],
   "save": {
     "schema": "ai-game-studio:monster-survivor:v1",
@@ -171,40 +184,41 @@
     "evidence": [
       "src/save.ts",
       "tests/sim.test.ts",
-      "reports/QA_REPORT.md"
+      "reports/QA_REPORT.md",
+      "reports/RELEASE_QA.md"
     ]
   },
   "publication": {
     "rights": "cleared",
-    "preview": "pending",
+    "preview": "approved",
     "release": "blocked",
     "evidence": [
       "production/DECISIONS.md",
       "production/RIGHTS.md",
-      "production/ASSET_MANIFEST.csv"
+      "production/RELEASE.md"
     ]
   },
   "deployment": {
-    "deployedCommit": null,
-    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
-    "observedAt": null,
+    "deployedCommit": "ff54db362cc29e6e7f3796eaae04d695dbdd639c",
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/monster-survivor/",
+    "observedAt": "2026-11-27T05:15:04.057Z",
     "checks": {
       "revision": {
-        "result": "BLOCKED",
+        "result": "PASS",
         "evidence": [
-          "reports/QA_REPORT.md"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
         ]
       },
       "http": {
-        "result": "BLOCKED",
+        "result": "PASS",
         "evidence": [
-          "reports/QA_REPORT.md"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
         ]
       },
       "gameplay": {
         "result": "NOT_RUN",
         "evidence": [
-          "reports/QA_REPORT.md"
+          "production/DECISIONS.md"
         ]
       }
     }
