@@ -171,6 +171,7 @@ test('T09 authored deadlines give reasoned losses, and death wins same-tick ties
   const boss = tied.add('warden', tied.player, 1);
   boss.state = 'idle';
   boss.hp = 0;
+  tied.add('seedling');
   tied.player.hp = 1;
   tied.step(still);
   assert.equal(tied.result, 'hp');

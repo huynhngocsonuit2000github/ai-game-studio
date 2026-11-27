@@ -1,9 +1,9 @@
 import { skills } from './content.ts';
-import type { Slice } from './slice.ts';
+import type { GardenRun } from './slice.ts';
 
 export const saveKey = 'ai-game-studio:monster-survivor:v1';
 export const defaultSettings = {
-  master: .8, music: .55, sfx: .72, mute: false, reducedMotion: false, highContrast: false, damageNumbers: true,
+  master: .8, music: .55, sfx: .72, mute: false, reducedMotion: false, highContrast: false, damageNumbers: true, lowDetail: false,
 };
 type Settings = typeof defaultSettings;
 const base = () => ({
@@ -55,7 +55,7 @@ export class Records {
         master: volume(settings.master, defaultSettings.master), music: volume(settings.music, defaultSettings.music),
         sfx: volume(settings.sfx, defaultSettings.sfx), mute: flag(settings.mute, false),
         reducedMotion: flag(settings.reducedMotion, false), highContrast: flag(settings.highContrast, false),
-        damageNumbers: flag(settings.damageNumbers, true),
+        damageNumbers: flag(settings.damageNumbers, true), lowDetail: flag(settings.lowDetail, false),
       };
       save.lifetime = {
         runs: counter(stats.runs), wins: counter(stats.wins), bestClearMs: counter(stats.bestClearMs) || null,
@@ -86,7 +86,13 @@ export class Records {
     this.write({ ...save, settings });
   }
 
-  finalize(run: Slice, id: string) {
+  selectScarf(selected: '' | 'dawn-scarf') {
+    const save = this.status || this.readOnly ? this.data : this.read();
+    if (selected && !save.cosmetics.unlocked.includes(selected)) return;
+    this.write({ ...save, cosmetics: { ...save.cosmetics, selected } });
+  }
+
+  finalize(run: GardenRun, id: string) {
     if (!run.result || this.data.runIds.includes(id)) return;
     const save = this.status || this.readOnly ? this.data : this.read();
     if (save.runIds.includes(id)) return;

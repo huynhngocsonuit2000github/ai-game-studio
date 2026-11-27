@@ -33,3 +33,28 @@ Pack `monster-survivor-production-v1` · design and assets staged for handoff. S
 - The canonical Pages build and Forest Adventure regression passed, including the full public campaign and save migration. The candidate has its own local project-subpath preview and independent static build. Shared desktop preview access was blocked by the environment.
 - Producer playtest and acceptance pending at G2. Next authorized work after approval is MS-410. S04–S06 remain pending. Registry and Pages approval are separate. Keep merge manual.
 - Review is open in [PR #24](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/24) on `prod/monster-survivor/vertical-slice`. The verified gameplay evidence is committed at `17c2eab978002ebe6a859cc553fc3632e89edd05`.
+
+## Monster Survivor First Release · S04–S06
+
+- G2 accepted for the live S03 preview on 2026-11-27. Both intermediate Producer reviews deferred under the named batch. G4 playtest, release, catalog changes and merge remain pending.
+- Intake baseline `ff54db3` includes S03, publication registration, and both Studio verification repairs. Approved scope is this game directory. Starting MS-410 and MS-420.
+
+### S04 · MS-410 / MS-420 · technical PASS
+
+- Normal starts from the production title. Verified all four recipes, two distinct rites and a disabled third ward, unique boons, Overrun, all normal foes and elites, and all three Warden phases. Field Guide, records and Dawn Scarf use the existing v1 save contract.
+- Twenty simulation and persistence checks passed. The built production game cleared a full seeded run on Chromium at 12:11.10 with 1,780 kills. Two rites, Comet Thread, Crown of Glass, all Warden phases, retry and the existing S03 save passed with zero observed game or HTTP errors. The browser clock advanced the full authored schedule using keyboard and menu events.
+- G3 content verification passed for the exercised scope. G4 human playtest remains open under the named batch. Baseline level 39 and an 11.1-second duel exceeded the progression and damage targets. S05 starts with that measured balance gap.
+
+### S05 · MS-510 · desktop technical PASS, device coverage open
+
+- Tuned Normal ember value and Warden recovery windows. Compared with the S04 seed, the wave-end level moved from 39 to 21 and the duel from 11.1 s to 28.85 s. Four different evolution builds cleared seeded runs. Two stronger builds still beat the 55-second duel target and wave-end levels land slightly above the 14–19 target. See the recorded runs and deviations in the [release QA](../reports/RELEASE_QA.md).
+- Reused spatial buckets, cached the lantern glow, culled offscreen effects and added a persistent low-detail option. Complete Chromium replay cleared at 12:28.85 with 1,782 kills, old v1 save compatibility, all three boss phases and three clean restarts. Desktop/touch emulation, all settings, audio unlock/mute and atlas recovery passed.
+- In the Chromium dense 90-second segment, median 59.9 FPS and p95 16.73 ms over 4,949 sampled frame intervals. Initial transfer 1,475,458 bytes, input ready in 1.74 s at 10 Mbps/150 ms, 3.11 MB dense JS heap, 23,796 bytes drift over three restarts. Local Chromium measurements passed the numeric targets for that environment.
+- Firefox and WebKit installs were blocked by HTTP 403. Physical Android and iOS, representative desktop hardware, and human balance/audio review remain open. No device exception was granted. Seal available evidence and proceed with the independent S06 assembly and rollback checks. Release approval remains pending.
+
+### S06 · MS-610 · G4 candidate
+
+- Candidate assembled with the canonical registry at commit `ff54db362cc29e6e7f3796eaae04d695dbdd639c`. Both public game paths and the release manifest are preserved. Normal and Forest Adventure passed the assembled launch and return checks. See [release verification](RELEASE.md) for the test matrix, retry and rollback evidence.
+- Rebuilt and tested the S03 rollback artifact independently. Forest Adventure’s output is identical. v1 preferences, results, discoveries and sibling save isolation survive the rollback. The optional Normal detail flag defaults safely if S03 rewrites the save.
+- Candidate playtest archive uses the existing PR browser-evidence job. Runtime test evidence is tied to `04338c6ea786b5b46652c14cd82c1537b7d8b54e`. The G4 review documents the remaining device and balance coverage and the separate Released registry proposal.
+- Stop at G4 for the Producer’s playtest and explicit approval. Merge remains manual. The live S03 route remains active pending that decision.

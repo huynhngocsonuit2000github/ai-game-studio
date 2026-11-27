@@ -7,7 +7,30 @@
     "hardLimitSec": 930,
     "ritesRequired": 2,
     "riteChargeSec": 9,
-    "bossHp": 4800
+    "bossHp": 4800,
+    "emberBands": [
+      {
+        "atSec": 0,
+        "multiplier": 1
+      },
+      {
+        "atSec": 150,
+        "multiplier": 0.56
+      },
+      {
+        "atSec": 240,
+        "multiplier": 0.23
+      },
+      {
+        "atSec": 360,
+        "multiplier": 0.15
+      },
+      {
+        "atSec": 540,
+        "multiplier": 0.12
+      }
+    ],
+    "wardenArmorMultiplier": 0.25
   },
   "slice": {
     "waveEndSec": 240,

@@ -1,0 +1,65 @@
+{
+  "chromium": "156.0.8078.79",
+  "viewport": "1366×768",
+  "url": "http://127.0.0.1:4192/ai-game-studio/games/monster-survivor/",
+  "outcome": "victory",
+  "seconds": 748.85,
+  "wallSeconds": 151.773575219,
+  "kills": 1782,
+  "hp": 67,
+  "build": [
+    [
+      "comet-thread",
+      1
+    ],
+    [
+      "bog-bloom",
+      1
+    ],
+    [
+      "starfall",
+      5
+    ],
+    [
+      "prism-ring",
+      5
+    ],
+    [
+      "thread-lens",
+      3
+    ],
+    [
+      "heart-husk",
+      2
+    ]
+  ],
+  "wards": 2,
+  "evolved": true,
+  "phases": [
+    1,
+    2,
+    3
+  ],
+  "attacks": [
+    "1-cleave",
+    "1-toll",
+    "2-toll",
+    "2-lanes",
+    "2-cleave",
+    "3-lanes",
+    "3-cleave",
+    "3-toll"
+  ],
+  "faults": [],
+  "metrics": {
+    "initialTransfer": 1475458,
+    "readyMs": 1736.9297649999999,
+    "highestFoes": 48,
+    "denseHeap": 3105752,
+    "firstRetryHeap": 2707204,
+    "lastRetryHeap": 2731000,
+    "frames": 4949,
+    "medianFps": 59.880239520968516,
+    "p95Ms": 16.73399999999674
+  }
+}

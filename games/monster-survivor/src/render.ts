@@ -1,7 +1,8 @@
 import { actors, garden, height, icons, orchard, viewHeight, viewWidth, width, world } from './content.ts';
 import { camera, distance, random, vector } from './sim.ts';
 import type { Cue, Point, Run } from './sim.ts';
-import type { Slice } from './slice.ts';
+import { bossLaneCenters, laneHalfWidth, tollGap, tollRings } from './slice.ts';
+import type { GardenRun } from './slice.ts';
 import actorsUrl from '../assets/runtime/atlases/actors.png?url';
 import worldUrl from '../assets/runtime/atlases/world.png?url';
 import iconsUrl from '../assets/runtime/atlases/skills.png?url';
@@ -37,9 +38,20 @@ export class Renderer {
   motion = true;
   numbers = true;
   contrast = false;
+  dawnScarf = false;
+  lowDetail = false;
+  private lantern = document.createElement('canvas');
 
   constructor(private canvas: HTMLCanvasElement, private art: Awaited<ReturnType<typeof loadArt>>) {
     this.ctx = canvas.getContext('2d', { alpha: false })!;
+    this.lantern.width = this.lantern.height = 228;
+    const lantern = this.lantern.getContext('2d')!;
+    const light = lantern.createRadialGradient(114, 114, 8, 114, 114, 114);
+    light.addColorStop(0, '#edbd7940');
+    light.addColorStop(.42, '#b6804330');
+    light.addColorStop(1, '#bc893d00');
+    lantern.fillStyle = light;
+    lantern.fillRect(0, 0, 228, 228);
     this.ground.width = width;
     this.ground.height = height;
     const ctx = this.ground.getContext('2d')!;
@@ -123,10 +135,10 @@ export class Renderer {
     ctx.restore();
   }
 
-  draw(run: Slice, cues: Cue[]) {
+  draw(run: GardenRun, cues: Cue[]) {
     const ctx = this.ctx;
     const v = camera(run.player);
-    const dpr = Math.min(devicePixelRatio || 1, matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
+    const dpr = Math.min(devicePixelRatio || 1, this.lowDetail ? 1.25 : matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
     const w = Math.round(viewWidth * dpr);
     const h = Math.round(viewHeight * dpr);
     if (this.canvas.width !== w || this.canvas.height !== h) {
@@ -149,32 +161,59 @@ export class Renderer {
     const visible = (p: Point) => p.x > v.x - 155 && p.x < v.x + viewWidth + 155 && p.y > v.y - 155 && p.y < v.y + viewHeight + 155;
     const entities: { y: number; draw: () => void }[] = [];
     for (const item of [...this.decor, ...garden.blockers]) {
+      if (this.lowDetail && item.sprite === 'stones' && !('r' in item)) continue;
       if (visible(item)) entities.push({ y: item.y, draw: () => this.sprite('props', item.sprite, item) });
     }
-    const ward = { x: orchard.point[0], y: orchard.point[1] };
-    if (visible(ward)) {
-      const lit = run.wardComplete;
-      this.ring(ward, orchard.radius, lit ? '#f7c574ac' : '#79caba', lit ? '#edaf4032' : '#31b9a125', !lit);
-      if (run.wardCharge && !lit) {
+    for (const ward of run.wards) {
+      if (!visible(ward)) continue;
+      const disabled = run.wardComplete && !ward.lit;
+      const outline = ward.lit ? '#f7c574ac' : disabled ? '#717b78a0' : '#79caba';
+      this.ring(ward, ward.radius, outline, ward.lit ? '#edaf4032' : disabled ? '#14232130' : '#31b9a125', !ward.lit);
+      if (ward.charge && !ward.lit && !disabled) {
         ctx.beginPath();
-        ctx.arc(ward.x, ward.y, orchard.radius + 4, -Math.PI / 2, -Math.PI / 2 + (run.wardCharge / 6) * Math.PI * 2);
+        ctx.arc(ward.x, ward.y, ward.radius + 4, -Math.PI / 2, -Math.PI / 2 + ward.charge / run.settings.riteChargeSec * Math.PI * 2);
         ctx.strokeStyle = '#ffe29a';
         ctx.lineWidth = 4;
         ctx.stroke();
       }
-      entities.push({ y: ward.y, draw: () => this.sprite('actor', 'ward', ward, 1.18) });
+      entities.push({ y: ward.y, draw: () => {
+        ctx.globalAlpha = disabled ? .55 : 1;
+        this.sprite('actor', 'ward', ward, 1.18);
+        ctx.globalAlpha = 1;
+        ctx.textAlign = 'center';
+        ctx.font = '600 13px system-ui';
+        ctx.strokeStyle = '#121819';
+        ctx.lineWidth = 4;
+        ctx.strokeText(ward.name, ward.x, ward.y + 28);
+        ctx.fillStyle = '#e7e7cf';
+        ctx.fillText(ward.name, ward.x, ward.y + 28);
+      } });
     }
     for (const item of run.loot) if (visible(item)) this.sprite('props', item.kind, item, 1, false, this.motion ? Math.sin(run.elapsed * 5 + item.x) * 3 : 0);
     for (const patch of run.patches) this.ring(patch, patch.radius, '#87d999a0', '#4ed88134', true);
     for (const foe of run.foes) {
       const boss = foe.def.role === 'boss';
+      if (!boss && !visible(foe)) continue;
       if (foe.state === 'arrival') this.ring(foe, boss ? 88 : 35, '#f9c68e', '#f09b5440', true);
       if (foe.state === 'windup' || (boss && foe.state === 'attack')) {
         if (boss && foe.attack === 'cleave') this.hazard(foe, foe.angle, Math.PI * 100 / 360, 205, 0, foe.state === 'attack');
-        else if (boss && foe.state === 'windup') this.hazard(foe, foe.angle + Math.PI, Math.PI - Math.PI * 52 / 360, 340, 40);
+        else if (boss && foe.attack === 'lanes') {
+          ctx.save();
+          ctx.translate(foe.x, foe.y);
+          for (const center of bossLaneCenters(foe)) {
+            ctx.beginPath();
+            if (foe.angle) ctx.rect(center - laneHalfWidth, -height, laneHalfWidth * 2, height * 2);
+            else ctx.rect(-width, center - laneHalfWidth, width * 2, laneHalfWidth * 2);
+            this.strokeHazard(foe.state === 'attack');
+          }
+          ctx.restore();
+        } else if (boss && foe.state === 'windup') this.hazard(foe, foe.angle + Math.PI, Math.PI - tollGap, 340, 40);
         else if (boss) {
-          const radius = Math.max(40, 340 - (foe.until - run.tick) * 145 / 60);
-          this.hazard(foe, foe.angle + Math.PI, Math.PI - Math.PI * 52 / 360, radius, radius - 26, true);
+          for (const { radius } of tollRings(foe, run.tick)) {
+            this.hazard(foe, foe.angle + Math.PI, Math.PI - tollGap, radius, radius - 26, true);
+          }
+        } else if (visible(foe) && foe.def.behavior.ai === 'pulse') {
+          this.hazard(foe, 0, Math.PI, foe.echo ? foe.def.behavior.echoRadius! : foe.def.behavior.pulseRadius!);
         } else if (visible(foe)) {
           const dir = vector(foe.angle);
           ctx.save();
@@ -202,40 +241,54 @@ export class Renderer {
       } });
     }
     const p = run.player;
-    const light = ctx.createRadialGradient(p.x + 8, p.y - 8, 8, p.x + 8, p.y - 8, 114);
-    light.addColorStop(0, '#edbd7940');
-    light.addColorStop(.42, '#b6804330');
-    light.addColorStop(1, '#bc893d00');
-    ctx.fillStyle = light;
-    ctx.fillRect(p.x - 106, p.y - 122, 228, 228);
+    if (!this.lowDetail) ctx.drawImage(this.lantern, p.x - 106, p.y - 122);
     entities.push({ y: p.y, draw: () => {
       this.ring(p, 16, '#ffe6a5', '#f1aa5640');
+      if (run.guards) this.ring(p, 21, '#96d8fc', '#5fbded30');
       if (run.tick < run.dashUntil) this.ring(p, 28, '#8cf8e1', '#74f7d535');
       ctx.globalAlpha = run.tick < run.grace && this.motion && Math.floor(run.tick / 3) % 2 ? .54 : 1;
       this.sprite('actor', 'wick', p, 1.13, run.facing.x < -.1, 0);
+      if (this.dawnScarf) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        if (run.facing.x < -.1) ctx.scale(-1, 1);
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#ffcb70';
+        ctx.beginPath();
+        ctx.moveTo(-12, -27);
+        ctx.quadraticCurveTo(-4, -21, 7, -26);
+        ctx.lineTo(11, -21);
+        ctx.stroke();
+        ctx.restore();
+      }
       ctx.globalAlpha = 1;
     } });
     for (const entity of entities.sort((a, b) => a.y - b.y)) entity.draw();
+    for (const p of run.familiars) this.sprite('actor', 'foxfire', p, 1, false);
+    for (const shot of run.shots) if (visible(shot)) this.ring(shot, 5, '#ffab85', '#c64f35');
+    for (const meteor of run.meteors) if (visible(meteor)) this.ring(meteor, meteor.radius, '#ffe4a3', '#ffc96b30', true);
     for (const blade of run.orbit) {
       this.ring(blade, 8, '#c5aaff', '#b192f8d4');
       this.ring(blade, 12, '#bea2ff74');
     }
     for (const bolt of run.bolts) {
+      if (!visible(bolt)) continue;
       ctx.beginPath();
       ctx.moveTo(bolt.x - bolt.vx * .036, bolt.y - bolt.vy * .036);
       ctx.lineTo(bolt.x, bolt.y);
       ctx.lineWidth = bolt.comet ? 4 : 2;
-      ctx.strokeStyle = bolt.comet ? '#ffe3a3' : '#eebc71';
+      ctx.strokeStyle = bolt.comet ? '#ffe3a3' : bolt.source === 'foxfire' ? '#8fe7e2' : '#eebc71';
       ctx.stroke();
       this.ring(bolt, 3.25, '#ffdf9f', '#fff3ca');
     }
     this.effects = this.effects.filter(cue => cue.until > run.tick);
     for (const cue of cues) {
-      if (cue.point && ['kill', 'hurt', 'ward', 'dash', 'impact'].includes(cue.id)) {
+      if (cue.point && ['kill', 'hurt', 'ward', 'dash', 'impact', 'glass'].includes(cue.id)) {
         this.effects.push({ ...cue, until: run.tick + (cue.damage ? 31 : 25) });
       }
     }
-    this.effects = this.effects.slice(-30);
+    this.effects = this.effects.slice(this.lowDetail ? -15 : -30);
     for (const cue of this.effects) {
       const progress = 1 - (cue.until - run.tick) / (cue.damage ? 31 : 25);
       ctx.globalAlpha = 1 - progress;

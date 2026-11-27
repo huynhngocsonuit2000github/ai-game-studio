@@ -286,3 +286,15 @@ p, li { line-height: 1.48; }
   .clock { min-width: 73px; }
 }
 .pause-icon { display: inline-block; width: 12px; height: 15px; border-inline: 3px solid currentColor; }
+
+#guards { color: #bbdef5; }
+.reward-cards:has(.card:nth-child(4)) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+button[data-action^="scarf-"][aria-pressed="true"] { outline: 2px solid var(--gold); }
+.boss-meter .meter::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 33%;
+  border-left: 2px solid #121819;
+  z-index: 1;
+}

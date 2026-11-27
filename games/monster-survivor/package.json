@@ -7,6 +7,6 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/sim.test.ts"
+    "test": "node --test tests/*.test.ts"
   }
 }
