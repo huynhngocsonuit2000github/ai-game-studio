@@ -327,7 +327,7 @@ test('matches a dense Prism encounter across normal and Low Detail and measures 
     await page.close();
   }
   expect(report[0].snapshot).toEqual(report[1].snapshot);
-  expect(report[0].canvas).toEqual([1920, 1080]);
+  expect(report[0].canvas).toEqual([1440, 810]);
   expect(report[1].canvas).toEqual([1200, 675]);
   writeFileSync(info.outputPath('matched-prism-frame-timing.json'), JSON.stringify(report, null, 2) + '\n');
 });

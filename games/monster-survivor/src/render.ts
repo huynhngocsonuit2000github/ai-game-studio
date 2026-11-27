@@ -294,7 +294,8 @@ export class Renderer {
     const ctx = this.ctx;
     const campaign = run instanceof CampaignRun ? run : undefined;
     const v = camera(run.player, run.arena);
-    const dpr = Math.min(devicePixelRatio || 1, this.lowDetail ? 1.25 : matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
+    const detailLimit = this.lowDetail ? 1.25 : campaign || matchMedia('(pointer:coarse)').matches ? 1.5 : 2;
+    const dpr = Math.min(devicePixelRatio || 1, detailLimit);
     const w = Math.round(viewWidth * dpr);
     const h = Math.round(viewHeight * dpr);
     if (this.canvas.width !== w || this.canvas.height !== h) {
