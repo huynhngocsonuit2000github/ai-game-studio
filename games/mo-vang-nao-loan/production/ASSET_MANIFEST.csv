@@ -5,7 +5,9 @@ rock,sprite,Heavy stone,S01,MVNL-001 original,Producer-cleared preview,pack payl
 hook,sprite,Winch hook,S01,MVNL-001 original,Producer-cleared preview,pack payload/art/hook.png,public/art/hook.png,RGBA PNG,128x128,aim and cast,verified,SHA-256 and browser
 cavern,background,Bãi Vàng Đầu Ca cutaway,S02,Original Canvas drawing,Original Studio contribution,src/art.ts,art.js,Canvas 2D,840x570,,verified,browser screenshot
 crew,animation,Miner and hand winch,S02,Original Canvas drawing,Original Studio contribution,src/art.ts,art.js,Canvas 2D,840x570,load lean and spool turn,verified,browser screenshot
-supplies,icons,Potion scissors magnet,S02,Original polygon drawings,Original Studio contribution,assets/source/shop-art.py,public/art/{potion scissors magnet}.png,RGBA PNG,64x64,,verified,browser shop screenshot
+potion,icon,Potion,S02,Original polygon drawing,Original Studio contribution,assets/source/shop-art.py,public/art/potion.png,RGBA PNG,64x64,,verified,browser shop screenshot
+scissors,icon,Scissors,S02,Original polygon drawing,Original Studio contribution,assets/source/shop-art.py,public/art/scissors.png,RGBA PNG,64x64,,verified,browser shop screenshot
+magnet,icon,Magnet,S02,Original polygon drawing,Original Studio contribution,assets/source/shop-art.py,public/art/magnet.png,RGBA PNG,64x64,,verified,browser shop screenshot
 cues,audio,Winch and shop feedback,S02,Original oscillator score,Original Studio contribution,src/sound.ts,sound.js,Web Audio,0 media bytes,short cues,verified,browser unlock and mute controls
 cover,cover,Mine 1 catalog cover,S02,Rendered original cavern and pack sprites,Producer-cleared preview,src/art.ts,public/cover.webp,WebP,560x380,,verified,catalog preflight
 rat,animation,Rat theft for Mine 5,S05,Planned,Pending,,,Canvas 2D,,dust and drag,missing,Awaiting G2
