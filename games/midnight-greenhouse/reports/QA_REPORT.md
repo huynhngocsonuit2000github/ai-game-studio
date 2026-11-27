@@ -21,3 +21,45 @@ State at handoff: this is a production pack. Static verification passed for 35 l
 | Q15 | Benchmark budget at heavy L3, cold title and repeated restart on stated environment. Verify no memory/resource growth, downgrade effects at reduced motion and retain timing signals. | NOT_RUN |
 | Q16 | Production-assembled candidate tested using trusted preflight with temporary catalog, proper subpath, no leaked private catalog entry, source files, debug controls or concept media in runtime. Preserve canonical catalog. | NOT_RUN |
 | Q17 | Once authorized, verify actual live published SHA, catalog and direct route, enter/play/return from public URL, and exhibit rollback target and prior routes. Record Producer G4 and live identifiers. | BLOCKED |
+
+## Sân Mưa candidate
+
+- Runtime candidate [`5b34762f240f93e8b1b4892fd116430d9e7e3dea`](https://github.com/huynhngocsonuit2000github/ai-game-studio/commit/5b34762f240f93e8b1b4892fd116430d9e7e3dea). Draft [PR #35](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35). The runtime build contains 32 files, totaling 1,344,085 bytes before HTTP compression. The standalone playtest ZIP came to 1,251,672 bytes in local packaging.
+- Node 24.22.3, pnpm 11.25.0, Playwright 1.65.1 and Debian Chromium 156.0.8078.79. Desktop 1280×720, Chromium touch emulation 844×390 and portrait rotation 390×844. Production files served over HTTP in the real project subpath. The six authored waves have no random seed. Browser play used actual card, tile and valve inputs and the ordinary 30 Hz simulation at normal speed.
+- Visual evidence from the runtime layout at `b03624ebfdaa2ac1f955ae695ca2f5978777d236`. The runtime candidate also shortened the preparation forecast label and repaired delayed combat audio. [Desktop wave 3](screenshots/s03-raincourt-desktop.webp) · [Touch wave 3](screenshots/s03-raincourt-touch.webp) · [Defeat](screenshots/s03-raincourt-defeat.webp).
+
+| Check | Result | Observed evidence |
+| --- | --- | --- |
+| Q01 | PASS | Frozen install, locked TypeScript build, direct and temporary catalog entry, play via the assembled project subpath, relative library return and zero browser errors in the targeted suite. |
+| Q02 | PASS | Unit checks for occupied, invalid, enemy-covered, unaffordable and locked placements. Touch planted and removed an outer tile, with stock 150 → 105 → 116. |
+| Q03 | PASS | Unit checks confirmed baseline interval and +18 wet / +10 dry collector payouts. Browser pause held the same countdown. |
+| Q04 S03 | PASS | A reroute during cooldown left only one lane wet. Unit checks covered dry damage, wet geometry, four-target ceiling and skipping shock-immune raincoats. Pump closures are Q10. |
+| Q05 | PASS | Roots, reduced frontal damage against Chậu Giáp, fern impact timing, single kill reward, impact-before-breach and immediate lethal loss passed simulation checks. Both browser routes cleared all six waves with no breach. |
+| Q06 | PASS | Desktop keyboard selection, arrow traversal and Enter placement. Compact touch placement, removal, both outer valves and ≥44 px valve controls. The forecast clears the board. Portrait rotate hint, focus and reduced-motion settings checked. Physical devices and assistive technology are pending. |
+| Q07 | PASS | No-defense route lost after the third breach, then retry restored 150 Ánh Hạt, three core HP, a dry board and preparation. Explicit pause tested. Visibility change also exercised by synthetic browser event. Real tab switching awaits device playtest. |
+| Q08 | PASS | Reviewed the supplied sprites in motion at desktop and compact sizes. Iterated on forecast placement to clear the top aisle and preserve the bottom valve. Captures show active wave, health/stock/wet status, physical projectiles and a lane entrance warning. |
+| Q09 technical | PASS | A strict-autoplay check found that the initial HTMLAudio implementation could suppress delayed clips. Replaced it with gesture-unlocked Web Audio. Rain, watch music and an Orchid shock advanced on the running audio clock. Pause suspended the context and the mute toggle zeroed master gain. Per-cue cooldown and an eight-voice bound are implemented. Human listening and loop continuity are NOT_RUN. |
+| Q12–Q13 S03 slice | PASS | Reload returned to campaign and retained the winning record. Audio and motion toggles persisted. Later stage unlocks and full save hardening are S04. |
+| Q14 S03 | PASS | Collector-first desktop and two-Fern-first touch routes cleared at normal speed. No-defense route was a reproducible loss. See timings below. First-run campaign duration and unaided play are pending. |
+| Q16 S03 | PASS | Used the trusted workflow's temporary catalog and the assembled Pages artifact. Canonical release manifest excluded this game. The playable ZIP excludes source sheets, concept art and designed S04 content. |
+| Q10–Q11, Q12–Q16 campaign | NOT_RUN | Blocked by the S04–S05 dependency on Producer G2; both later arenas are designed and scoped. |
+| Q17 | BLOCKED | Pages publication and G4 are separate Producer decisions. |
+
+### Normal-speed routes
+
+Actions and timings are in [playtest.mjs](../tests/playtest.mjs). Combat times exclude the 20-second preparation and use the simulation clock on the result screen.
+
+| Route | Opening | Outcome |
+| --- | --- | --- |
+| Collector first | Put Bình Hứng and Dương Xỉ in luống 2, water that lane, defend luống 3 and add Lan Sét to luống 2 once funded. | 7:09.867 combat, 3/3 Hạt Tim, two stars, best chain two. |
+| Two Ferns first | Start Dương Xỉ in luống 2 and 3, build collectors in luống 4, then add Gai Cuộn and route water to Lan Sét in luống 2 when targets bunch. | 7:13.400 combat, 3/3 Hạt Tim, three stars, best chain three. |
+| No defense | Let enemies through with no plants and retry from the result dialog. | Defeat after three breaches. Retry starts a fresh attempt. |
+
+The shipped Sân Mưa waves and plant values match the approved tuning. The runs confirm two materially different openings and an observable trade between wet income and an Orchid combo. Once both collectors and several Ferns are established, players can retain a large stock reserve in the final waves. Producer feedback should assess whether those waves need more decisions before scaling.
+
+### Reproduce
+
+- From the repository root, run `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `python3 -B -m unittest discover -s scripts/tests -p 'test_game_pack.py'`.
+- Build and run the focused unit suite with `pnpm --filter @studio/midnight-greenhouse typecheck` and `pnpm --filter @studio/midnight-greenhouse test`.
+- Run `STUDIO_PAGES_BASE_SHA=$(git rev-parse origin/main) node scripts/catalog-preflight.mjs` from the committed candidate. Set `STUDIO_CHROMIUM_PATH` only when using a system Chromium.
+- For the long game-local run, serve the built game on the project subpath, set `GREENHOUSE_PLAYTEST_URL` to its entry and run `node games/midnight-greenhouse/tests/playtest.mjs`. This runner sends regular browser inputs and takes about eight minutes. See the [standalone launch and Producer checklist](../README.md#s03-playtest).

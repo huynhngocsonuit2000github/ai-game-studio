@@ -12,7 +12,7 @@
       "acceptance": "pending",
       "evidence": ["tests/simulation.test.mjs", "tests/pages.spec.ts", "reports/QA_REPORT.md"],
       "acceptanceEvidence": [],
-      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+      "artifactCheck": { "target": "private-fixture", "result": "PASS", "evidence": ["reports/QA_REPORT.md", "tests/pages.spec.ts"] }
     },
     {
       "id": "pump-gallery",
