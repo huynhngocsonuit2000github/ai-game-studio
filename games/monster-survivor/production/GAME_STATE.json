@@ -336,7 +336,7 @@
   "knownGaps": [
     "G4 Normal Producer playtest and explicit release approval are pending.",
     "Firefox and WebKit installation was blocked. Physical Android and iOS and representative desktop hardware remain unchecked.",
-    "Normal is a candidate. S03 is the observed published preview. Studio approval is required for Released catalog metadata.",
+    "The existing In Development preview ran the pinned Normal build per deployment HTTP and revision checks. Producer acceptance and any Released catalog change are separate decisions.",
     "The Campaign candidate awaits Producer playtest, manual merge, and Pages deployment verification.",
     "Scripted Campaign clears were below the target playtest duration band. Representative player pacing and physical-device performance remain unmeasured."
   ],
@@ -365,26 +365,26 @@
     ]
   },
   "deployment": {
-    "deployedCommit": "ff54db362cc29e6e7f3796eaae04d695dbdd639c",
+    "deployedCommit": "85955db765164f52ea2cea2c4c0878321e81fc4c",
     "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/monster-survivor/",
-    "observedAt": "2026-11-27T05:15:04.057Z",
+    "observedAt": "2026-11-27T05:57:13.866Z",
     "checks": {
       "revision": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
         ]
       },
       "http": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
         ]
       },
       "gameplay": {
         "result": "NOT_RUN",
         "evidence": [
-          "production/DECISIONS.md"
+          "reports/CAMPAIGN_QA.md"
         ]
       }
     }
