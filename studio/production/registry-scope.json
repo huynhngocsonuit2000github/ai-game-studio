@@ -25,6 +25,24 @@
       "games/forest-adventure/vite.config.ts",
       "pnpm-lock.yaml",
       "registry/games.json"
+    ],
+    "e36cbee194d7fdf97c94e32ca12dc3d3471a5827": [
+      ".github/workflows/pages.yml",
+      "AGENTS.md",
+      "README.md",
+      "deployment/README.md",
+      "games/forest-adventure/production/GAME_STATE.json",
+      "scripts/game-state.mjs",
+      "scripts/tests/game-state.test.mjs",
+      "scripts/tests/test_game_pack.py",
+      "studio/production/PROGRESS.md",
+      "studio/standards/CONTEXT_V5_2.md",
+      "studio/standards/PRODUCTION_CONTRACT.md",
+      "studio/standards/WORKFLOW_V5_1.md",
+      "studio/templates/FEATURE.md",
+      "studio/templates/IMPORT_CHECKLIST.md",
+      "studio/templates/game/production/GAME_STATE.example.json",
+      "studio/templates/game/production/PROGRESS.md"
     ]
   }
 }
