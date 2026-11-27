@@ -18,6 +18,11 @@ Local verification also passed frozen installation, ESLint, Studio and Forest Ad
 
 Resume from `studio/context-aware-production-v5-2` and its draft PR. Recover its exact candidate SHA and paths from the PR, reconcile with current main, and use the existing trusted scope process before review. Verify hosted checks when accessible. After any authorized manual merge, record the workflow's observed revision and run the public checklist against that SHA.
 
+### Trusted scope follow-up
+
+- Reconciled PR #20 with main at `e84935e4053fcc35ea7a8258559ce55a5e87f9bd` after PR #21 merged. The seeded state now records all 13 trails in the canonical preview, the expansion v1 save and migration, and pending Producer acceptance for the ten additions. The checks above describe the original three-trail baseline; the reconciled state cites the [expansion checkpoint](../../games/forest-adventure/features/exp-10-trails/CHECKPOINT.md).
+- The Producer authorized the combined infrastructure and state diff. The existing scope workflow requires a policy-only companion PR containing an exact-head and exact-path grant. After the companion lands on main, use an edited event on PR #20 to trigger scope with the new trusted base while retaining its approved head. Check both SHAs in the job logs before merge.
+
 ## Studio V5.1 — Workflow upgrade
 
 - Base: `ea96679a42732a3a260fa4d77b35c6a2ac8bd115`. Workflow-only scope covers exact-ID handoffs, pack validation, feature and import templates, autonomous delivery, and trusted scope regression. The game trees, canonical registry and published Pages route remain as recorded at the base. Forest Adventure is a public In Development preview.
