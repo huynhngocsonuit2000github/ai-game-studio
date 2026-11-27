@@ -344,7 +344,7 @@ function updateHud(game: Garden) {
   renderText(byId('core').querySelector('strong')!, game.core + '/' + content.level.coreHealth);
   renderText(byId('time'), preparing ? 'Chuẩn bị · ' + seconds(game.prep - game.now) + ' giây'
     : 'Ca trực · ' + clock(Math.floor((game.now - game.prep) / HZ)));
-  renderText(byId('wave'), preparing ? 'Chuẩn bị đội hình' : 'Đợt ' + game.wave + '/' + content.level.waves.length);
+  renderText(byId('wave'), game.wave === 0 ? 'Đợt đầu' : 'Đợt ' + game.wave + '/' + content.level.waves.length);
   const next = game.nextThreat;
   const warning = Boolean(next && next.at - game.now <= 6 * HZ);
   byId('threat').dataset.warning = String(warning);
