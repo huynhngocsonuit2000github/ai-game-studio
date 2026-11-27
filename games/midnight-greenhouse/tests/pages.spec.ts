@@ -48,7 +48,7 @@ test('temporary catalog launch, keyboard placement, water, explicit pause and po
   const before = await page.locator('#time').innerText();
   await page.waitForTimeout(1150);
   await expect(page.locator('#time')).toHaveText(before);
-  await page.getByRole('button', { name: 'Tiếp tục', exact: true }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Tiếp tục', exact: true }).click();
   await expect(page.locator('#time')).not.toHaveText(before);
   await page.getByRole('link', { name: 'Thư viện game (Game Library)', exact: true }).click();
   await page.getByRole('link', { name: 'Về thư viện game', exact: true }).click();
@@ -63,6 +63,17 @@ test('direct route has tappable outer lanes, rotate hint and persistent audio se
   try {
     await page.goto(game);
     await start(page);
+    const forecast = await page.locator('#threat').boundingBox();
+    const board = await page.locator('#board').boundingBox();
+    expect(forecast).not.toBeNull();
+    expect(board).not.toBeNull();
+    expect(forecast!.y + forecast!.height).toBeLessThan(board!.y);
+    expect(board!.y + board!.height).toBeLessThan(391);
+    for (const lane of [1, 4]) {
+      const valve = await page.getByRole('button', { name: new RegExp('Tưới luống ' + lane) }).boundingBox();
+      expect(valve!.width).toBeGreaterThanOrEqual(44);
+      expect(valve!.height).toBeGreaterThanOrEqual(44);
+    }
     await page.getByRole('button', { name: /Tưới luống 4/ }).tap();
     await expect(page.locator('.valve[aria-pressed=true]')).toHaveCount(1);
     await page.getByRole('button', { name: /Bình Hứng Mưa/ }).tap();
