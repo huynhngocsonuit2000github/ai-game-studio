@@ -271,9 +271,9 @@ async function start() {
       <div id="core" class="badge">Hạt Tim <strong></strong></div><div id="time" class="badge"></div><button id="help" class="plain">Cách chơi</button></div></header>
       <p class="rotate">Xoay ngang màn hình để có ô trồng và chữ lớn hơn.</p>
       <div class="playfield"><div class="board-column">
-        <div id="board" class="board">${boardMarkup()}<div id="threat" class="threat">
+        <div id="board" class="board">${boardMarkup()}</div><div id="threat" class="threat">
           <div><strong id="wave"></strong><span id="next-threat"></span></div><progress id="wave-progress" aria-label="Tiến độ đợt"></progress>
-        </div></div>
+        </div>
         <p id="readout" class="readout" role="status"></p>
       </div><aside class="deck" aria-label="Hạt giống và công cụ">
       ${content.cards.map((card, index) => `<button class="seed-card" data-card="${card.id}" aria-pressed="false" aria-describedby="card-help">

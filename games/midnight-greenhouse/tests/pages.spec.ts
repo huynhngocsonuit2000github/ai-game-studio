@@ -1,3 +1,7 @@
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
+import process from "node:process";
+import { fileURLToPath, URL } from "node:url";
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
@@ -80,4 +84,17 @@ test('direct route has tappable outer lanes, rotate hint and persistent audio se
     await expect(page.getByLabel('Giảm chuyển động')).toBeChecked();
     expect(errors).toEqual([]);
   } finally { await context.close(); }
+});
+
+// The temporary catalog worktree is removed by Studio after this suite.
+// Preserve the standalone playtest build in the workflow's browser-evidence paths.
+test.afterAll(async () => {
+  const { GITHUB_ACTIONS, GITHUB_WORKSPACE, GITHUB_EVENT_PATH } = process.env;
+  if (GITHUB_ACTIONS !== 'true' || !GITHUB_WORKSPACE || !GITHUB_EVENT_PATH) return;
+  const gameDirectory = fileURLToPath(new URL('../', import.meta.url));
+  const gameBuild = resolve(gameDirectory, '../../deployment/dist/games/midnight-greenhouse');
+  const artifact = resolve(GITHUB_WORKSPACE,
+    'games/midnight-greenhouse/test-results/pages-browser/midnight-greenhouse-s03.zip');
+  execFileSync(process.execPath, [resolve(gameDirectory, 'tests/playtest-artifact.mjs'),
+    gameBuild, artifact, GITHUB_EVENT_PATH], { cwd: gameDirectory, stdio: 'inherit' });
 });

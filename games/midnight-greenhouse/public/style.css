@@ -62,7 +62,7 @@ h1, h2 { font-family: var(--serif); }
 .badge strong { font-size: 1.16rem; color: var(--gold); font-variant-numeric: tabular-nums; }
 #core strong { color: #ffd1ac; }
 .playfield { display: grid; grid-template-columns: minmax(0, 1fr) clamp(190px, 20vw, 248px); gap: 12px; align-items: start; }
-.board-column { min-width: 0; }
+.board-column { min-width: 0; position: relative; }
 .board { width: 100%; aspect-ratio: 1.8; position: relative; overflow: hidden; border: 1px solid #857654; border-radius: 13px; background: #102129; touch-action: manipulation; box-shadow: inset 0 0 28px #000, 0 14px 34px #060d1266; }
 .board-layer { position: absolute; bottom: 0; width: 100%; aspect-ratio: 1.5; }
 canvas { width: 100%; height: 100%; display: block; }
@@ -124,6 +124,11 @@ dialog input { accent-color: #edc686; }
   .badge + #help { font-size: .8rem; padding: 0 6px; }
   .shortcut { display: none; }
   .toolbelt button { font-size: .77rem; white-space: nowrap; }
+}
+@media (min-width: 800px) and (max-width: 950px) and (orientation: landscape) {
+  .board { aspect-ratio: 2.34; max-height: calc(100dvh - 108px); }
+  .board-layer { bottom: -9.9%; }
+  .threat { top: -36px; left: 119px; right: auto; width: min(37vw, 324px); }
 }
 @media (orientation: portrait) {
   .rotate { display: block; }
