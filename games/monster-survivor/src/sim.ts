@@ -7,6 +7,7 @@ const tau = 2 * Math.PI;
 const unlearned: Readonly<Record<string, number>> = Object.freeze({});
 export type Point = { x: number; y: number };
 export type Input = Point & { dash: boolean; burst?: boolean; interact?: boolean };
+export type HitKind = 'hero' | 'direct' | 'splash' | 'burst' | 'pet' | 'engraving';
 export type Cue = { id: string; point?: Point; damage?: number };
 export type SpellEffect = {
   spell: string; kind: 'hit' | 'cast' | 'ring' | 'spread'; at: Point; tick: number;
@@ -19,6 +20,7 @@ type Foe = Point & {
   state: 'idle' | 'windup' | 'attack' | 'recover' | 'arrival';
   until: number; attack: 'cleave' | 'toll' | 'lanes'; angle: number; casts: number; hit: boolean;
   phase: number; spark: number; poison: number; poisonDamage: number; poisonNext: number;
+  hidden?: boolean; lastHit?: HitKind;
   bladeHits: number[]; chill: number; slow: number; echo: boolean; attackTick: number; laneOrigin: number; hitRings: number;
 };
 type Bolt = Point & { vx: number; vy: number; left: number; damage: number; pierce: number; hits: number[]; source: 'wick-dart' | 'foxfire'; comet: boolean };
@@ -162,6 +164,8 @@ export class Run {
   }
 
   protected movementScale() { return 1; }
+  protected absorb(amount: number) { return amount; }
+  protected dartSplash(radius: number, damage: number) { return { radius, damage }; }
   protected action(_input: Input) { void _input; }
   protected foeAction(_foe: Foe) { void _foe; return false; }
   protected death(_foe: Foe) { void _foe; return false; }
@@ -299,6 +303,11 @@ export class Run {
       if (mirror.burstDamage) this.pulse(this.player, mirror.radius, mirror.burstDamage, 'mirror-ward');
       this.emit('shield', this.player);
       this.effect('mirror-ward', 'ring', this.player, { radius: mirror.burstDamage ? this.area(mirror.radius) : 31 });
+      return;
+    }
+    amount = this.absorb(amount);
+    if (amount <= 0) {
+      this.grace = this.tick + ticks(rules.player.blockGraceSec);
       return;
     }
     this.player.hp = Math.max(0, this.player.hp - amount);
@@ -534,7 +543,7 @@ export class Run {
     let best: Foe | undefined;
     for (const foe of this.neighbors(this.player, range)) {
       const gap = distance(foe, this.player);
-      if (foe.hp <= 0 || foe.state === 'arrival' || gap > range || (gap === range && best && best.id < foe.id)) continue;
+      if (foe.hp <= 0 || foe.hidden || foe.state === 'arrival' || gap > range || (gap === range && best && best.id < foe.id)) continue;
       if (solidHit(this.player, foe, 0, this.arena) !== Infinity) continue;
       best = foe;
       range = gap;
@@ -542,18 +551,23 @@ export class Run {
     return best;
   }
 
-  protected hit(foe: Foe, amount: number, source: string, at: Point = foe, angle?: number) {
-    if (foe.hp <= 0 || foe.state === 'arrival') return;
+  protected hit(foe: Foe, amount: number, source: string, at: Point = foe, angle?: number, kind: HitKind = 'hero') {
+    if (foe.hp <= 0 || foe.hidden || foe.state === 'arrival' || amount <= 0) return 0;
     const armor = this.normal && foe.def.role === 'boss' && foe.state !== 'recover'
       ? this.campaign ? .28 : rules.normal.wardenArmorMultiplier : 1;
-    const damage = Math.max(1, Math.round(amount * armor * (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus)));
-    this.damage.set(source, (this.damage.get(source) ?? 0) + Math.min(foe.hp, damage));
+    const hero = kind !== 'pet' && kind !== 'engraving';
+    const bonus = hero ? (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus) : 1;
+    const damage = Math.max(1, Math.round(amount * armor * bonus));
+    const confirmed = Math.min(foe.hp, damage);
+    this.damage.set(source, (this.damage.get(source) ?? 0) + confirmed);
+    foe.lastHit = kind;
     foe.hp -= damage;
     this.emit('impact', foe, damage);
     if (this.campaign) {
       const spell = [...this.build.keys()].find(id => skills.get(id)?.recipe?.active === source) ?? source;
       this.effect(spell, 'hit', at, { angle });
     }
+    return damage;
   }
 
   private cast() {
@@ -593,7 +607,7 @@ export class Run {
       const p = { x: this.player.x + dir.x * ring.radius * area, y: this.player.y + dir.y * ring.radius * area };
       this.orbit.push(p);
       for (const foe of this.neighbors(p, 65)) {
-        if (foe.state === 'arrival' || foe.hp <= 0 || distance(p, foe) > foe.def.radius + 12 ||
+        if (foe.hidden || foe.state === 'arrival' || foe.hp <= 0 || distance(p, foe) > foe.def.radius + 12 ||
             this.tick < (foe.bladeHits[i] ?? 0)) continue;
         foe.bladeHits[i] = this.tick + ticks(ring.rehitSec);
         this.hit(foe, ring.damage + (foe.spark > this.tick ? 9 : 0), 'prism-ring');
@@ -650,7 +664,7 @@ export class Run {
   private pulse(center: Point, radius: number, damage: number, source: string, bonus?: 'spark' | 'poison', push = 0) {
     radius = this.area(radius);
     for (const foe of this.neighbors(center, radius)) {
-      if (foe.state === 'arrival' || foe.hp <= 0 || distance(center, foe) > radius) continue;
+      if (foe.hidden || foe.state === 'arrival' || foe.hp <= 0 || distance(center, foe) > radius) continue;
       const extra = bonus === 'spark' && foe.spark > this.tick ? 9 : 0;
       const scale = bonus === 'poison' && foe.poison > this.tick ? 1.35 : 1;
       this.hit(foe, damage * scale + extra, source);
@@ -736,22 +750,23 @@ export class Run {
       const wall = solidHit(bolt, end, 3, this.arena);
       const hits: { foe: Foe; time: number }[] = [];
       for (const foe of this.neighbors(bolt, 70)) {
-        if (foe.state === 'arrival' || foe.hp <= 0 || bolt.hits.includes(foe.id)) continue;
+        if (foe.hidden || foe.state === 'arrival' || foe.hp <= 0 || bolt.hits.includes(foe.id)) continue;
         const time = distance(bolt, foe) <= foe.def.radius + 4 ? 0 : segmentHit(bolt, end, foe, foe.def.radius + 4);
         if (time < wall && time <= 1) hits.push({ foe, time });
       }
       for (const { foe, time } of hits.sort((a, b) => a.time - b.time || a.foe.id - b.foe.id)) {
         const at = this.campaign ? { x: bolt.x + (end.x - bolt.x) * time, y: bolt.y + (end.y - bolt.y) * time } : foe;
-        this.hit(foe, bolt.damage, bolt.source, at, this.campaign ? Math.atan2(bolt.vy, bolt.vx) : undefined);
+        this.hit(foe, bolt.damage, bolt.source, at, this.campaign ? Math.atan2(bolt.vy, bolt.vx) : undefined, 'direct');
         if (bolt.source === 'wick-dart') foe.spark = this.tick + ticks(3);
         bolt.hits.push(foe.id);
         const dart = this.rank('wick-dart');
         if (this.campaign && bolt.source === 'wick-dart' && !bolt.comet && dart.splashFraction) {
-          const radius = this.area(dart.splashRadius + this.splashAdd);
+          const splash = this.dartSplash(dart.splashRadius + this.splashAdd, bolt.damage * dart.splashFraction);
+          const radius = this.area(splash.radius);
           this.effect('wick-dart', 'ring', at, { radius });
           this.emit('splash', at);
           for (const other of this.neighbors(at, radius)) {
-            if (other !== foe && distance(other, at) <= radius) this.hit(other, bolt.damage * dart.splashFraction, 'wick-dart');
+            if (other !== foe && distance(other, at) <= radius) this.hit(other, splash.damage, 'wick-dart', other, undefined, 'splash');
           }
         }
         if (bolt.pierce-- > 0) continue;
@@ -761,7 +776,7 @@ export class Run {
           const radius = this.area(rank.splashRadius);
           this.effect('comet-thread', 'ring', at, { radius });
           for (const other of this.neighbors(at, radius)) {
-            if (other !== foe && distance(other, at) <= radius) this.hit(other, rank.splashDamage, 'wick-dart');
+            if (other !== foe && distance(other, at) <= radius) this.hit(other, rank.splashDamage, 'wick-dart', other, undefined, 'splash');
           }
         }
         break;

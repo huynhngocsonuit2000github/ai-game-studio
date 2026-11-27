@@ -1,0 +1,49 @@
+{
+  "elite": {
+    "result": "victory",
+    "seconds": 139.18333333333334,
+    "hp": 118,
+    "kills": 500,
+    "peak": 30,
+    "phases": [],
+    "enemyIds": [
+      "seedling",
+      "moth",
+      "scarab",
+      "bulwark-beetle",
+      "moth-shaman",
+      "thornback"
+    ],
+    "encounters": [
+      "west",
+      "north",
+      "checkpoint",
+      "thornback"
+    ],
+    "seed": 1807
+  },
+  "nightmare": {
+    "result": "victory",
+    "seconds": 160.73333333333332,
+    "hp": 124,
+    "kills": 523,
+    "peak": 29,
+    "phases": [],
+    "enemyIds": [
+      "seedling",
+      "moth",
+      "scarab",
+      "bulwark-beetle",
+      "moth-shaman",
+      "ash-burrower",
+      "thornback"
+    ],
+    "encounters": [
+      "west",
+      "north",
+      "checkpoint",
+      "thornback"
+    ],
+    "seed": 1807
+  }
+}

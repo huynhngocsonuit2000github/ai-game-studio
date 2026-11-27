@@ -11,6 +11,7 @@ export type Encounter = {
   nestHp?: number;
   defenseHp?: number;
   recoveryAfter?: number;
+  waymark?: boolean;
 };
 export type Sweep = { id: string; label: string; encounters: Encounter[]; chooseCrossing?: true };
 type Pacing = { safetyTimeout: number; ambientCap: number; ambientSec: number; sweeps: Sweep[] };

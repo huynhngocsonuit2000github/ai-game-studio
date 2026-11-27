@@ -1,5 +1,6 @@
 import gear from '../production/features/ms-campaign-v1/gear.json' with { type: 'json' };
 import data from '../production/features/ms-campaign-v1/stages.json' with { type: 'json' };
+import { kinLayouts, kinStages } from './kin-maps.ts';
 import { pacing } from './campaign-encounters.ts';
 import type { Sweep } from './campaign-encounters.ts';
 import type { Point } from './sim.ts';
@@ -43,13 +44,15 @@ export const stages: Stage[] = data.stages.map(({ objectives, ...stage }) => {
       stage.order === 1 && chest.id === 'orchard-fork' ? { ...chest, at: [850, 553], after: 'patrols' } : chest),
   };
 });
+export const campaignStages = [...stages, ...kinStages];
 export { gear };
 export const point = ([x, y]: number[]): Point => ({ x, y });
 export const campaignHash = (id: string) => Array.from(id).reduce((hash, c) => Math.imul(hash ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0;
 
 type Prop = [number, number, number, string];
-type Layout = { tint: string; path: string; routes: number[][][]; props: Prop[]; decor: string[] };
+export type Layout = { tint: string; path: string; routes: number[][][]; props: Prop[]; decor: string[] };
 export const layouts: Record<string, Layout> = {
+  ...kinLayouts,
   'bell-orchard': {
     tint: '#69834a38', path: '#caca9474',
     routes: [[[200,570],[430,615],[520,690],[780,635],[1130,730],[1390,560],[1570,560]], [[430,615],[550,390],[790,270],[870,470],[1150,455],[1390,560]]],

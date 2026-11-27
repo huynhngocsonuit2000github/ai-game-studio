@@ -1,0 +1,86 @@
+[
+  {
+    "result": "victory",
+    "seconds": 171.88333333333333,
+    "hp": 112,
+    "kills": 497,
+    "peak": 31,
+    "phases": [
+      1
+    ],
+    "enemyIds": [
+      "seedling",
+      "moth",
+      "scarab",
+      "ash-burrower",
+      "bulwark-beetle",
+      "moth-shaman",
+      "fog-keeper"
+    ],
+    "encounters": [
+      "willow",
+      "ford-light",
+      "ridge-light",
+      "keeper-court"
+    ],
+    "seed": 1807
+  },
+  {
+    "result": "victory",
+    "seconds": 170.43333333333334,
+    "hp": 93,
+    "kills": 499,
+    "peak": 31,
+    "phases": [
+      1
+    ],
+    "enemyIds": [
+      "seedling",
+      "moth",
+      "scarab",
+      "bulwark-beetle",
+      "bells",
+      "thornback",
+      "ash-burrower",
+      "moth-shaman",
+      "bottle",
+      "discord",
+      "furnace-overseer"
+    ],
+    "encounters": [
+      "north-foundry",
+      "south-foundry",
+      "furnace-court"
+    ],
+    "seed": 2521
+  },
+  {
+    "result": "victory",
+    "seconds": 214.15,
+    "hp": 93,
+    "kills": 514,
+    "peak": 38,
+    "phases": [
+      1,
+      2,
+      3
+    ],
+    "enemyIds": [
+      "seedling",
+      "moth",
+      "scarab",
+      "moth-shaman",
+      "bells",
+      "bulwark-beetle",
+      "bottle",
+      "ash-burrower",
+      "eclipse-warden"
+    ],
+    "encounters": [
+      "north-pillar",
+      "south-pillar",
+      "warden-court"
+    ],
+    "seed": 1807
+  }
+]

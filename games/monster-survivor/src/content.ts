@@ -1,3 +1,4 @@
+import { kinEnemies } from './kin-enemies.ts';
 import rules from '../design/data/rules.json' with { type: 'json' };
 import garden from '../design/data/garden.json' with { type: 'json' };
 import waves from '../design/data/waves.json' with { type: 'json' };
@@ -10,7 +11,9 @@ import icons from '../assets/runtime/atlases/skills.json' with { type: 'json' };
 export { rules, waves, garden, actors, world, icons };
 export type EnemyDef = typeof enemyData.enemies[number];
 export type Skill = Omit<typeof skillData.skills[number], 'ranks'> & { ranks: Record<string, number>[] };
-export const enemies = new Map(enemyData.enemies.map(def => [def.id, def]));
+const baseEnemies = new Map(enemyData.enemies.map(def => [def.id, def]));
+const expansionEnemies = kinEnemies(baseEnemies);
+export const enemies = new Map([...baseEnemies, ...expansionEnemies.map(def => [def.id, def] as const)]);
 export const skills = new Map<string, Skill>(
   skillData.skills.map(def => [def.id, { ...def, ranks: def.ranks.map(rank => (
     Object.fromEntries(Object.entries(rank).filter((entry): entry is [string, number] => typeof entry[1] === 'number'))
@@ -24,7 +27,7 @@ export function validateContent() {
   function requireValue(condition: unknown, label: string) {
     if (!condition) throw new Error(`Invalid garden data: ${label}`);
   }
-  requireValue(enemies.size === enemyData.enemies.length && skills.size === skillData.skills.length, 'duplicate IDs');
+  requireValue(enemies.size === enemyData.enemies.length + expansionEnemies.length && skills.size === skillData.skills.length, 'duplicate IDs');
   requireValue(orchard && Object.values(rules.caps).every(cap => Number.isInteger(cap) && cap > 0), 'ward or caps');
   for (const band of [waves.slice, waves.normal]) {
     let boundary = 0;

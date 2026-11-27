@@ -3,6 +3,9 @@ import { camera, distance, heading, random, vector } from './sim.ts';
 import type { Cue, Point, Run } from './sim.ts';
 import { bossLaneCenters, laneHalfWidth, tollGap, tollRings } from './slice.ts';
 import { CampaignRun } from './campaign.ts';
+import { kinArt } from './kin-art.ts';
+import { beetle, burrow } from './kin-enemies.ts';
+import { name, t } from './locale.ts';
 import { items } from './campaign-content.ts';
 import { lanternId, lanternPortrait } from './lantern-art.ts';
 import type { LanternId } from './lantern-art.ts';
@@ -22,7 +25,8 @@ function load(url: string) {
 
 export async function loadArt() {
   const [actor, props, icon, ground] = await Promise.all([actorsUrl, worldUrl, iconsUrl, groundUrl].map(load));
-  return { actor, props, icon, ground };
+  const kin = new Map(await Promise.all(Object.entries(kinArt).map(async ([id, url]) => [id, await load(url)] as const)));
+  return { actor, props, icon, ground, kin };
 }
 
 export function skillIcon(id: string) {
@@ -137,11 +141,13 @@ export class Renderer {
     ctx.restore();
   }
 
-  private strokeHazard(active: boolean) {
+  private strokeHazard(active: boolean, style?: string) {
     const ctx = this.ctx;
-    ctx.fillStyle = active ? '#e15c3a65' : '#ad412c38';
+    ctx.fillStyle = style === 'mistwood' ? active ? '#9df2f16c' : '#5ca5ac53'
+      : style === 'eclipse-temple' ? active ? '#ca9cff76' : '#9668bb5a'
+        : active ? '#e15c3a65' : '#ad412c38';
     ctx.fill();
-    ctx.strokeStyle = this.contrast ? '#ffe7ce' : '#ff9a66';
+    ctx.strokeStyle = this.contrast ? '#ffe7ce' : style === 'mistwood' ? '#b5fff2' : style === 'eclipse-temple' ? '#f0cfff' : '#ff9a66';
     ctx.lineWidth = active ? 3 : 2;
     ctx.stroke();
     ctx.save();
@@ -189,6 +195,26 @@ export class Renderer {
       ctx.strokeStyle = run.layout.path;
       ctx.stroke();
       ctx.setLineDash([]);
+    }
+    if (run.stage.order >= 6) {
+      const [court] = run.groups.slice(-1);
+      for (const radius of [73, 119, 173]) {
+        ctx.beginPath();
+        ctx.arc(court.x, court.y, radius, 0, Math.PI * 2);
+        ctx.strokeStyle = run.layout.path;
+        ctx.lineWidth = radius === 119 ? 4 : 2;
+        ctx.stroke();
+      }
+      if (run.stage.order === 7) {
+        ctx.strokeStyle = '#d7825a88';
+        ctx.lineWidth = 6;
+        for (const y of [court.y - 110, court.y + 110]) {
+          ctx.beginPath();
+          ctx.moveTo(court.x - 245, y);
+          ctx.lineTo(court.x + 245, y);
+          ctx.stroke();
+        }
+      }
     }
     ctx.strokeStyle = run.layout.path;
     ctx.lineWidth = 3;
@@ -239,11 +265,25 @@ export class Renderer {
   private objectives(run: CampaignRun, view: Point, visible: (p: Point) => boolean) {
     const ctx = this.ctx;
     for (const group of run.groups) {
-      if (!visible(group) || group.state === 'done') continue;
+      if (!visible(group)) continue;
+      if (group.lit) {
+        this.ring(group, 37, '#ffdf9a', '#e6c07130');
+        this.sprite('actor', 'ward', group, 1.06);
+      }
+      if (group.state === 'done') continue;
       const active = run.activeObjective === group.objective;
       const color = active ? '#fff0b2' : '#b0bab6';
       this.ring(group, group.kind === 'defense' ? 47 : 32, color, '#292c2462', group.state === 'waiting');
-      if (group.kind === 'nest') this.sprite('props', 'thorn', group, 1.25);
+      if (group.waymark) {
+        this.sprite('actor', 'ward', group, .92);
+        if (active && run.lightTicks) {
+          ctx.beginPath();
+          ctx.arc(group.x, group.y, 38, -Math.PI / 2, -Math.PI / 2 + run.lightTicks / 150 * Math.PI * 2);
+          ctx.lineWidth = 4;
+          ctx.strokeStyle = '#ffe1a0';
+          ctx.stroke();
+        }
+      } else if (group.kind === 'nest') this.sprite('props', run.stage.order === 8 ? 'arch' : 'thorn', group, 1.25);
       else if (group.kind === 'defense') this.sprite('actor', 'ward', group, 1.24);
       else if (group.state === 'waiting') this.sprite('props', 'broken-bell', group, 1.08);
       if (active && group.kind === 'nest') {
@@ -255,19 +295,32 @@ export class Renderer {
           ctx.fillRect(group.x - 25, group.y + 17, 50 * nest.hp / nest.maxHp, 4);
         }
       }
-      this.label(group, active ? group.label : 'Locked · ' + group.label, color, 39);
+      this.label(group, active ? name(group.label) : t('Locked · {0}', name(group.label)), color, 39);
+    }
+    for (const site of run.sites) {
+      if (!visible(site) || site.open) continue;
+      this.ring(site, 29, site.kind === 'cage' ? '#b4efab' : '#ffe4a3', '#262b27aa', true);
+      if (site.kind === 'cage') {
+        this.kinSprite('moss-turtle', site, 36, run.tick);
+        ctx.strokeStyle = '#dfb374';
+        ctx.lineWidth = 2;
+        for (let x = -16; x <= 16; x += 8) {
+          ctx.beginPath(); ctx.moveTo(site.x + x, site.y - 24); ctx.lineTo(site.x + x, site.y + 7); ctx.stroke();
+        }
+      } else this.sprite('props', 'chest', site, 1.14);
+      this.label(site, name(site.label), '#fff0ba', 34);
     }
     for (const chest of run.chests) {
       if (!visible(chest) || chest.open) continue;
       const open = run.chestReady(chest);
       this.ring(chest, 27, open ? '#ffda84' : '#b1b5ad', '#251e18a0', !open);
       this.sprite('props', 'chest', chest, 1.25);
-      this.label(chest, open ? 'Chest' : 'Locked chest', open ? '#ffe2a1' : '#d7d7c6', 33);
+      this.label(chest, t(open ? 'Chest' : 'Locked chest'), open ? '#ffe2a1' : '#d7d7c6', 33);
     }
     if (visible(run.exit)) {
       this.ring(run.exit, 38, run.exitOpen ? '#a4ffe0' : '#b4b8a6', '#14272192', !run.exitOpen);
       this.sprite('props', 'arch', run.exit, 1.18);
-      this.label(run.exit, run.exitOpen ? 'Exit open' : 'Exit locked', run.exitOpen ? '#a4ffe0' : '#d9dcca', 49);
+      this.label(run.exit, t(run.exitOpen ? 'Exit open' : 'Exit locked'), run.exitOpen ? '#a4ffe0' : '#d9dcca', 49);
     }
     const target = run.objectivePoint;
     if (!target || (target.x > view.x + 20 && target.x < view.x + viewWidth - 20 &&
@@ -312,8 +365,37 @@ export class Renderer {
       if (drop.kind !== 'heart') ctx.fill();
       ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
       ctx.restore();
-      this.label(at, item ? item.name : drop.kind === 'heart' ? 'Heart' : drop.kind === 'magnet' ? 'Magnet' : 'Power Charm', color, -17);
+      this.label(at, name(item ? item.name : drop.kind === 'heart' ? 'Heart' : drop.kind === 'magnet' ? 'Magnet' : 'Power Charm'), color, -17);
     }
+  }
+
+  private kinSprite(id: string, p: Point, size: number, tick: number, flip = false) {
+    const art = this.art.kin.get(id);
+    if (!art) return;
+    const ctx = this.ctx;
+    const bob = this.motion ? Math.sin(tick / 7) * 2 : 0;
+    ctx.save();
+    ctx.translate(p.x, p.y - bob);
+    if (flip) ctx.scale(-1, 1);
+    ctx.drawImage(art, -size / 2, -size * .75, size, size);
+    ctx.restore();
+  }
+
+  private fog(run: CampaignRun, view: Point) {
+    if (run.stage.id !== 'mistwood') return;
+    const ctx = this.ctx;
+    const light = run.groups.filter(group => group.lit).length;
+    const fog = ctx.createRadialGradient(run.player.x, run.player.y, 110 + light * 42, run.player.x, run.player.y, 430 + light * 55);
+    fog.addColorStop(0, '#152f4000');
+    fog.addColorStop(1, this.contrast || !this.motion ? '#34556778' : '#426877b5');
+    ctx.fillStyle = fog;
+    ctx.fillRect(view.x, view.y, viewWidth, viewHeight);
+  }
+
+  private kinLine(from: Point, to: Point, color: string, width: number) {
+    const ctx = this.ctx;
+    ctx.beginPath(); ctx.moveTo(from.x, from.y - 10); ctx.lineTo(to.x, to.y - 10);
+    ctx.lineWidth = width; ctx.strokeStyle = color; ctx.stroke();
   }
 
   draw(run: GardenRun, cues: Cue[], effects = true) {
@@ -332,6 +414,7 @@ export class Renderer {
     if (campaign) this.stageFloor(campaign);
     else if (this.groundId !== 'bellgrave-garden') this.normalFloor();
     ctx.drawImage(this.ground, v.x, v.y, viewWidth, viewHeight, v.x, v.y, viewWidth, viewHeight);
+    if (campaign) this.fog(campaign, v);
     if (this.run !== run) {
       this.run = run;
       this.clearEffects();
@@ -369,9 +452,9 @@ export class Renderer {
         ctx.font = '600 13px system-ui';
         ctx.strokeStyle = '#121819';
         ctx.lineWidth = 4;
-        ctx.strokeText(ward.name, ward.x, ward.y + 28);
+        ctx.strokeText(name(ward.name), ward.x, ward.y + 28);
         ctx.fillStyle = '#e7e7cf';
-        ctx.fillText(ward.name, ward.x, ward.y + 28);
+        ctx.fillText(name(ward.name), ward.x, ward.y + 28);
       } });
     }
     for (const item of run.loot) if (visible(item)) this.sprite('props', item.kind, item, 1, false, this.motion ? Math.sin(run.elapsed * 5 + item.x) * 3 : 0);
@@ -385,16 +468,54 @@ export class Renderer {
         const h = lane.to.y - lane.from.y + lane.width * 2;
         ctx.beginPath();
         ctx.rect(-w / 2, -h / 2, w, h);
-        this.strokeHazard(run.tick >= lane.due);
+        this.strokeHazard(run.tick >= lane.due, lane.style);
         ctx.restore();
       }
+      for (const [id, link] of campaign.mendLinks) {
+        const from = campaign.foes.find(foe => foe.id === id);
+        const to = campaign.foes.find(foe => foe.id === link.target);
+        if (from && to && (visible(from) || visible(to))) {
+          this.kinLine(from, to, '#96ff9d', 3);
+          this.ring(to, 16, '#d7ffd5', '#66cd6a29');
+        }
+      }
+      for (const spot of campaign.burrows.values()) {
+        if (visible(spot)) this.hazard(spot, 0, Math.PI, burrow.radius);
+      }
+      const kinCue = campaign.kinCue;
+      if (kinCue && run.tick < kinCue.until) {
+        if (kinCue.radius) this.ring(kinCue.from, kinCue.radius, '#fde395', '#eab4512d');
+        else this.kinLine(kinCue.from, kinCue.to, '#8cdefc', 4);
+      }
+      const petCue = campaign.petCue;
+      if (petCue && run.tick < petCue.until) {
+        const color = campaign.kin.pet === 'moon-owl' ? '#dacaff' : campaign.kin.pet === 'moss-turtle' ? '#befa98' : '#ff954e';
+        this.kinLine(petCue.from, petCue.to, color, 4);
+        this.ring(petCue.to, 24, color);
+      }
+      if (campaign.kin.pet) {
+        const pet = campaign.petPosition;
+        entities.push({ y: pet.y, draw: () => this.kinSprite(campaign.kin.pet!, pet, 52, campaign.tick) });
+      }
+      if (campaign.wardGuard > 0) this.ring(run.player, 29, '#f9d995', '#f4d97828');
       for (const pool of campaign.pools) {
         if (visible(pool)) this.hazard(pool, 0, Math.PI, pool.radius, 0, run.tick >= pool.due);
       }
     } else for (const patch of run.patches) this.ring(patch, patch.radius, '#87d999a0', '#4ed88134', true);
     for (const foe of run.foes) {
       const boss = foe.def.role === 'boss';
-      if (!boss && !visible(foe) || campaign?.isNest(foe)) continue;
+      if (foe.hidden || !boss && !visible(foe) || campaign?.isNest(foe)) continue;
+      if (foe.def.id === 'eclipse-warden') this.ring(foe, 69, '#e4bcfc', '#b486e52b');
+      if (campaign?.owlMark?.id === foe.id && campaign.owlMark.until > run.tick) {
+        this.ring(foe, foe.def.radius + 7, '#d9c4ff', '#ad8fff24');
+        this.label(foe, '☾', '#e5d1ff', foe.def.radius + 13);
+      }
+      if (campaign?.brand?.id === foe.id && campaign.brand.until > run.tick) this.ring(foe, foe.def.radius + 4, '#ff9e63');
+      if (foe.def.id === 'bulwark-beetle' && foe.state !== 'recover') {
+        ctx.beginPath();
+        ctx.arc(foe.x, foe.y, 27, foe.angle - beetle.arc, foe.angle + beetle.arc);
+        ctx.strokeStyle = '#ffecb9'; ctx.lineWidth = 4; ctx.stroke();
+      }
       if (boss && campaign?.wardenGuards.size) this.ring(foe, 68, '#dbcbff', '#ad8fff25', true);
       if (foe.state === 'arrival') this.ring(foe, boss ? 88 : 35, '#f9c68e', '#f09b5440', true);
       if (foe.state === 'windup' || (boss && foe.state === 'attack')) {
@@ -435,7 +556,8 @@ export class Renderer {
         if (foe.def.role === 'elite' || foe.spark > run.tick) this.ring(foe, foe.def.radius * .8, '#ffc66dc4', '#38281e84');
         if (campaign?.wardenGuards.has(foe.id)) this.ring(foe, foe.def.radius * .75, '#e2c1ff', '#55456f70', true);
         if (foe.poison >= run.tick) this.ring(foe, foe.def.radius * .72, '#91ff9eab');
-        this.sprite('actor', foe.def.sprite, foe, scale, foe.vx < -.5, this.motion ? Math.sin(run.elapsed * 11 + foe.id) * (boss ? 2 : 3) : 0);
+        if (this.art.kin.has(foe.def.id)) this.kinSprite(foe.def.id, foe, 64, run.tick + foe.id, foe.vx < -.5);
+        else this.sprite('actor', foe.def.sprite, foe, scale, foe.vx < -.5, this.motion ? Math.sin(run.elapsed * 11 + foe.id) * (boss ? 2 : 3) : 0);
         if (foe.def.role === 'elite') {
           ctx.fillStyle = '#141918';
           ctx.fillRect(foe.x - 24, foe.y + 9, 48, 4);
