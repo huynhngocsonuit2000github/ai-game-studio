@@ -4,6 +4,7 @@ import type { EnemyDef } from './content.ts';
 export const dt = 1 / 60;
 export const ticks = (seconds: number) => Math.round(seconds * 60);
 const tau = 2 * Math.PI;
+const unlearned: Readonly<Record<string, number>> = Object.freeze({});
 export type Point = { x: number; y: number };
 export type Input = Point & { dash: boolean };
 export type Cue = { id: string; point?: Point; damage?: number };
@@ -157,7 +158,8 @@ export class Run {
   private waveRng: () => number;
   private draftRng: () => number;
   private aiRng: () => number;
-  private cells = new Map<number, Foe[]>();
+  private cells: Foe[][] = [];
+  private populatedCells: Foe[][] = [];
 
   readonly seed: number;
   readonly normal: boolean;
@@ -179,7 +181,7 @@ export class Run {
   get elite() { return this.foes.find(foe => foe.def.role === 'elite'); }
 
   rank(id: string) {
-    return skills.get(id)?.ranks[(this.build.get(id) ?? 0) - 1] ?? {};
+    return skills.get(id)?.ranks[(this.build.get(id) ?? 0) - 1] ?? unlearned;
   }
 
   step(input: Input) {
@@ -457,19 +459,23 @@ export class Run {
   }
 
   private indexFoes() {
-    this.cells.clear();
+    for (const cell of this.populatedCells) cell.length = 0;
+    this.populatedCells.length = 0;
     for (const foe of this.foes) {
       const id = Math.floor(foe.x / 80) + 32 * Math.floor(foe.y / 80);
-      const cell = this.cells.get(id);
-      if (cell) cell.push(foe);
-      else this.cells.set(id, [foe]);
+      const cell = this.cells[id] ??= [];
+      if (cell.length === 0) this.populatedCells.push(cell);
+      cell.push(foe);
     }
   }
 
   private *neighbors(p: Point, radius: number) {
-    for (let y = Math.floor((p.y - radius) / 80); y <= Math.floor((p.y + radius) / 80); y++) {
-      for (let x = Math.max(0, Math.floor((p.x - radius) / 80)); x <= Math.min(31, Math.floor((p.x + radius) / 80)); x++) {
-        yield* this.cells.get(x + y * 32) ?? [];
+    const left = Math.max(0, Math.floor((p.x - radius) / 80));
+    const right = Math.min(31, Math.floor((p.x + radius) / 80));
+    for (let y = Math.max(0, Math.floor((p.y - radius) / 80)); y <= Math.floor((p.y + radius) / 80); y++) {
+      for (let x = left; x <= right; x++) {
+        const cell = this.cells[x + y * 32];
+        if (cell?.length) yield* cell;
       }
     }
   }
@@ -488,7 +494,9 @@ export class Run {
 
   private hit(foe: Foe, amount: number, source: string) {
     if (foe.hp <= 0 || foe.state === 'arrival') return;
-    const damage = Math.round(amount * (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus));
+    const armor = this.normal && foe.def.role === 'boss' && foe.state !== 'recover'
+      ? rules.normal.wardenArmorMultiplier : 1;
+    const damage = Math.max(1, Math.round(amount * armor * (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus)));
     this.damage.set(source, (this.damage.get(source) ?? 0) + Math.min(foe.hp, damage));
     foe.hp -= damage;
     this.emit('impact', foe, damage);
@@ -730,11 +738,20 @@ export class Run {
       if (foe.def.role === 'normal' && ++this.normalKills % 45 === 0 && !this.loot.some(item => item.kind === 'potion')) {
         this.drop(foe, 'potion', 18, this.tick + ticks(20));
       }
-      if (this.loot.length < rules.caps.xpPickups) this.drop(foe, 'ember', foe.def.xp);
+      let xp = foe.def.xp;
+      if (this.normal && foe.def.role === 'normal') {
+        let multiplier = 1;
+        for (const band of rules.normal.emberBands) {
+          if (this.elapsed < band.atSec) break;
+          multiplier = band.multiplier;
+        }
+        xp *= multiplier;
+      }
+      if (this.loot.length < rules.caps.xpPickups) this.drop(foe, 'ember', xp);
       else {
         const closest = this.loot.filter(item => item.kind === 'ember').reduce<Loot | undefined>((best, item) =>
           !best || distance(foe, item) < distance(foe, best) ? item : best, undefined);
-        if (closest) closest.value += foe.def.xp;
+        if (closest) closest.value += xp;
       }
     }
     this.foes = this.foes.filter(foe => foe.hp > 0);

@@ -21,3 +21,7 @@ Intake matched `f46ee26e4c0402dcd3d9c84504380af27c48e644`. Studio V5.2 landed du
 On 2026-11-27 the Producer accepted G2 for the live S03 In Development preview and authorized S04–S06 as one named batch. Separate S04 and S05 Producer reviews are deferred for this batch. Technical checks remain stage gates. Stop at the G4 candidate for explicit release approval and playtest. Keep merge manual and route any Released registry change through separate Studio approval.
 
 The preview source is the S03 tree merged and registered at `ff54db3` in PR #25. GitHub reported a successful Pages workflow for that commit. The workspace live URL probe returned HTTP 403, so the exact commit marker from the Producer's play session remains unobserved here. [Registration PR](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/25) · [Pages run](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699)
+
+## MS-510 · Normal balance
+
+Keep the authored spawn schedule, enemy HP bands, rites, recipe ranks and Warden HP. Taper the Normal-only ember value by wave time and give the Warden full vulnerability during recovery. Outside recovery the base damage multiplier is 0.25. The S03 release and save schema remain the rollback base. A graphics detail preference is optional in v1 and defaults to full detail for existing saves.

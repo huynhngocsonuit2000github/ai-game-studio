@@ -83,7 +83,11 @@ function setText(id: string, value: string) {
   const node = get(id);
   if (node.textContent !== value) node.textContent = value;
 }
-function meter(id: string, ratio: number) { get(id).style.width = percent(Math.min(1, ratio)); }
+function meter(id: string, ratio: number) {
+  const fill = get(id);
+  const width = percent(Math.max(0, Math.min(1, ratio)));
+  if (fill.style.width !== width) fill.style.width = width;
+}
 
 const shortSynergies: Record<string, string> = {
   'wick-dart': 'Marks enemies for Prism Ring. At rank V it can evolve with Thread Lens II.',
@@ -140,14 +144,14 @@ function settingsView() {
   const settings = records.data.settings;
   const range = (id: 'master' | 'music' | 'sfx', label: string) =>
     `<label class="setting" for="set-${id}"><span>${label}</span><input id="set-${id}" name="${id}" type="range" min="0" max="1" step=".01" value="${settings[id]}"><output>${percent(settings[id])}</output></label>`;
-  const check = (id: 'mute' | 'reducedMotion' | 'highContrast' | 'damageNumbers', label: string) =>
+  const check = (id: 'mute' | 'reducedMotion' | 'highContrast' | 'damageNumbers' | 'lowDetail', label: string) =>
     `<label class="setting"><input name="${id}" type="checkbox" ${settings[id] ? 'checked' : ''}>${label}</label>`;
   return headingPanel('Settings', `
     <fieldset><legend>Audio</legend>
       ${range('master', 'Master volume')}${range('music', 'Music')}${range('sfx', 'Effects')}${check('mute', 'Mute audio')}
     </fieldset>
     <fieldset><legend>Display</legend>
-      ${check('reducedMotion', 'Reduce motion')}${check('highContrast', 'High contrast')}${check('damageNumbers', 'Damage numbers')}
+      ${check('reducedMotion', 'Reduce motion')}${check('highContrast', 'High contrast')}${check('damageNumbers', 'Damage numbers')}${check('lowDetail', 'Reduce graphics detail')}
     </fieldset>
     ${records.data.cosmetics.unlocked.includes('dawn-scarf') ? `<fieldset><legend>Wick’s scarf</legend>
       ${normalButton('Original', 'scarf-original', `aria-pressed="${records.data.cosmetics.selected === ''}"`)}
@@ -191,7 +195,7 @@ function rewardView() {
       const [name, details, synergy] = def
         ? [def.name, spellStats(id, def.ranks[rank - 1]), shortSynergies[id] ?? def.synergy]
         : cardNotes[id];
-      const label = def ? (def.type === 'evolution' ? 'Evolution' : rank > 1 ? `Rank ${rank - 1} → ${rank}` : 'Learn · Rank 1') : '';
+      const label = def ? (def.recipe ? `${skills.get(def.recipe.active)!.name} V + ${skills.get(def.recipe.passive)!.name} II` : rank > 1 ? `Rank ${rank - 1} → ${rank}` : 'Learn · Rank 1') : '';
       return `<button type="button" class="card" data-card="${i}" ${i ? '' : 'data-focus'}>${def ? skillIcon(id) : ''}
         <kbd aria-hidden="true">${i + 1}</kbd><strong>${name}</strong>${label ? `<span class="rank">${label}</span>` : ''}
         <span class="detail">${details}</span>${synergy ? `<span class="synergy">${synergy}</span>` : ''}
@@ -363,6 +367,7 @@ function applySettings() {
     renderer.motion = !s.reducedMotion && !systemReduced.matches;
     renderer.numbers = s.damageNumbers;
     renderer.contrast = s.highContrast;
+    renderer.lowDetail = s.lowDetail;
     renderer.dawnScarf = records.data.cosmetics.selected === 'dawn-scarf';
   }
   game.classList.toggle('high-contrast', s.highContrast);

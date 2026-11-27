@@ -17,17 +17,22 @@ export function draft(run, family) {
     const preference = run.player.hp <= 75 ? 'hearth' : run.rites === 1 ? 'gather' : 'wind';
     return offer.cards.includes(preference) ? preference : offer.cards[0];
   }
-  if (offer.kind === 'evolution') return offer.cards.includes(family) ? family : offer.cards[0];
+  if (offer.kind === 'evolution') return offer.cards.includes(family) ? family : 'later';
   const [act, passive, ...support] = recipes[family];
   const activeRank = run.build.get(act) ?? 0;
   const passRank = run.build.get(passive) ?? 0;
   const priorities = [
-    ...run.player.hp < 72 ? ['patch', 'heart-husk'] : [],
+    ...run.player.hp < 85 ? ['patch', 'heart-husk', 'mirror-ward'] : [],
     ...activeRank < 5 && !run.build.has(family) ? [act] : [],
     ...passRank < 2 ? [passive] : [],
     ...support, 'heart-husk', 'wick-dart', 'thread-lens', 'mirror-ward',
     'starfall', 'prism-ring', 'bog-bloom', passive, 'hex-bell', 'foxfire',
   ];
+  if (offer.level === 2) {
+    const first = [act, 'prism-ring', 'bog-bloom', 'starfall', 'foxfire', 'hex-bell', 'mirror-ward']
+      .find(id => id !== 'wick-dart' && offer.cards.includes(id));
+    if (first) return first;
+  }
   return priorities.find(id => offer.cards.includes(id)) ?? offer.cards[0];
 }
 
@@ -50,7 +55,7 @@ export function steer(run) {
     const angle = (boss.attack === 'toll' && ['windup', 'attack'].includes(boss.state)) ? boss.angle : from + .22;
     const gap = vector(angle);
     target = { x: boss.x + gap.x * desire, y: boss.y + gap.y * desire };
-  } else if (ward && (ward.charge >= .1 || run.elapsed >= (run.rites ? 432 : 142))) {
+  } else if (ward && run.elapsed >= (run.rites ? 432 : 142)) {
     target = ward;
   } else if (chest || potion) {
     target = chest ?? potion;
@@ -74,13 +79,28 @@ export function steer(run) {
     let value = -distance(ahead, target) * .5;
     if (stopped) value -= 10;
     if (ward === target && distance(ward, ahead) < ward.radius - 12) value += 35;
+    if (ward && ward !== target && distance(ward, ahead) < 97) value -= 96;
     for (const foe of nearby) {
-      const gap = distance(ahead, foe) - foe.def.radius;
-      value -= Math.max(0, 72 - gap) * (gap < 19 ? 2.4 : .61);
+      const predicted = { x: foe.x + foe.vx * .18, y: foe.y + foe.vy * .18 };
+      const gap = Math.min(distance(ahead, foe), distance(ahead, predicted)) - foe.def.radius;
+      value -= Math.max(0, 78 - gap) * (gap < 19 ? 2.8 : .62);
+      if (foe.def.behavior.ai === 'charge' && ['windup','attack'].includes(foe.state)) {
+        const aim = vector(foe.angle);
+        const dx = ahead.x - foe.x;
+        const dy = ahead.y - foe.y;
+        const along = dx * aim.x + dy * aim.y;
+        if (along > -15 && along < 153 && Math.abs(dx * aim.y - dy * aim.x) < foe.def.radius + 17) value -= 66;
+      }
       if (foe.state === 'windup' && foe.def.behavior.ai === 'pulse') {
         const radius = foe.echo ? foe.def.behavior.echoRadius : foe.def.behavior.pulseRadius;
         if (distance(foe, ahead) <= radius) value -= 38;
       }
+    }
+    for (const shot of run.shots) {
+      const dx = ahead.x - shot.x;
+      const dy = ahead.y - shot.y;
+      const t = Math.min(.5, Math.max(0, (dx * shot.vx + dy * shot.vy) / (shot.vx ** 2 + shot.vy ** 2)));
+      if (Math.hypot(dx - t * shot.vx, dy - t * shot.vy) < 29) value -= 60;
     }
     if (boss && ['windup', 'attack'].includes(boss.state)) {
       const d = distance(ahead, boss);
@@ -99,13 +119,20 @@ export function steer(run) {
       best = direction;
     }
   }
-  const danger = nearby.some(foe => foe.def.role !== 'boss' && distance(foe, p) < foe.def.radius + 24);
-  return { ...best, dash: Boolean(danger && run.tick >= run.dashReady && (best.x || best.y) && target !== ward) };
+  let danger = nearby.some(foe => foe.def.role !== 'boss' && distance(foe, p) < foe.def.radius + 29);
+  if (boss?.state === 'windup' && boss.attack === 'cleave' && boss.until - run.tick < 30 &&
+      distance(boss, p) < 208 && angleDistance(heading(boss, p), boss.angle) < Math.PI * 100 / 360) {
+    const endpoint = { ...p };
+    const magnitude = Math.hypot(best.x, best.y) || 1;
+    move(endpoint, best.x * 180 / magnitude, best.y * 180 / magnitude, 13, false);
+    danger ||= distance(boss, endpoint) > 205 || angleDistance(heading(boss, endpoint), boss.angle) > Math.PI * 100 / 360;
+  }
+  return { ...best, dash: Boolean(danger && run.tick >= run.dashReady && (best.x || best.y) && (target !== ward || p.hp < 45)) };
 }
 
 export function simulate(seed, family) {
   const run = new GardenRun(seed);
-  const observed = { firstLevel: null, rites: [], elites: [], evolutions: [], phases: new Set(), attacks: new Set(), seen: new Set() };
+  const observed = { firstLevel: null, waveLevel: null, peakFoes: 0, peakShots: 0, rites: [], elites: [], evolutions: [], phases: new Set(), attacks: new Set(), seen: new Set() };
   let direction = steer(run);
   while (!run.result && run.tick <= ticks(930)) {
     if (run.offer) {
@@ -121,7 +148,10 @@ export function simulate(seed, family) {
     for (const foe of run.foes) observed.seen.add(foe.def.id);
     for (const cue of run.cues) if (cue.id === 'elite') observed.elites.push([run.elapsed, run.elite?.def.id]);
     run.cues.length = 0;
+    observed.peakFoes = Math.max(observed.peakFoes, run.foes.length);
+    observed.peakShots = Math.max(observed.peakShots, run.shots.length);
     if (run.boss) {
+      observed.waveLevel ??= run.level;
       observed.phases.add(run.boss.phase);
       if (run.boss.state === 'windup') observed.attacks.add(run.boss.attack);
     }

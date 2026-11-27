@@ -39,9 +39,19 @@ export class Renderer {
   numbers = true;
   contrast = false;
   dawnScarf = false;
+  lowDetail = false;
+  private lantern = document.createElement('canvas');
 
   constructor(private canvas: HTMLCanvasElement, private art: Awaited<ReturnType<typeof loadArt>>) {
     this.ctx = canvas.getContext('2d', { alpha: false })!;
+    this.lantern.width = this.lantern.height = 228;
+    const lantern = this.lantern.getContext('2d')!;
+    const light = lantern.createRadialGradient(114, 114, 8, 114, 114, 114);
+    light.addColorStop(0, '#edbd7940');
+    light.addColorStop(.42, '#b6804330');
+    light.addColorStop(1, '#bc893d00');
+    lantern.fillStyle = light;
+    lantern.fillRect(0, 0, 228, 228);
     this.ground.width = width;
     this.ground.height = height;
     const ctx = this.ground.getContext('2d')!;
@@ -128,7 +138,7 @@ export class Renderer {
   draw(run: GardenRun, cues: Cue[]) {
     const ctx = this.ctx;
     const v = camera(run.player);
-    const dpr = Math.min(devicePixelRatio || 1, matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
+    const dpr = Math.min(devicePixelRatio || 1, this.lowDetail ? 1.25 : matchMedia('(pointer:coarse)').matches ? 1.5 : 2);
     const w = Math.round(viewWidth * dpr);
     const h = Math.round(viewHeight * dpr);
     if (this.canvas.width !== w || this.canvas.height !== h) {
@@ -151,6 +161,7 @@ export class Renderer {
     const visible = (p: Point) => p.x > v.x - 155 && p.x < v.x + viewWidth + 155 && p.y > v.y - 155 && p.y < v.y + viewHeight + 155;
     const entities: { y: number; draw: () => void }[] = [];
     for (const item of [...this.decor, ...garden.blockers]) {
+      if (this.lowDetail && item.sprite === 'stones' && !('r' in item)) continue;
       if (visible(item)) entities.push({ y: item.y, draw: () => this.sprite('props', item.sprite, item) });
     }
     for (const ward of run.wards) {
@@ -182,6 +193,7 @@ export class Renderer {
     for (const patch of run.patches) this.ring(patch, patch.radius, '#87d999a0', '#4ed88134', true);
     for (const foe of run.foes) {
       const boss = foe.def.role === 'boss';
+      if (!boss && !visible(foe)) continue;
       if (foe.state === 'arrival') this.ring(foe, boss ? 88 : 35, '#f9c68e', '#f09b5440', true);
       if (foe.state === 'windup' || (boss && foe.state === 'attack')) {
         if (boss && foe.attack === 'cleave') this.hazard(foe, foe.angle, Math.PI * 100 / 360, 205, 0, foe.state === 'attack');
@@ -229,12 +241,7 @@ export class Renderer {
       } });
     }
     const p = run.player;
-    const light = ctx.createRadialGradient(p.x + 8, p.y - 8, 8, p.x + 8, p.y - 8, 114);
-    light.addColorStop(0, '#edbd7940');
-    light.addColorStop(.42, '#b6804330');
-    light.addColorStop(1, '#bc893d00');
-    ctx.fillStyle = light;
-    ctx.fillRect(p.x - 106, p.y - 122, 228, 228);
+    if (!this.lowDetail) ctx.drawImage(this.lantern, p.x - 106, p.y - 122);
     entities.push({ y: p.y, draw: () => {
       this.ring(p, 16, '#ffe6a5', '#f1aa5640');
       if (run.guards) this.ring(p, 21, '#96d8fc', '#5fbded30');
@@ -266,6 +273,7 @@ export class Renderer {
       this.ring(blade, 12, '#bea2ff74');
     }
     for (const bolt of run.bolts) {
+      if (!visible(bolt)) continue;
       ctx.beginPath();
       ctx.moveTo(bolt.x - bolt.vx * .036, bolt.y - bolt.vy * .036);
       ctx.lineTo(bolt.x, bolt.y);
@@ -280,7 +288,7 @@ export class Renderer {
         this.effects.push({ ...cue, until: run.tick + (cue.damage ? 31 : 25) });
       }
     }
-    this.effects = this.effects.slice(-30);
+    this.effects = this.effects.slice(this.lowDetail ? -15 : -30);
     for (const cue of this.effects) {
       const progress = 1 - (cue.until - run.tick) / (cue.damage ? 31 : 25);
       ctx.globalAlpha = 1 - progress;

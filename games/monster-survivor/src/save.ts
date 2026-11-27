@@ -3,7 +3,7 @@ import type { GardenRun } from './slice.ts';
 
 export const saveKey = 'ai-game-studio:monster-survivor:v1';
 export const defaultSettings = {
-  master: .8, music: .55, sfx: .72, mute: false, reducedMotion: false, highContrast: false, damageNumbers: true,
+  master: .8, music: .55, sfx: .72, mute: false, reducedMotion: false, highContrast: false, damageNumbers: true, lowDetail: false,
 };
 type Settings = typeof defaultSettings;
 const base = () => ({
@@ -55,7 +55,7 @@ export class Records {
         master: volume(settings.master, defaultSettings.master), music: volume(settings.music, defaultSettings.music),
         sfx: volume(settings.sfx, defaultSettings.sfx), mute: flag(settings.mute, false),
         reducedMotion: flag(settings.reducedMotion, false), highContrast: flag(settings.highContrast, false),
-        damageNumbers: flag(settings.damageNumbers, true),
+        damageNumbers: flag(settings.damageNumbers, true), lowDetail: flag(settings.lowDetail, false),
       };
       save.lifetime = {
         runs: counter(stats.runs), wins: counter(stats.wins), bestClearMs: counter(stats.bestClearMs) || null,

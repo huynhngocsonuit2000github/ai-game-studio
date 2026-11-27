@@ -59,6 +59,7 @@ try {
   await desktop.getByLabel('Reduce motion').check();
   await desktop.getByLabel('High contrast').check();
   await desktop.getByLabel('Damage numbers').uncheck();
+  await desktop.getByLabel('Reduce graphics detail').check();
   await desktop.waitForFunction(() => window.msAudio.gain.gain.value < .01);
   await desktop.reload();
   await button(desktop, 'Settings').click();
@@ -67,6 +68,7 @@ try {
   assert.equal(await desktop.getByLabel('Reduce motion').isChecked(), true);
   assert.equal(await desktop.getByLabel('High contrast').isChecked(), true);
   assert.equal(await desktop.getByLabel('Damage numbers').isChecked(), false);
+  assert.equal(await desktop.getByLabel('Reduce graphics detail').isChecked(), true);
   assert.equal(await desktop.evaluate(key => localStorage.getItem(key), saveKey), JSON.stringify(forestRecord));
   await desktop.screenshot({ path: join(evidence, 'settings.png') });
   await button(desktop, 'Back').click();

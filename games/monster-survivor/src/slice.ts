@@ -3,6 +3,7 @@ import { Run, angleDistance, distance, dt, heading, move, random, ticks, vector 
 import type { Foe, Point } from './sim.ts';
 
 export const wardPoint = { x: orchard.point[0], y: orchard.point[1] };
+const recipes = [...skills.values()].flatMap(({ id, recipe }) => recipe ? [{ id, recipe }] : []);
 const boons = ['hearth', 'wind', 'gather'];
 const bossPatterns = [
   ['cleave', 'toll'],
@@ -244,8 +245,9 @@ export class GardenRun extends Run {
   }
 
   private eligible() {
-    const available = [...skills.values()].flatMap(({ id, recipe }) => {
-      if (!recipe || (!this.normal && !rules.slice.evolutionPool.includes(id))) return [];
+    if (!this.catalysts) return { available: [], snapshot: '' };
+    const available = recipes.flatMap(({ id, recipe }) => {
+      if (!this.normal && !rules.slice.evolutionPool.includes(id)) return [];
       const active = this.build.get(recipe.active) ?? 0;
       const passive = this.build.get(recipe.passive) ?? 0;
       return active >= recipe.activeRank && passive >= recipe.passiveRank && this.catalysts >= recipe.catalysts
