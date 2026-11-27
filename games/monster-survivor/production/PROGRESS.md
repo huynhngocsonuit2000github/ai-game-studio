@@ -58,3 +58,11 @@ Pack `monster-survivor-production-v1` · design and assets staged for handoff. S
 - Rebuilt and tested the S03 rollback artifact independently. Forest Adventure’s output is identical. v1 preferences, results, discoveries and sibling save isolation survive the rollback. The optional Normal detail flag defaults safely if S03 rewrites the save.
 - Candidate playtest archive uses the existing PR browser-evidence job. Runtime test evidence is tied to `04338c6ea786b5b46652c14cd82c1537b7d8b54e`. The G4 review documents the remaining device and balance coverage and the separate Released registry proposal.
 - Stop at G4 for the Producer’s playtest and explicit approval. Merge remains manual. The live S03 route remains active pending that decision.
+
+## Campaign v1 · MSC-10, MSC-20, MSC-30
+
+The Producer approved the design, the exact ZIP with five additions and zero replacements, and the complete named batch with intermediate reviews deferred. The pack ID is `monster-survivor-campaign-v2`. ZIP SHA-256 `08ab02235596655e2a68ed40f137145b9a99cbc936fba1bc8a9e370126e44d06` passed the trusted validator on clean `85955db765164f52ea2cea2c4c0878321e81fc4c`. Inspected GitHub main matched the pinned baseline. [Brief](features/ms-campaign-v1/BRIEF.md) · [QA and evidence](../reports/CAMPAIGN_QA.md).
+
+- **MSC-10** · Campaign entry, camp, first two stages, settlement and upgrade loop are playable. The assembled browser earned Ember Lantern, upgraded it, reloaded and completed Venom Marsh with the upgraded loadout.
+- **MSC-20** · All five stages, 12 items, gold, drops, permanent upgrades, temporary pickups, Burst and weapon presentation are implemented. The assembled browser run unlocked each stage, defended the Crypt lantern and completed all three Warden phases. A matched Belltower encounter exercised both presentation settings.
+- **MSC-30** · The Campaign and Survival suites ran against the assembled project-subpath artifact. The report records checks, playfeel and performance measurements, remaining device coverage and rollback. Scripted clears came in under the 3–5 minute playtest band. Producer playtest and approval remain pending. Merge stays manual. After the existing deployment completes, verify the public marker and launch Campaign and Survival at the existing route.

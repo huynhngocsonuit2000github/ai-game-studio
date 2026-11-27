@@ -1,0 +1,310 @@
+{
+  "schemaVersion": 1,
+  "currency": "gold",
+  "rarities": [
+    "common",
+    "uncommon",
+    "rare"
+  ],
+  "rankCap": 3,
+  "upgradeCostByTargetRank": {
+    "1": 35,
+    "2": 75,
+    "3": 130
+  },
+  "duplicatesGoldByRarity": {
+    "common": 12,
+    "uncommon": 22,
+    "rare": 35
+  },
+  "startingGold": 0,
+  "earnedGold": {
+    "normalKill": 1,
+    "eliteKill": 10,
+    "awardKillDropsUntilPerStageCap": true,
+    "useOneGoldPickupWithMergedValueWhenAtVisualCap": true,
+    "pickupRadiusPx": 74,
+    "chestBonusGold": 8
+  },
+  "chests": {
+    "reward": "One seeded gear pick and the chest gold value; each spawns separate explicitly collectible pickups. No theoretical unclaimed rewards in the wallet.",
+    "selection": "Choose one uniform item from the specified stable pool using the stage seed and chest ID. Prefer a pool item not yet owned or collected on this attempt. Break ties by ID order before the seeded roll.",
+    "pools": {
+      "meadow": [
+        "ember-lantern",
+        "patchcoat",
+        "trail-boots",
+        "amber-charm"
+      ],
+      "marsh": [
+        "prism-lantern",
+        "patchcoat",
+        "marsh-boots",
+        "amber-charm"
+      ],
+      "crypt": [
+        "prism-lantern",
+        "grave-ward",
+        "bell-charm",
+        "echo-charm"
+      ],
+      "gate": [
+        "thorn-mail",
+        "trail-boots",
+        "gale-boots",
+        "echo-charm"
+      ],
+      "tower": [
+        "warden-lantern",
+        "grave-ward",
+        "gale-boots",
+        "bell-charm"
+      ]
+    }
+  },
+  "combat": {
+    "starterWickDart": {
+      "damage": 20,
+      "intervalSec": 0.6
+    },
+    "wickDartRankTwo": {
+      "damage": 23,
+      "splashFraction": 0.4,
+      "splashRadiusPx": 36
+    },
+    "caps": {
+      "weaponFlatDamage": 20,
+      "moveSpeedPercent": 25,
+      "damageReductionPercent": 25,
+      "cooldownReductionPercent": 18,
+      "pickupRadiusPx": 160
+    },
+    "lanternBurst": {
+      "trigger": "Q or Burst touch button",
+      "chargeInitial": 0,
+      "chargeMax": 100,
+      "normalKillCharge": 9,
+      "eliteKillCharge": 22,
+      "radiusPx": 150,
+      "damage": 65,
+      "eliteDamageMultiplier": 0.7,
+      "bossDamageMultiplier": 0.55,
+      "spendOnSuccessfulCastOnly": true,
+      "canRechargeFromOwnKills": false
+    }
+  },
+  "temporaryPickups": {
+    "heart": {
+      "effect": "Heal up to 20 HP",
+      "consumeAtFullHealth": false
+    },
+    "magnet": {
+      "effect": "Pull existing gold and embers within 220 px; gear stays manually collectible",
+      "durationSec": 2
+    },
+    "power-charm": {
+      "effect": "+18% spell damage for 12 seconds",
+      "stacking": "Refresh only"
+    }
+  },
+  "items": [
+    {
+      "id": "ember-lantern",
+      "name": "Ember Lantern",
+      "slot": "weapon",
+      "rarity": "common",
+      "stats": {
+        "flatMainDamage": [
+          3,
+          7,
+          10,
+          13
+        ]
+      },
+      "effect": "Stronger Wick Dart and its evolution."
+    },
+    {
+      "id": "prism-lantern",
+      "name": "Prism Lantern",
+      "slot": "weapon",
+      "rarity": "uncommon",
+      "stats": {
+        "splashRadiusAddPx": [
+          8,
+          13,
+          18,
+          24
+        ]
+      },
+      "effect": "Wick Dart Rank II splash reaches farther. Orbit and hazard shapes stay readable."
+    },
+    {
+      "id": "warden-lantern",
+      "name": "Warden Lantern",
+      "slot": "weapon",
+      "rarity": "rare",
+      "stats": {
+        "flatMainDamage": [
+          5,
+          8,
+          11,
+          15
+        ],
+        "burstRadiusAddPx": [
+          14,
+          18,
+          22,
+          28
+        ]
+      },
+      "effect": "Sharper main spell and wider Lantern Burst."
+    },
+    {
+      "id": "patchcoat",
+      "name": "Patchcoat",
+      "slot": "armor",
+      "rarity": "common",
+      "stats": {
+        "maxHpAdd": [
+          14,
+          20,
+          26,
+          34
+        ]
+      },
+      "effect": "Start each stage with a larger health pool."
+    },
+    {
+      "id": "thorn-mail",
+      "name": "Thorn Mail",
+      "slot": "armor",
+      "rarity": "uncommon",
+      "stats": {
+        "contactReductionPercent": [
+          9,
+          12,
+          16,
+          22
+        ]
+      },
+      "effect": "Reduce enemy contact damage."
+    },
+    {
+      "id": "grave-ward",
+      "name": "Grave Ward",
+      "slot": "armor",
+      "rarity": "rare",
+      "stats": {
+        "maxHpAdd": [
+          8,
+          12,
+          17,
+          22
+        ],
+        "projectileReductionPercent": [
+          8,
+          10,
+          13,
+          17
+        ]
+      },
+      "effect": "Survive ranged packs."
+    },
+    {
+      "id": "trail-boots",
+      "name": "Trail Boots",
+      "slot": "boots",
+      "rarity": "common",
+      "stats": {
+        "moveSpeedPercent": [
+          5,
+          8,
+          11,
+          15
+        ]
+      },
+      "effect": "Move faster between packs and chests."
+    },
+    {
+      "id": "marsh-boots",
+      "name": "Marsh Boots",
+      "slot": "boots",
+      "rarity": "uncommon",
+      "stats": {
+        "moveSpeedPercent": [
+          4,
+          6,
+          8,
+          10
+        ],
+        "slowReductionPercent": [
+          35,
+          42,
+          50,
+          60
+        ]
+      },
+      "effect": "Move more freely through marsh terrain."
+    },
+    {
+      "id": "gale-boots",
+      "name": "Gale Boots",
+      "slot": "boots",
+      "rarity": "rare",
+      "stats": {
+        "dashCooldownReductionSec": [
+          0.25,
+          0.4,
+          0.55,
+          0.7
+        ]
+      },
+      "effect": "Recover dash sooner."
+    },
+    {
+      "id": "amber-charm",
+      "name": "Amber Charm",
+      "slot": "charm",
+      "rarity": "common",
+      "stats": {
+        "pickupRadiusAddPx": [
+          14,
+          23,
+          32,
+          42
+        ]
+      },
+      "effect": "Collect gold and embers from farther away."
+    },
+    {
+      "id": "bell-charm",
+      "name": "Bell Charm",
+      "slot": "charm",
+      "rarity": "uncommon",
+      "stats": {
+        "burstDamageAdd": [
+          9,
+          14,
+          20,
+          28
+        ]
+      },
+      "effect": "Lantern Burst hits crowds harder."
+    },
+    {
+      "id": "echo-charm",
+      "name": "Echo Charm",
+      "slot": "charm",
+      "rarity": "rare",
+      "stats": {
+        "spellCooldownReductionPercent": [
+          5,
+          8,
+          11,
+          14
+        ]
+      },
+      "effect": "Time-based auto-spells cast more frequently. Entry-only charges, dash and Burst are separate."
+    }
+  ]
+}

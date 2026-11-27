@@ -1,0 +1,105 @@
+{
+  "schemaVersion": 1,
+  "setup": {
+    "mode": "campaign",
+    "logicalView": [960, 540],
+    "clearTargetSec": [180, 300],
+    "safetyTimeoutSec": 420,
+    "townAfterEveryAttempt": true,
+    "openExitAfterFinalObjective": true,
+    "stageSeedMix": "Combine stable stage ID with fresh attempt seed. Preserve deterministic test seeds.",
+    "coordinateConvention": "World pixels, x right, y down. Open corridors at least 130 px wide. Objective, chest and exit interaction circles must always be reachable.",
+    "awardOnExit": true
+  },
+  "stages": [
+    {
+      "id": "bell-orchard",
+      "order": 1,
+      "name": "Bell Orchard",
+      "size": [1760, 1120],
+      "start": [240, 570],
+      "exit": [1540, 560],
+      "look": "Pale moss garden, broken arches, an orchard path with a narrow north branch and a broad east plaza.",
+      "path": "West spawn to central fork; north orchard loop rejoins the main path at the plaza. Keep midpoint visibly open.",
+      "objectives": [
+        { "id": "patrols", "kind": "clear-patrols", "anchors": [[520, 690], [870, 470], [1130, 730]], "packs": [{"seedling": 10}, {"seedling": 12, "moth": 3}, {"seedling": 15, "moth": 5}], "ambientNormalCap": 18 },
+        { "id": "thornback", "kind": "defeat-arena-leader", "anchor": [1390, 560], "enemy": "thornback", "hpScale": 0.7, "adds": {"seedling": 8} }
+      ],
+      "chests": [{ "id": "orchard-fork", "at": [790, 270], "pool": "meadow" }, { "id": "thornback-cache", "at": [1390, 620], "pool": "meadow", "after": "thornback" }],
+      "firstClearGear": "ember-lantern",
+      "goldClear": 45,
+      "enemyGoldCap": 50
+    },
+    {
+      "id": "venom-marsh",
+      "order": 2,
+      "name": "Venom Marsh",
+      "size": [1870, 1230],
+      "start": [230, 780],
+      "exit": [1570, 330],
+      "look": "Cool flooded crossings, jade reeds and teal stone islands. Poison areas need a patterned telegraph.",
+      "path": "Two connected causeways around a middle channel. South branch leads to loot and reconnects before the last island.",
+      "objectives": [
+        { "id": "nests", "kind": "destroy-nests", "anchors": [[530, 800], [870, 570], [1210, 450]], "hp": 130, "guard": {"seedling": 4, "bottle": 1}, "hazardSec": 1.2 },
+        { "id": "marsh-keeper", "kind": "defeat-arena-leader", "anchor": [1440, 360], "enemy": "bottle", "hpScale": 4.5, "pattern": "Three slow readable shots; two poison pools placed on projected player trail with clear safe lanes.", "adds": {"seedling": 8, "moth": 4} }
+      ],
+      "chests": [{ "id": "reed-cache", "at": [955, 1020], "pool": "marsh" }, { "id": "keeper-cache", "at": [1420, 425], "pool": "marsh", "after": "marsh-keeper" }],
+      "firstClearGear": "marsh-boots",
+      "goldClear": 60,
+      "enemyGoldCap": 65
+    },
+    {
+      "id": "candle-crypt",
+      "order": 3,
+      "name": "Candle Crypt",
+      "size": [1720, 1220],
+      "start": [250, 620],
+      "exit": [1510, 630],
+      "look": "Slate-blue crypt, alcoves and tombstone props, strong candle channels on the floor.",
+      "path": "Entrance room, central defense room with two exits around columns, then wide east hall. Side alcove reconnects to central room.",
+      "objectives": [
+        { "id": "hold-lantern", "kind": "defend-lantern", "anchor": [855, 650], "lanternHp": 150, "waves": [{"seedling": 20, "moth": 8}, {"moth": 12, "bells": 5, "scarab": 2}], "nextWaveAfterClearSec": 4 },
+        { "id": "crypt-bell", "kind": "defeat-arena-leader", "anchor": [1300, 650], "enemy": "discord", "hpScale": 0.62, "adds": {"bells": 2} }
+      ],
+      "chests": [{ "id": "ossuary-cache", "at": [650, 310], "pool": "crypt" }, { "id": "lantern-cache", "at": [1040, 650], "pool": "crypt", "after": "hold-lantern" }],
+      "firstClearGear": "bell-charm",
+      "goldClear": 80,
+      "enemyGoldCap": 75
+    },
+    {
+      "id": "thorn-gate",
+      "order": 4,
+      "name": "Thorn Gate",
+      "size": [1950, 1310],
+      "start": [220, 650],
+      "exit": [1735, 650],
+      "look": "Rust-red briars and angular thorn silhouettes with green travel lanes.",
+      "path": "Two separate curved branches from a central junction. Both remain traversable and rejoin at the gate.",
+      "objectives": [
+        { "id": "two-keys", "kind": "hunt-elites", "hunts": [{"anchor": [1030, 340], "enemy": "thornback", "hpScale": 1, "adds": {"scarab": 3}}, {"anchor": [1120, 960], "enemy": "discord", "hpScale": 0.86, "adds": {"bells": 3}}], "order": "either" }
+      ],
+      "chests": [{ "id": "briar-north", "at": [1270, 300], "pool": "gate" }, { "id": "bell-south", "at": [1360, 1020], "pool": "gate" }, { "id": "thorn-gate-cache", "at": [1550, 680], "pool": "gate", "after": "two-keys" }],
+      "firstClearGear": "thorn-mail",
+      "goldClear": 100,
+      "enemyGoldCap": 90
+    },
+    {
+      "id": "belltower",
+      "order": 5,
+      "name": "Hollow Belltower",
+      "size": [2040, 1220],
+      "start": [260, 620],
+      "exit": [1800, 620],
+      "look": "Amber moonlit stone, cracked bell motifs and a wide, readable boss ring.",
+      "path": "Two adjoining chambers with a side treasury, then an unobstructed boss court. Place the exit beyond the boss.",
+      "objectives": [
+        { "id": "tower-chambers", "kind": "clear-patrols", "anchors": [[520, 600], [915, 620]], "packs": [{"scarab": 4, "moth": 12}, {"bells": 6, "bottle": 5, "seedling": 16}], "ambientNormalCap": 25 },
+        { "id": "hollow-warden", "kind": "defeat-arena-leader", "anchor": [1450, 625], "enemy": "warden", "hpScale": 0.95, "pattern": "All three Normal phases with readable recovery windows. Unlock stage completion on defeat." }
+      ],
+      "chests": [{ "id": "tower-treasury", "at": [820, 285], "pool": "tower" }, { "id": "citadel-cache", "at": [1080, 625], "pool": "tower", "after": "tower-chambers" }],
+      "firstClearGear": "warden-lantern",
+      "goldClear": 140,
+      "enemyGoldCap": 105
+    }
+  ]
+}

@@ -1,6 +1,13 @@
 import './style.css';
 import { enemies, garden, rules, skills, validateContent } from './content.ts';
 import { GardenRun } from './slice.ts';
+import { CampaignRun } from './campaign.ts';
+import { gear, items, slots, stages } from './campaign-content.ts';
+import type { Slot } from './campaign-content.ts';
+import { CampaignRecords, campaignKey } from './campaign-save.ts';
+import type { Settlement } from './campaign-save.ts';
+import { campHtml, campaignResult, quoteHtml } from './camp-view.ts';
+import type { CampPanel, CampSelection, Quote } from './camp-view.ts';
 import { Clock, distance, heading } from './sim.ts';
 import { Renderer, loadArt, skillIcon } from './render.ts';
 import { Records } from './save.ts';
@@ -21,12 +28,18 @@ const portrait = matchMedia('(orientation: portrait)');
 const systemReduced = matchMedia('(prefers-reduced-motion: reduce)');
 const clock = new Clock();
 const records = new Records(() => localStorage);
+const campaignRecords = new CampaignRecords(() => localStorage);
+const camp: CampSelection = { stage: stages[0], panel: 'stages', slot: 'weapon', message: '' };
+let quote: Quote | undefined;
+let settlement: Settlement | undefined;
+let startingCampaign = false;
+let settling = false;
 const sound = new Sound(records.data.settings);
 const keys = new Set<string>();
 const movementKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']);
 const library = '<a class="nav-link" href="../../#/">← Game Library</a>';
 
-type Mode = 'loading' | 'title' | 'running' | 'reward' | 'paused' | 'settings' | 'guide' | 'result' | 'rotate' | 'confirm';
+type Mode = 'loading' | 'title' | 'running' | 'reward' | 'paused' | 'settings' | 'guide' | 'result' | 'rotate' | 'confirm' | 'camp' | 'upgrade';
 let mode: Mode = 'loading';
 let run: GardenRun | null = null;
 let renderer: Renderer;
@@ -34,6 +47,8 @@ let runId = '';
 let settingsOrigin: 'title' | 'paused' = 'title';
 let confirming: 'restart' | 'quit' = 'restart';
 let dash = false;
+let burst = false;
+let interact = false;
 let stickId: number | null = null;
 let touchVector = { x: 0, y: 0 };
 let inputAfter = 0;
@@ -53,7 +68,7 @@ const fmt = (number: number) => Number(number.toFixed(2));
 const percent = (fraction: number) => `${Math.round(fraction * 100)}%`;
 const focusable = 'button:not([disabled]), input:not([disabled]), a[href]';
 const title = '<h1>Monster <span>Survivor</span></h1>';
-const startLabel = 'Start Run';
+const startLabel = 'Survival';
 const normalButton = (text: string, action: string, extra = '') =>
   `<button type="button" data-action="${action}" ${extra}>${text}</button>`;
 const primary = (text: string, action: string) => normalButton(text, action, 'class="primary" data-focus');
@@ -77,6 +92,8 @@ hud.innerHTML = `
     <div class="hud-chip vitals"><div class="readout"><span id="level"></span><span id="xp"></span></div><div class="meter xp"><span id="xp-fill"></span></div></div>
     <div id="hud-build" aria-label="Current build"></div>
     <div class="hud-chip" id="dash-state"></div>
+    <div class="hud-chip" id="campaign-combat" hidden><div class="readout"><span id="burst-state"></span><span id="pending-gold"></span></div>
+      <div class="meter burst"><span id="burst-fill"></span></div><small id="interact-hint" hidden></small></div>
   </div>`;
 
 function setText(id: string, value: string) {
@@ -133,8 +150,8 @@ function titleView() {
     <img class="title-art" src="${keyArt}" alt="">
     <div class="title-content">
       <p class="eyebrow">Bellgrave Garden</p>${title}
-      <p>Carry Wick’s lantern through the swarm. Rekindle two wards and defeat the Hollow Warden.</p>
-      <div class="actions">${primary(startLabel, 'start')}${normalButton('Field Guide', 'guide')}${normalButton('Settings', 'settings')}</div>
+      <p>Carry Wick’s lantern from Bell Orchard to the Hollow Belltower.</p>
+      <div class="actions">${primary('Campaign', 'campaign')}${normalButton(startLabel, 'start')}${normalButton('Field Guide', 'guide')}${normalButton('Settings', 'settings')}</div>
       ${library}
     </div>
   </div>`;
@@ -192,8 +209,15 @@ function rewardView() {
     <div class="reward-cards">${offer.cards.map((id, i) => {
       const def = skills.get(id);
       const rank = (run!.build.get(id) ?? 0) + 1;
+      const campaign = run instanceof CampaignRun ? run : undefined;
+      const values = def ? run!.skillRank(id, rank) : {};
+      const dart = campaign && (id === 'wick-dart' || id === 'comet-thread');
+      const tuned = dart ? { ...values, damage: values.damage + campaign.kit.flatMainDamage,
+        intervalSec: fmt(values.intervalSec * (1 - campaign.kit.spellCooldownReductionPercent / 100)) } : values;
       const [name, details, synergy] = def
-        ? [def.name, spellStats(id, def.ranks[rank - 1]), shortSynergies[id] ?? def.synergy]
+        ? [def.name, spellStats(id, tuned) + (dart && values.splashFraction ?
+          ` ${percent(values.splashFraction)} splash · ${fmt((values.splashRadius + campaign.kit.splashRadiusAddPx) * (run!.rank('lantern-oil').areaMultiplier ?? 1))} px.` : ''),
+          shortSynergies[id] ?? def.synergy]
         : cardNotes[id];
       const label = def ? (def.recipe ? `${skills.get(def.recipe.active)!.name} V + ${skills.get(def.recipe.passive)!.name} II` : rank > 1 ? `Rank ${rank - 1} → ${rank}` : 'Learn · Rank 1') : '';
       return `<button type="button" class="card" data-card="${i}" ${i ? '' : 'data-focus'}>${def ? skillIcon(id) : ''}
@@ -209,6 +233,10 @@ function rewardView() {
 
 function resultView() {
   const active = run!;
+  if (active instanceof CampaignRun) {
+    const result = campaignResult(active.stage, active.result!, time(active.elapsed), settlement, active.lanternLost);
+    return headingPanel(result.title, result.body);
+  }
   const copy = {
     victory: ['Garden rekindled', 'The Hollow Warden fell. Wick’s lantern lights the garden again.'],
     hp: ['The lantern went out', 'Wick ran out of health. Keep moving and dash through danger.'],
@@ -228,6 +256,8 @@ function resultView() {
 function clearInput() {
   keys.clear();
   dash = false;
+  burst = false;
+  interact = false;
   const id = stickId;
   stickId = null;
   if (id !== null && stick.hasPointerCapture(id)) stick.releasePointerCapture(id);
@@ -250,6 +280,10 @@ function view(next: Mode) {
   screen.removeAttribute('aria-modal');
   screen.removeAttribute('aria-labelledby');
   if (next === 'title') screen.innerHTML = titleView();
+  if (next === 'camp') screen.innerHTML = `<div class="panel wide camp">${campHtml(camp, campaignRecords, time)}</div>`;
+  if (next === 'upgrade' && quote) screen.innerHTML = headingPanel('Confirm upgrade', quoteHtml(quote));
+  if (next === 'paused' || next === 'result') renderer?.clearEffects();
+  if (next !== 'running') run?.clearSpellEffects();
   if (next === 'settings') screen.innerHTML = settingsView();
   if (next === 'guide') screen.innerHTML = guideView();
   if (next === 'reward') {
@@ -261,9 +295,9 @@ function view(next: Mode) {
     ${normalButton('Restart', 'restart')}${normalButton('Quit', 'quit')}</div>`);
   if (next === 'rotate') screen.innerHTML = headingPanel('Rotate to play', `
     <p>Use landscape orientation to see the garden and both controls.</p>
-    <div class="actions">${primary(run ? 'Resume' : startLabel, run ? 'resume' : 'start')}${normalButton('Back', run ? 'pause' : 'title')}</div>`);
+    <div class="actions">${primary(run ? 'Resume' : startingCampaign ? 'Enter ' + camp.stage.name : startLabel, run ? 'resume' : startingCampaign ? 'campaign-start' : 'start')}${normalButton('Back', run ? 'pause' : 'title')}</div>`);
   if (next === 'confirm') screen.innerHTML = headingPanel(confirming === 'restart' ? 'Restart this run?' : 'Quit this run?', `
-    <p>Your current run will end.</p><div class="actions">${primary('Cancel', 'pause')}${normalButton(confirming === 'restart' ? 'Restart' : 'Quit', 'confirm')}</div>`);
+    <p>${run instanceof CampaignRun ? 'Your current attempt will end and unbanked gold and gear will be lost.' : 'Your current run will end.'}</p><div class="actions">${primary('Cancel', 'pause')}${normalButton(confirming === 'restart' ? 'Restart' : 'Quit', 'confirm')}</div>`);
   if (next === 'result') screen.innerHTML = resultView();
   if (next === 'running') {
     screen.replaceChildren();
@@ -288,14 +322,46 @@ function announce(text: string, duration = 300) {
   eventUntil = (run?.tick ?? 0) + duration;
 }
 
-function start() {
-  if (coarse.matches && portrait.matches) { view('rotate'); return; }
-  run = new GardenRun(crypto.getRandomValues(new Uint32Array(1))[0]);
+function start(campaign = false) {
+  startingCampaign = campaign;
+  if (coarse.matches && portrait.matches) {
+    run = null;
+    sound.clearEffects();
+    view('rotate');
+    return;
+  }
+  const seed = crypto.getRandomValues(new Uint32Array(1))[0];
+  if (campaign) {
+    campaignRecords.refresh();
+    if (!campaignRecords.unlocked(camp.stage.id)) { openCamp(); return; }
+    const weapon = campaignRecords.data.equipment.weapon;
+    run = new CampaignRun(camp.stage, seed, campaignRecords.stats, weapon, weapon ? campaignRecords.data.ranks[weapon] : 0,
+      new Set(Object.keys(campaignRecords.data.ranks)));
+  } else run = new GardenRun(seed);
+  board.setAttribute('aria-label', campaign ? camp.stage.name + ' arena' : 'Bellgrave Garden arena');
+  settlement = undefined;
   runId = crypto.randomUUID();
   sound.clearEffects();
   sound.theme('through-the-garden');
-  announce(coarse.matches ? 'Move with the joystick · Dash with your right thumb' : 'WASD or arrows to move · Space to dash', 365);
+  if (!campaign || !campaignRecords.data.cleared.length) {
+    announce(coarse.matches ? 'Move with the joystick · Dash with your right thumb' : 'WASD or arrows to move · Space to dash', 365);
+  } else announce('', 0);
   view('running');
+}
+function openCamp(keepSelection = false) {
+  run = null;
+  quote = undefined;
+  campaignRecords.refresh();
+  if (!keepSelection || !campaignRecords.unlocked(camp.stage.id)) {
+    camp.stage = stages[Math.min(campaignRecords.data.cleared.length, stages.length - 1)];
+  }
+  camp.panel = 'stages';
+  camp.slot = 'weapon';
+  camp.item = undefined;
+  camp.message = '';
+  sound.clearEffects();
+  sound.theme('moonlit-gate');
+  view('camp');
 }
 function backToTitle() {
   run = null;
@@ -312,16 +378,87 @@ function select(index: number) {
   const id = run?.offer?.cards[index];
   if (!id || !run?.choose(id)) return;
   if (id === 'comet-thread') announce('Comet Thread evolved');
-  if (run.picks === 1 && !run.wardComplete) announce('Follow the arrow to the nearest ward');
+  if (!(run instanceof CampaignRun) && run.picks === 1 && !run.wardComplete) announce('Follow the arrow to the nearest ward');
   view(run.offer ? 'reward' : 'running');
 }
-function finish() {
-  records.finalize(run!, runId);
+async function campaignWrite<T>(write: () => T): Promise<T> {
+  if (!navigator.locks) return write();
+  let acquired = false;
+  try {
+    return await navigator.locks.request(campaignKey, () => {
+      acquired = true;
+      return write();
+    });
+  } catch (error) {
+    if (acquired) throw error;
+    return write();
+  }
+}
+
+async function finish() {
+  const active = run!;
+  if (active instanceof CampaignRun) {
+    settling = true;
+    const attempt = { id: runId, stageId: active.stage.id, ...active.pending,
+      cleared: active.result === 'victory', elapsedMs: Math.round(active.elapsed * 1000) };
+    settlement = await campaignWrite(() => campaignRecords.settle(attempt));
+    settling = false;
+  } else records.finalize(active, runId);
   sound.theme(null);
   sound.clearEffects();
   sound.play(run!.result === 'victory' ? 'win' : 'lose');
-  notice.textContent = run!.result === 'victory' ? 'Victory. Garden rekindled.' : 'Run ended.';
+  notice.textContent = run!.result === 'victory' ? run instanceof CampaignRun ? 'Stage cleared.' : 'Victory. Garden rekindled.' : 'Run ended.';
   view('result');
+}
+
+async function campAction(action: string) {
+  if (mode !== 'camp' && mode !== 'upgrade') return;
+  if (action === 'campaign-start' || action === 'title') return;
+  if (mode === 'upgrade') {
+    if (!quote) return;
+    if (action === 'upgrade-confirm') {
+      const { item, rank } = quote;
+      quote = undefined;
+      const upgraded = await campaignWrite(() => campaignRecords.upgrade(item.id, rank));
+      camp.message = upgraded ? item.name + ' upgraded to +' + (rank + 1) : 'The price or rank changed. Check your equipment.';
+      if (mode !== 'upgrade') return;
+    }
+    if (action === 'upgrade-confirm' || action === 'upgrade-cancel') {
+      quote = undefined;
+      view('camp');
+      screen.querySelector<HTMLElement>('[data-action="upgrade-item"]')?.focus();
+    }
+    return;
+  }
+  camp.message = '';
+  campaignRecords.refresh();
+  if (action.startsWith('camp-panel-')) {
+    camp.panel = action.slice(11) as CampPanel;
+    camp.item = undefined;
+  } else if (action.startsWith('stage-')) {
+    const selected = stages.find(stage => stage.id === action.slice(6));
+    if (selected && campaignRecords.unlocked(selected.id)) camp.stage = selected;
+  } else if (action.startsWith('slot-')) {
+    const slot = action.slice(5) as Slot;
+    if (slots.includes(slot)) { camp.slot = slot; camp.item = undefined; }
+  } else if (action.startsWith('item-')) camp.item = action.slice(5);
+  else if (action === 'equip-item' || action === 'equip-starter') {
+    const slot = camp.slot;
+    const item = action === 'equip-item' ? camp.item : undefined;
+    if (await campaignWrite(() => campaignRecords.equip(slot, item))) camp.message = 'Equipment updated.';
+    if (mode !== 'camp') return;
+  } else if (action === 'upgrade-item') {
+    const item = items.get(camp.item ?? campaignRecords.data.equipment[camp.slot] ?? '');
+    const rank = item && campaignRecords.data.ranks[item.id];
+    const cost = typeof rank === 'number' && gear.upgradeCostByTargetRank[(rank + 1) as 1 | 2 | 3];
+    if (item && typeof rank === 'number' && cost && campaignRecords.data.wallet >= cost) {
+      quote = { item, rank, cost };
+      view('upgrade');
+      return;
+    }
+  }
+  view('camp');
+  screen.querySelector<HTMLElement>(`[data-action="${action}"]`)?.focus();
 }
 
 screen.addEventListener('click', event => {
@@ -329,8 +466,18 @@ screen.addEventListener('click', event => {
   if (!target) return;
   if (target.dataset.card !== undefined) { select(Number(target.dataset.card)); return; }
   const action = target.dataset.action;
+  if (action && (mode === 'camp' || mode === 'upgrade') && !['title', 'campaign-start'].includes(action)) {
+    void campAction(action);
+    return;
+  }
   if (action === 'title') backToTitle();
   if (action === 'start') start();
+  if (action === 'campaign') openCamp();
+  if (action === 'campaign-start') start(true);
+  if (action === 'campaign-continue' && run instanceof CampaignRun) {
+    if (settlement?.firstClear) camp.stage = stages[run.stage.order] ?? run.stage;
+    openCamp(true);
+  }
   if (action === 'pause') view('paused');
   if (action === 'resume') resume();
   if (action === 'settings') { settingsOrigin = run ? 'paused' : 'title'; view('settings'); }
@@ -342,7 +489,12 @@ screen.addEventListener('click', event => {
     screen.querySelector<HTMLElement>(`[data-action="${action}"]`)?.focus();
   }
   if (action === 'restart' || action === 'quit') { confirming = action; view('confirm'); }
-  if (action === 'confirm') { if (confirming === 'restart') start(); else backToTitle(); }
+  if (action === 'confirm') {
+    const campaign = run instanceof CampaignRun;
+    if (confirming === 'restart') start(campaign);
+    else if (campaign) openCamp(true);
+    else backToTitle();
+  }
   if (action === 'scarf-original' || action === 'scarf-dawn') {
     records.selectScarf(action === 'scarf-dawn' ? 'dawn-scarf' : '');
     applySettings();
@@ -371,12 +523,13 @@ function applySettings() {
     renderer.dawnScarf = records.data.cosmetics.selected === 'dawn-scarf';
   }
   game.classList.toggle('high-contrast', s.highContrast);
+  game.classList.toggle('reduced-motion', s.reducedMotion || systemReduced.matches);
   sound.apply(s);
   dirty = true;
 }
 
 const focusPause = () => {
-  if (mode === 'running' || mode === 'reward') view('paused');
+  if (!settling && (mode === 'running' || mode === 'reward')) view('paused');
 };
 get('pause').addEventListener('click', focusPause);
 window.addEventListener('blur', focusPause);
@@ -385,6 +538,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pointerdown', () => sound.unlock(), { passive: true });
 window.addEventListener('keydown', event => {
+  if (settling) return;
   if (!event.repeat) sound.unlock();
   if (mode === 'running' && movementKeys.has(event.code)) {
     event.preventDefault();
@@ -396,11 +550,18 @@ window.addEventListener('keydown', event => {
     event.preventDefault();
     dash = true;
   }
+  if (mode === 'running' && run instanceof CampaignRun && (event.code === 'KeyQ' || event.code === 'KeyE')) {
+    event.preventDefault();
+    if (event.code === 'KeyQ') burst = true;
+    else interact = true;
+  }
   if (event.code === 'Escape') {
     if (mode === 'running' || mode === 'reward' || mode === 'confirm') view('paused');
     else if (mode === 'paused') resume();
     else if (mode === 'settings') view(settingsOrigin);
-    else if (mode === 'guide' || mode === 'rotate' && !run) backToTitle();
+    else if (mode === 'upgrade') void campAction('upgrade-cancel');
+    else if (mode === 'rotate' && !run && startingCampaign) openCamp(true);
+    else if (mode === 'camp' || mode === 'guide' || mode === 'rotate' && !run) backToTitle();
     return;
   }
   if (mode === 'reward' && /^Digit[1-4]$/.test(event.code)) {
@@ -426,8 +587,12 @@ window.addEventListener('keydown', event => {
 window.addEventListener('keyup', event => keys.delete(event.code));
 systemReduced.addEventListener('change', applySettings);
 portrait.addEventListener('change', () => {
+  if (settling) return;
   if (mode === 'running' && coarse.matches && portrait.matches) view('rotate');
-  else if (mode === 'rotate' && !portrait.matches) view(run ? 'paused' : 'title');
+  else if (mode === 'rotate' && !portrait.matches) {
+    if (!run && startingCampaign) openCamp(true);
+    else view(run ? 'paused' : 'title');
+  }
   dirty = true;
 });
 
@@ -464,14 +629,20 @@ dashControl.addEventListener('click', event => {
   if (event.detail === 0 && mode === 'running') dash = true;
 });
 
+const burstControl = get<HTMLButtonElement>('burst');
+const interactControl = get<HTMLButtonElement>('interact');
+burstControl.addEventListener('click', () => { if (mode === 'running') burst = true; });
+interactControl.addEventListener('click', () => { if (mode === 'running') interact = true; });
+
 function renderHud() {
   if (!run || hud.hidden) return;
   const { tick, player, boss } = run;
+  const campaign = run instanceof CampaignRun ? run : undefined;
   game.dataset.state = mode;
   setText('health', `${player.hp} / ${player.maxHp} HP`);
   meter('hp-fill', player.hp / player.maxHp);
   setText('run-time', time(run.elapsed));
-  setText('run-chapter', boss
+  setText('run-chapter', campaign ? `Stage ${campaign.stage.order}/5 · ${campaign.stage.name}` : boss
     ? run.elapsed >= rules.normal.enrageSec ? `Final toll in ${time(Math.ceil(run.settings.hardLimitSec - run.elapsed))}` : 'Warden duel'
     : run.overrun ? `Overrun · ${time(Math.ceil(run.settings.riteDeadlineSec - run.elapsed))}` : 'Bellgrave Garden');
   setText('level', `Lv ${run.level}`);
@@ -482,15 +653,33 @@ function renderHud() {
   dashControl.dataset.ready = String(dashReady);
   const ward = run.nearestWard;
   const arrow = get('ward-arrow');
-  arrow.hidden = Boolean(boss);
-  arrow.style.transform = ward ? `rotate(${heading(player, ward)}rad)` : '';
-  arrow.textContent = ward ? '➜' : '✓';
-  setText('ward-title', ward?.name ?? `Ward Rites ${run.rites} / ${run.settings.ritesRequired}`);
-  setText('ward-info', ward
+  const marker = campaign ? campaign.objectivePoint : ward;
+  arrow.hidden = !marker && Boolean(boss);
+  arrow.style.transform = marker ? `rotate(${heading(player, marker)}rad)` : '';
+  arrow.textContent = marker ? '➜' : '✓';
+  setText('ward-title', campaign ? campaign.exitOpen ? 'Exit open' :
+    campaign.activeGroups.find(group => group === marker)?.label ?? 'Objective' : ward?.name ?? `Ward Rites ${run.rites} / ${run.settings.ritesRequired}`);
+  setText('ward-info', campaign ? campaign.objectiveText : ward
     ? distance(player, ward) <= ward.radius || ward.charge > 0
       ? `${fmt(ward.charge)} / ${run.settings.riteChargeSec} s · Rites ${run.rites}/2`
       : `${Math.round(distance(player, ward))} px · Rites ${run.rites}/2`
     : boss ? 'The Warden is awake' : 'Hold until 12:00');
+  get('campaign-combat').hidden = !campaign;
+  burstControl.hidden = !campaign;
+  interactControl.hidden = !campaign?.canInteract;
+  if (campaign) {
+    const context = campaign.canInteract;
+    setText('pending-gold', `◉ ${campaign.pending.gold}`);
+    setText('burst-state', campaign.burstReady ? `Burst ready${coarse.matches ? '' : ' · Q'}` : `Burst ${campaign.charge}%`);
+    meter('burst-fill', campaign.charge / gear.combat.lanternBurst.chargeMax);
+    burstControl.disabled = !campaign.burstReady;
+    burstControl.dataset.ready = String(campaign.burstReady);
+    get('interact-hint').hidden = !context || coarse.matches;
+    if (context) {
+      setText('interact', context);
+      setText('interact-hint', context + ' · E');
+    }
+  }
   get('guards').hidden = !run.build.has('mirror-ward');
   setText('guards', `Guard ${run.guards}/${run.rank('mirror-ward').charges ?? 0}`);
   get('boss-meter').hidden = !boss;
@@ -510,17 +699,19 @@ function renderHud() {
 }
 
 function frame(now: number) {
-  if (run && mode === 'running') {
+  if (run && mode === 'running' && !settling) {
     const axis = (one: string, two: string) => Number(keys.has(one) || keys.has(two));
     clock.advance((now - last) / 1000, () => {
       run!.step({
         x: Math.max(-1, Math.min(1, axis('KeyD', 'ArrowRight') - axis('KeyA', 'ArrowLeft') + touchVector.x)),
         y: Math.max(-1, Math.min(1, axis('KeyS', 'ArrowDown') - axis('KeyW', 'ArrowUp') + touchVector.y)),
-        dash,
+        dash, burst, interact,
       });
       dash = false;
+      burst = false;
+      interact = false;
       dirty = true;
-      if (run!.result) { finish(); return false; }
+      if (run!.result) { void finish(); return false; }
       if (run!.offer) { view('reward'); return false; }
       return true;
     });
@@ -535,10 +726,13 @@ function frame(now: number) {
       }
       if (cue.id === 'boss-phase') announce(run.boss?.phase === 3 ? 'Midnight · Watch for the second toll' : 'Briar · Find the gap between lanes', 210);
       if (cue.id === 'elite') announce(`${run.elite?.def.name ?? 'Elite'} · Defeat it for a catalyst`);
+      if (cue.id.startsWith('loot:')) announce(cue.id.slice(5), 165);
+      if (cue.id === 'exit-open') announce('Exit open · Collect nearby loot before leaving', 215);
       if (cue.id === 'ward') announce(`${run.lastWard?.name ?? 'Ward'} rekindled`);
       sound.play(cue.id);
     }
-    renderer.draw(run, cues);
+    renderer.draw(run, mode === 'running' ? cues : [], mode === 'running');
+    run.clearSpellEffects();
     renderHud();
     dirty = false;
   }

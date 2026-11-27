@@ -44,7 +44,7 @@ try {
   };
   collector(desktop);
   await desktop.goto(url);
-  await button(desktop, 'Start Run').waitFor();
+  await button(desktop, 'Survival').waitFor();
   assert.equal(await desktop.evaluate(() => window.msAudio.contexts), 0);
   await button(desktop, 'Field Guide').click();
   await button(desktop, 'Threats').click();
@@ -72,7 +72,7 @@ try {
   assert.equal(await desktop.evaluate(key => localStorage.getItem(key), saveKey), JSON.stringify(forestRecord));
   await desktop.screenshot({ path: join(evidence, 'settings.png') });
   await button(desktop, 'Back').click();
-  await button(desktop, 'Start Run').click();
+  await button(desktop, 'Survival').click();
   const ward = desktop.locator('#ward-info');
   const initialDistance = await ward.innerText();
   await desktop.keyboard.down('KeyW');
@@ -111,10 +111,10 @@ try {
   const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, deviceScaleFactor: 2 });
   collector(mobile);
   await mobile.goto(url);
-  await button(mobile, 'Start Run').tap();
+  await button(mobile, 'Survival').tap();
   await mobile.getByRole('heading', { name: 'Rotate to play' }).waitFor();
   await mobile.setViewportSize({ width: 844, height: 390 });
-  await button(mobile, 'Start Run').tap();
+  await button(mobile, 'Survival').tap();
   const stick = await mobile.locator('#stick').boundingBox();
   const dash = await mobile.locator('#dash').boundingBox();
   assert.ok(stick && dash);
@@ -148,7 +148,7 @@ try {
   await failure.getByRole('heading', { name: 'The garden could not load' }).waitFor();
   await failure.unroute(atlas);
   await button(failure, 'Retry').click();
-  await button(failure, 'Start Run').waitFor();
+  await button(failure, 'Survival').waitFor();
   console.log('Chromium', await browser.version(), 'settings persistence, Web Audio unlock/mute, keyboard, 2-touch dash, pointer cancel, rotation, library return, asset recovery PASS');
 } finally {
   await browser.close();

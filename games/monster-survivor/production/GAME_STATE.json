@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameId": "monster-survivor",
-  "baselineCommit": "ff54db362cc29e6e7f3796eaae04d695dbdd639c",
+  "baselineCommit": "85955db765164f52ea2cea2c4c0878321e81fc4c",
   "records": [
     {
       "id": "bellgrave-garden",
@@ -171,12 +171,174 @@
           "reports/RELEASE_QA.md"
         ]
       }
+    },
+    {
+      "id": "ms-campaign-v1",
+      "kind": "feature",
+      "intendedBehavior": "Enter Lantern Camp, clear and replay all five stages, and complete the Campaign after beating all three Warden phases.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/campaign.ts",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-campaign-gear",
+      "kind": "feature",
+      "intendedBehavior": "Collect and bank gold and permanent gear, equip four independent slots, and upgrade items through +3 across reloads.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/campaign-save.ts",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-campaign-weapon-effects",
+      "kind": "feature",
+      "intendedBehavior": "Play stronger early combat with splash, visibly different weapons and rank feedback, spell effects, and Lantern Burst.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/weapon-vfx.ts",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "bell-orchard",
+      "kind": "level",
+      "intendedBehavior": "Clear three patrols, defeat Thornback and confirm the exit.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "production/features/ms-campaign-v1/stages.json",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "venom-marsh",
+      "kind": "level",
+      "intendedBehavior": "Break three nests, dodge the Marsh Keeper\u2019s poison and projectiles, and confirm the exit.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "production/features/ms-campaign-v1/stages.json",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "candle-crypt",
+      "kind": "level",
+      "intendedBehavior": "Defend the lantern through two waves, defeat Discord Bell and confirm the exit.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "production/features/ms-campaign-v1/stages.json",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "thorn-gate",
+      "kind": "level",
+      "intendedBehavior": "Hunt both elites in either order to open the gate.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "production/features/ms-campaign-v1/stages.json",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "belltower",
+      "kind": "level",
+      "intendedBehavior": "Clear two patrols and all three Hollow Warden phases before confirming the final exit.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "production/features/ms-campaign-v1/stages.json",
+        "reports/CAMPAIGN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_QA.md"
+        ]
+      }
     }
   ],
   "knownGaps": [
     "G4 Normal Producer playtest and explicit release approval are pending.",
     "Firefox and WebKit installation was blocked. Physical Android and iOS and representative desktop hardware remain unchecked.",
-    "Normal is a candidate. S03 is the observed published preview. Studio approval is required for Released catalog metadata."
+    "The existing In Development preview ran the pinned Normal build per deployment HTTP and revision checks. Producer acceptance and any Released catalog change are separate decisions.",
+    "The Campaign candidate awaits Producer playtest, manual merge, and Pages deployment verification.",
+    "Scripted Campaign clears were below the target playtest duration band. Representative player pacing and physical-device performance remain unmeasured."
   ],
   "save": {
     "schema": "ai-game-studio:monster-survivor:v1",
@@ -185,7 +347,10 @@
       "src/save.ts",
       "tests/sim.test.ts",
       "reports/QA_REPORT.md",
-      "reports/RELEASE_QA.md"
+      "reports/RELEASE_QA.md",
+      "src/campaign-save.ts",
+      "production/features/ms-campaign-v1/SAVE_AND_QA.md",
+      "reports/CAMPAIGN_QA.md"
     ]
   },
   "publication": {
@@ -195,30 +360,31 @@
     "evidence": [
       "production/DECISIONS.md",
       "production/RIGHTS.md",
-      "production/RELEASE.md"
+      "production/RELEASE.md",
+      "reports/CAMPAIGN_QA.md"
     ]
   },
   "deployment": {
-    "deployedCommit": "ff54db362cc29e6e7f3796eaae04d695dbdd639c",
+    "deployedCommit": "85955db765164f52ea2cea2c4c0878321e81fc4c",
     "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/monster-survivor/",
-    "observedAt": "2026-11-27T05:15:04.057Z",
+    "observedAt": "2026-11-27T05:57:13.866Z",
     "checks": {
       "revision": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
         ]
       },
       "http": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45938886699"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
         ]
       },
       "gameplay": {
         "result": "NOT_RUN",
         "evidence": [
-          "production/DECISIONS.md"
+          "reports/CAMPAIGN_QA.md"
         ]
       }
     }

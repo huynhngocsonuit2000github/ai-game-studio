@@ -138,7 +138,8 @@ export class Sound {
   }
 
   play(id: string) {
-    const key = id as Sfx;
+    const key = (id === 'splash' ? 'bloom' : id === 'lantern-burst' ? 'ward' :
+      id.startsWith('loot:') || id === 'exit-open' ? 'select' : id) as Sfx;
     if (!this.ctx || this.suspended || this.config.mute || !Object.hasOwn(manifest.sfx, key)) return;
     const now = performance.now();
     if (now - (this.last.get(key) ?? -Infinity) < (key === 'xp' ? 110 : 65)) return;

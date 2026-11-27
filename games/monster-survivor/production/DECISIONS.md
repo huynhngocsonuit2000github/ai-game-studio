@@ -25,3 +25,7 @@ The preview source is the S03 tree merged and registered at `ff54db3` in PR #25.
 ## MS-510 · Normal balance
 
 Keep the authored spawn schedule, enemy HP bands, rites, recipe ranks and Warden HP. Taper the Normal-only ember value by wave time and give the Warden full vulnerability during recovery. Outside recovery the base damage multiplier is 0.25. The S03 release and save schema remain the rollback base. A graphics detail preference is optional in v1 and defaults to full detail for existing saves.
+
+## Campaign v1 batch authorization
+
+The Producer approved expansion design and the exact five additive payload files with zero replacements in pack `monster-survivor-campaign-v2`. The approved external request names MSC-10, MSC-20 and MSC-30 as one batch with intermediate reviews deferred. The candidate uses the game’s existing media grant and preview entry. Final acceptance and manual merge remain with the Producer. [Campaign brief](features/ms-campaign-v1/BRIEF.md) · [Campaign QA](../reports/CAMPAIGN_QA.md).
