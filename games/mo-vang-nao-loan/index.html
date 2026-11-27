@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Căn góc thả móc và kéo đủ vàng trước khi hết ca đào.">
+    <meta name="theme-color" content="#211524">
+    <title>Mỏ Vàng Náo Loạn</title>
+    <link rel="icon" href="./art/gold.png" type="image/png">
+    <link rel="stylesheet" href="./style.css">
+    <script type="module" src="./bootstrap.js"></script>
+  </head>
+  <body>
+    <main class="machine">
+      <header class="masthead">
+        <a class="back" href="../../#/" aria-label="Về thư viện trò chơi (Game Library)">‹ Thư viện</a>
+        <h1>Mỏ Vàng Náo Loạn</h1>
+        <div class="settings">
+          <button id="sound" type="button" aria-pressed="false" aria-label="Tắt âm thanh" title="Tắt âm thanh">♪</button>
+          <button id="motion" type="button" aria-pressed="false" aria-label="Giảm chuyển động" title="Giảm chuyển động">≈</button>
+        </div>
+      </header>
+      <section class="floor" aria-label="Bãi Vàng Đầu Ca">
+        <header class="mine-heading">
+          <span id="shift">MỎ 01</span>
+          <h2>Bãi Vàng Đầu Ca</h2>
+        </header>
+        <div class="gauges" aria-label="Thông tin ca đào">
+          <div class="gauge"><span>CÒN LẠI</span><strong id="clock">75,0 s</strong></div>
+          <div class="gauge"><span>THIẾU CHỈ TIÊU</span><strong id="shortfall">600 <small>vàng</small></strong></div>
+          <div class="gauge wallet"><span>VÍ VÀNG</span><strong id="wallet">0 <small>vàng</small></strong></div>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Chỉ tiêu ca đào" aria-valuemin="0" aria-valuemax="600" aria-valuenow="0">
+          <div id="progress"></div>
+        </div>
+        <div id="field" class="field">
+          <canvas id="mine" aria-label="Hang mỏ với dây móc ở giữa, vàng, đá và rương dưới lòng đất"></canvas>
+          <p id="feedback" class="feedback" role="status" hidden></p>
+          <div id="effects" class="effects" hidden></div>
+          <section id="panel" class="overlay" aria-label="Ca đào">
+            <div id="panel-content" class="slate"></div>
+          </section>
+        </div>
+        <footer class="controls">
+          <p id="hint">Canh hướng móc rồi nhấn <kbd>Space</kbd> hoặc chạm vào mỏ.</p>
+          <button id="action" type="button" class="primary" hidden>Thả móc</button>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>

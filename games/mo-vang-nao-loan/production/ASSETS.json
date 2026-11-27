@@ -1,0 +1,62 @@
+[
+  {
+    "id": "chest",
+    "runtime": "art/chest.png",
+    "source": "Original polygon illustration authored and rasterized for this pack",
+    "dimensions": [
+      128,
+      128
+    ],
+    "format": "RGBA PNG",
+    "thirdParty": "none",
+    "attribution": "none requested",
+    "redistribution": "Original project artwork for Producer use",
+    "publicPreview": "pending Producer approval",
+    "validation": "PNG decoded; atlas-independent"
+  },
+  {
+    "id": "gold",
+    "runtime": "art/gold.png",
+    "source": "Original polygon illustration authored and rasterized for this pack",
+    "dimensions": [
+      128,
+      128
+    ],
+    "format": "RGBA PNG",
+    "thirdParty": "none",
+    "attribution": "none requested",
+    "redistribution": "Original project artwork for Producer use",
+    "publicPreview": "pending Producer approval",
+    "validation": "PNG decoded; atlas-independent"
+  },
+  {
+    "id": "hook",
+    "runtime": "art/hook.png",
+    "source": "Original polygon illustration authored and rasterized for this pack",
+    "dimensions": [
+      128,
+      128
+    ],
+    "format": "RGBA PNG",
+    "thirdParty": "none",
+    "attribution": "none requested",
+    "redistribution": "Original project artwork for Producer use",
+    "publicPreview": "pending Producer approval",
+    "validation": "PNG decoded; atlas-independent"
+  },
+  {
+    "id": "rock",
+    "runtime": "art/rock.png",
+    "source": "Original polygon illustration authored and rasterized for this pack",
+    "dimensions": [
+      128,
+      128
+    ],
+    "format": "RGBA PNG",
+    "thirdParty": "none",
+    "attribution": "none requested",
+    "redistribution": "Original project artwork for Producer use",
+    "publicPreview": "pending Producer approval",
+    "validation": "PNG decoded; atlas-independent"
+  }
+]

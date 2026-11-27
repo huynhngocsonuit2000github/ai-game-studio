@@ -1,0 +1,323 @@
+{
+  "runtimeCommit": "3cca41749a5085362d8605861ee87eff72abadf4",
+  "artifactBase": "/ai-game-studio/",
+  "runs": [
+    {
+      "path": "chest-60",
+      "control": "Space",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 16.7,
+      "frameCount": 478,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.1333
+        },
+        {
+          "action": "latch",
+          "time": 2.4667,
+          "target": "chest"
+        },
+        {
+          "action": "bank",
+          "time": 6.1917,
+          "target": "chest",
+          "value": 350,
+          "roll": "cash"
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": true
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "safe-60",
+      "control": "Space",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 16.7,
+      "frameCount": 478,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.7583
+        },
+        {
+          "action": "latch",
+          "time": 2,
+          "target": "safe-left"
+        },
+        {
+          "action": "bank",
+          "time": 3.8333,
+          "target": "safe-left",
+          "value": 100
+        },
+        {
+          "action": "cast",
+          "time": 4.1917
+        },
+        {
+          "action": "latch",
+          "time": 5.4333,
+          "target": "safe-right"
+        },
+        {
+          "action": "bank",
+          "time": 7.2667,
+          "target": "safe-right",
+          "value": 100
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": true
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "safe-30",
+      "control": "touch",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 33.3,
+      "frameCount": 241,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.7583
+        },
+        {
+          "action": "latch",
+          "time": 2,
+          "target": "safe-left"
+        },
+        {
+          "action": "bank",
+          "time": 3.8333,
+          "target": "safe-left",
+          "value": 100
+        },
+        {
+          "action": "cast",
+          "time": 4.225
+        },
+        {
+          "action": "latch",
+          "time": 5.4667,
+          "target": "safe-right"
+        },
+        {
+          "action": "bank",
+          "time": 7.3,
+          "target": "safe-right",
+          "value": 100
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": true
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "chest-30",
+      "control": "touch",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 33.3,
+      "frameCount": 240,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.1583
+        },
+        {
+          "action": "latch",
+          "time": 2.4917,
+          "target": "chest"
+        },
+        {
+          "action": "bank",
+          "time": 6.2167,
+          "target": "chest",
+          "value": 350,
+          "roll": "cash"
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": true
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "vat-pham",
+      "control": "Space",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 16.7,
+      "frameCount": 478,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.1167
+        },
+        {
+          "action": "latch",
+          "time": 2.45,
+          "target": "chest"
+        },
+        {
+          "action": "bank",
+          "time": 6.175,
+          "target": "chest",
+          "value": 0,
+          "roll": "supply"
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": false
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "da",
+      "control": "Space",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 16.7,
+      "frameCount": 478,
+      "events": [
+        {
+          "action": "cast",
+          "time": 0.125
+        },
+        {
+          "action": "latch",
+          "time": 2.4583,
+          "target": "chest"
+        },
+        {
+          "action": "bank",
+          "time": 6.1833,
+          "target": "chest",
+          "value": 15,
+          "roll": "rock"
+        },
+        {
+          "action": "result",
+          "time": 8,
+          "passed": false
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    },
+    {
+      "path": "normal-mine",
+      "control": "Space",
+      "viewport": {
+        "width": 1366,
+        "height": 768
+      },
+      "browser": "156.0.8078.79",
+      "medianFrameMs": 16.7,
+      "frameCount": 900,
+      "events": [
+        {
+          "action": "cast",
+          "time": 2.875
+        },
+        {
+          "action": "latch",
+          "time": 3.4667,
+          "target": "gold-1"
+        },
+        {
+          "action": "bank",
+          "time": 4.3417,
+          "target": "gold-1",
+          "value": 100
+        },
+        {
+          "action": "cast",
+          "time": 7.125
+        },
+        {
+          "action": "latch",
+          "time": 8.7083,
+          "target": "gold-7"
+        },
+        {
+          "action": "bank",
+          "time": 11.2583,
+          "target": "gold-7",
+          "value": 220
+        },
+        {
+          "action": "cast",
+          "time": 11.775
+        },
+        {
+          "action": "latch",
+          "time": 13.5083,
+          "target": "gold-8"
+        },
+        {
+          "action": "bank",
+          "time": 16.3,
+          "target": "gold-8",
+          "value": 220
+        },
+        {
+          "action": "cast",
+          "time": 17.1417
+        },
+        {
+          "action": "latch",
+          "time": 18.4083,
+          "target": "gold-3"
+        },
+        {
+          "action": "bank",
+          "time": 20.275,
+          "target": "gold-3",
+          "value": 100
+        },
+        {
+          "action": "result",
+          "time": 75,
+          "passed": true
+        }
+      ],
+      "consoleAndNetworkErrors": []
+    }
+  ]
+}
