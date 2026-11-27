@@ -97,6 +97,23 @@ export class WeaponEffects {
       ctx.quadraticCurveTo(-2, 0, -8, 4); ctx.quadraticCurveTo(3, 8, 9, 0);
       ctx.fillStyle = bright;
       ctx.fill();
+    } else if (run.weapon === 'ember-lantern') {
+      const split = 3 + run.weaponRank;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.quadraticCurveTo(-4, -split, 11, -split);
+      ctx.lineTo(6, 0); ctx.lineTo(11, split);
+      ctx.quadraticCurveTo(-2, split + 2, -12, 0);
+      ctx.fillStyle = '#ff8c4d'; ctx.fill();
+      if (!low) this.shard(-3, 0, 9, '#ffd485', .24);
+    } else if (run.weapon === 'prism-lantern') {
+      this.shard(0, 0, 11 + run.weaponRank, '#c099fb', .63);
+      this.shard(0, -2, 7, '#f0dbff', .4);
+      if (!low) this.shard(-4, 3, 6, '#9f73e2');
+    } else if (run.weapon === 'warden-lantern') {
+      this.contour(7, '#fbe0a0', 2.2, [7, 3]);
+      this.shard(-3, 0, 10, '#fff3dd');
+      if (!low && trail) this.contour(12 + run.weaponRank, '#dec28580', 1.5, [4, 5]);
     } else this.shard(0, 0, comet ? 10 : 8, bright, .45);
     this.shard(3, 0, 4, white, .54);
   }
@@ -186,10 +203,14 @@ export class WeaponEffects {
     for (const effect of this.effects) {
       const initial = palettes[effect.spell];
       if (!initial) continue;
-      const [bright, dark] = effect.spell === 'wick-dart' && run.weapon ? accents[run.weapon] ?? initial : initial;
+      const main = effect.spell === 'wick-dart' || effect.spell === 'comet-thread';
+      const weapon = main ? run.weapon : undefined;
+      const [bright, dark] = weapon ? accents[weapon] ?? initial :
+        effect.spell === 'lantern-burst' && run.weapon === 'warden-lantern' ? ['#fff1d3', '#dcae6d'] : initial;
       const age = (run.tick - effect.tick) / lifetime(effect);
       ctx.save();
-      ctx.translate(effect.at.x, effect.at.y);
+      const muzzle = main && effect.kind === 'cast';
+      ctx.translate(effect.at.x + (muzzle ? (run.facing.x < -.1 ? -14 : 14) : 0), effect.at.y - (muzzle ? 15 : 0));
       ctx.globalAlpha = Math.max(0, 1 - age);
       if (effect.kind === 'spread' && effect.to) {
         const dx = effect.to.x - effect.at.x;
@@ -237,12 +258,18 @@ export class WeaponEffects {
         ctx.rotate(effect.angle ?? (effect.tick * .618) % tau);
         this.shard(cast ? 12 : 0, 0, cast ? 12 : 8, bright);
         this.shard(cast ? 14 : 0, 0, cast ? 7 : 4, white);
+        if (weapon === 'warden-lantern') {
+          const r = 7 + age * (motion ? 16 : 7);
+          this.contour(r, '#fff1d3', 2, [6, 4]);
+          if (!low) this.contour(r + 4 + run.weaponRank, '#c9944a', 1, [5, 5]);
+        }
         if (!cast && effect.spell === 'lantern-burst') this.contour(7 + age * 12, bright, 2);
-        const count = Math.min(particles, cast ? 0 : low || !motion ? 2 : 4);
+        const count = Math.min(particles, cast ? 0 : low || !motion ? 2 : weapon === 'prism-lantern' ? 5 : 4);
         particles -= count;
         for (let i = 0; i < count; i++) {
-          ctx.save(); ctx.rotate((i - 1.5) * 1.1);
-          this.shard(7 + (motion ? age * 20 : 5), 0, 3.5, i % 2 ? dark : bright);
+          ctx.save();
+          ctx.rotate(weapon === 'prism-lantern' ? i * tau / count : (i - 1.5) * (weapon === 'ember-lantern' ? .53 : 1.1));
+          this.shard(7 + (motion ? age * 20 : 5), 0, weapon === 'warden-lantern' ? 4.5 : 3.5, i % 2 ? dark : bright);
           ctx.restore();
         }
       }

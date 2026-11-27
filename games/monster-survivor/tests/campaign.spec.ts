@@ -69,11 +69,11 @@ async function frame(page: Page, info: TestInfo, name: string) {
 
 async function campAction(page: Page, slot: string, id: string, upgrade = false) {
   const item = items.get(id)!;
-  await button(page, upgrade ? 'Upgrades' : 'Equipment').click();
+  await button(page, 'Armory').click();
   await page.locator(`[data-action="slot-${slot}"]`).click();
   await page.locator(`[data-action="item-${id}"]`).click();
   if (upgrade) {
-    await button(page, /^Upgrade · /).click();
+    await button(page, /^Forge \+[1-3] · /).click();
     await button(page, 'Confirm upgrade').click();
   } else if (await button(page, 'Equip ' + item.name).count()) await button(page, 'Equip ' + item.name).click();
   await button(page, 'Back to stages').click();
@@ -89,7 +89,8 @@ function model(raw: string | null, selectedSeed = seed) {
 }
 
 test('clears all five Campaign stages through the assembled game and reloads the upgraded kit', async ({ page }, info) => {
-  test.setTimeout(180_000);
+  const paceOrchard = process.env.MSCP_PACED === '1';
+  test.setTimeout(paceOrchard ? 540_000 : 250_000);
   const faults: string[] = [];
   page.on('pageerror', error => faults.push(error.message));
   page.on('response', response => { if (response.status() >= 400) faults.push(response.status() + ' ' + response.url()); });
@@ -101,6 +102,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
   await expect(page.getByRole('heading', { name: 'Lantern Camp' })).toBeVisible();
   await expect(page.locator('.stage-choice:disabled')).toHaveCount(4);
   const summaries = [];
+  const beforeSeconds = [42.6167, 48.4167, 39.0167, 53.0167, 103.4167];
   for (const stage of stages) {
     const run = model(await page.evaluate(key => localStorage.getItem(key), campaignKey))(stage);
     await button(page, 'Enter ' + stage.name).click();
@@ -117,6 +119,9 @@ test('clears all five Campaign stages through the assembled game and reloads the
     let firstDraft: number | undefined;
     let peakFoes = 0;
     let bossBurstAt = 0;
+    let crowd = 0;
+    const beginWall = performance.now();
+    const encounters = new Set<string>();
     let next = steer(run);
     while (!run.result) {
       if (run.offer) {
@@ -150,6 +155,9 @@ test('clears all five Campaign stages through the assembled game and reloads the
         count++;
         const effects = run.spellEffects;
         peakFoes = Math.max(peakFoes, run.foes.length);
+        crowd += run.foes.length;
+        for (const group of run.activeGroups) if (group.state === 'active') encounters.add(group.key);
+        if (run.wardenGuards.size) marks.add('warden-guards');
         if (run.boss) phases.add(run.boss.phase);
         for (const effect of effects) seen.add(effect.spell + '/' + effect.kind);
         if (stage.order === 1) {
@@ -157,9 +165,10 @@ test('clears all five Campaign stages through the assembled game and reloads the
           if (effects.some(effect => effect.spell === 'wick-dart' && effect.kind === 'ring')) shot ??= record('splash', '03-rank-ii-splash');
           if (run.drops.some(drop => drop.kind === 'gear') && run.chests.some(chest => chest.open)) shot ??= record('loot', '04-orchard-loot');
         }
-        if (stage.order === 2 && effects.some(effect => effect.spell === 'wick-dart' && effect.kind === 'ring')) {
+        if (stage.order === 2 && effects.some(effect => effect.spell === 'wick-dart' && effect.kind === 'hit')) {
           shot ??= record('upgraded', '06-ember-lantern-volley');
         }
+        if (stage.order === 2 && run.venomLanes.length) shot ??= record('venom-lane', '06-marsh-venom-lane');
         if (stage.order === 3 && run.lantern && run.foes.length >= 18) shot ??= record('defense', '07-crypt-defense');
         if (stage.order === 4 && run.elite) shot ??= record('hunts', '08-thorn-gate-hunt');
         if (stage.order === 5 && run.boss?.state === 'windup') {
@@ -178,7 +187,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
         run.clearSpellEffects();
         run.cues.length = 0;
       } while (run.tick % 12 && !run.offer && !run.result && !shot);
-      await advance(page, batch, count);
+      await advance(page, batch, count, paceOrchard && stage.order === 1);
       if (shot) await frame(page, info, shot);
       if (run.tick % 12 === 0 && !run.result && !run.offer) next = steer(run);
     }
@@ -196,8 +205,15 @@ test('clears all five Campaign stages through the assembled game and reloads the
       expect([...phases]).toEqual([1, 2, 3]);
       await frame(page, info, '11-campaign-complete');
     }
-    summaries.push({ stage: stage.id, duration: run.elapsed, firstDraft, peakFoes, kills: run.kills, gold: run.pending.gold,
-      wallet: saved.wallet, hp: run.player.hp, phases: [...phases], effects: [...seen], marks: [...marks] });
+    const before = beforeSeconds[stage.order - 1];
+    const ratio = run.elapsed / before;
+    expect(ratio, stage.name + ' pacing ratio').toBeGreaterThanOrEqual(2.7);
+    expect(ratio, stage.name + ' pacing ratio').toBeLessThanOrEqual(3.3);
+    summaries.push({ stage: stage.id, baseline: before, duration: run.elapsed, ratio, firstDraft, peakFoes,
+      averageFoes: crowd / run.tick, damageTaken: [...run.damageTakenBy.values()].reduce((sum, amount) => sum + amount, 0),
+      kills: run.kills, gold: run.pending.gold, wallet: saved.wallet, hp: run.player.hp, loadout: run.kit,
+      weapon: run.weapon ?? 'wick-lantern', rank: run.weaponRank, encounters: [...encounters], phases: [...phases],
+      effects: [...seen], marks: [...marks], wallSec: (performance.now() - beginWall) / 1000, paced: paceOrchard && stage.order === 1 });
     await button(page, 'Continue').click();
     if (stage.order === 1) {
       expect(saved.wallet).toBeGreaterThanOrEqual(35);
@@ -205,7 +221,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
       await campAction(page, 'weapon', 'ember-lantern');
       await campAction(page, 'armor', 'patchcoat');
       await campAction(page, 'charm', 'amber-charm');
-      await button(page, 'Equipment').click();
+      await button(page, 'Armory').click();
       await page.locator('[data-action="slot-weapon"]').click();
       await frame(page, info, '05-camp-ember-lantern');
       await page.reload();
@@ -333,7 +349,7 @@ test('matches a dense Prism encounter across normal and Low Detail and measures 
 });
 
 test('touch layout exposes the joystick, chest, Burst, and camp transactions', async ({ browser }, info) => {
-  test.setTimeout(65_000);
+  test.setTimeout(120_000);
   const page = await browser.newPage({ viewport: { width: 844, height: 390 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 });
   await installClock(page);
   await page.goto(url);
@@ -392,14 +408,146 @@ test('touch layout exposes the joystick, chest, Burst, and camp transactions', a
   expect(run.result).toBe('victory');
   await expect(page.getByRole('heading', { name: 'Bell Orchard cleared' })).toBeVisible();
   await button(page, 'Continue').tap();
-  await button(page, 'Upgrades').tap();
+  await button(page, 'Armory').tap();
   await page.locator('[data-action="item-ember-lantern"]').tap();
-  await button(page, /^Upgrade · /).tap();
+  await button(page, /^Forge \+[1-3] · /).tap();
+  await button(page, 'Confirm upgrade').scrollIntoViewIfNeeded();
+  await frame(page, info, 'mobile-02-forge-confirmation');
   await button(page, 'Confirm upgrade').tap();
-  await button(page, 'Equipment').tap();
+  await expect(page.locator('.forge [role="status"]')).toContainText('upgraded to +1');
   await page.locator('[data-action="item-ember-lantern"]').tap();
   await button(page, 'Equip Ember Lantern').tap();
-  await expect(page.locator('.slot-choice').first()).toContainText('Ember Lantern +1');
-  await frame(page, info, 'mobile-02-upgraded-equipment');
+  await expect(page.locator('[data-action="item-ember-lantern"]')).toContainText('Equipped');
+  await page.screenshot({ path: info.outputPath('mobile-03-armory-and-forge.png'), fullPage: true, animations: 'disabled' });
   await page.close();
+});
+
+test('Forge shows equipped, empty, insufficient, and maximum states and rejects stale or repeated confirmation', async ({ page }, info) => {
+  const fixture = {
+    schemaVersion: 1, wallet: 46, ranks: { 'ember-lantern': 0, 'prism-lantern': 2, 'warden-lantern': 3 },
+    equipment: { weapon: 'ember-lantern' }, cleared: [], bestMs: {}, settled: [],
+  };
+  await page.addInitScript(({ key, fixture }) => { if (!localStorage.getItem(key)) localStorage.setItem(key, JSON.stringify(fixture)); },
+    { key: campaignKey, fixture });
+  await page.goto(url);
+  await button(page, 'Campaign').click();
+  await button(page, 'Armory').click();
+  const forge = page.locator('.forge');
+  const pictures = page.locator('.gear-card img');
+  await expect(pictures).toHaveCount(4);
+  for (const image of await pictures.all()) await image.evaluate(el => (el as HTMLImageElement).decode());
+  const select = (id: string) => page.locator(`[data-action="item-${id}"]`).click();
+  await select('ember-lantern');
+  await expect(page.locator('[data-action="item-ember-lantern"]')).toContainText('Equipped');
+  await expect(forge.locator('.forge-stats')).toContainText('+3 →+7');
+  await button(page, 'Test shot').click();
+  await expect(page.locator('.attack-demo')).toHaveAttribute('data-playing', 'true');
+  await frame(page, info, 'forge-01-equipped-and-demo');
+  await button(page, 'Forge +1 · 35 gold').click();
+  await expect(page.getByRole('heading', { name: 'Confirm upgrade' })).toBeVisible();
+  await frame(page, info, 'forge-02-confirmation');
+  // Model a parallel tab completing the same quote before the first tab confirms.
+  await page.evaluate(key => {
+    const save = JSON.parse(localStorage.getItem(key)!);
+    save.ranks['ember-lantern'] = 1;
+    save.wallet = 11;
+    localStorage.setItem(key, JSON.stringify(save));
+  }, campaignKey);
+  await button(page, 'Confirm upgrade').click();
+  await expect(forge.getByRole('status')).toContainText('rank changed');
+  await expect(page.locator('.camp-gold')).toContainText('11 gold');
+  await select('prism-lantern');
+  await expect(forge.getByText('Needs 119 more gold')).toBeVisible();
+  await expect(button(page, 'Forge +3 · 130 gold')).toBeDisabled();
+  await frame(page, info, 'forge-03-insufficient');
+  await select('warden-lantern');
+  await expect(forge.getByText('Maximum rank')).toBeVisible();
+  await frame(page, info, 'forge-04-maximum');
+  await page.locator('[data-action="slot-charm"]').click();
+  await expect(page.getByRole('heading', { name: 'Empty charm slot' })).toBeVisible();
+  await frame(page, info, 'forge-05-empty-charm');
+
+  await page.evaluate(key => {
+    const save = JSON.parse(localStorage.getItem(key)!);
+    save.wallet = 100;
+    localStorage.setItem(key, JSON.stringify(save));
+  }, campaignKey);
+  await page.locator('[data-action="slot-weapon"]').click();
+  await select('ember-lantern');
+  await button(page, 'Forge +2 · 75 gold').click();
+  await button(page, 'Confirm upgrade').evaluate(element => {
+    (element as HTMLButtonElement).click();
+    (element as HTMLButtonElement).click();
+  });
+  await expect(forge.getByRole('status')).toContainText('upgraded to +2');
+  await expect(forge).toHaveAttribute('data-forged', 'true');
+  await page.screenshot({ path: info.outputPath('forge-06-strike-and-success.png'), animations: 'allow' });
+  const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)!), campaignKey);
+  expect(saved.wallet).toBe(25);
+  expect(saved.ranks['ember-lantern']).toBe(2);
+  await page.reload();
+  await button(page, 'Campaign').click();
+  await button(page, 'Armory').click();
+  await expect(forge.locator('[aria-current="step"]')).toHaveText('+2');
+  await expect(page.locator('.camp-gold')).toContainText('25 gold');
+});
+
+test('clears Belltower with Warden Lantern +3 and captures a confirmed hit', async ({ page }, info) => {
+  test.setTimeout(150_000);
+  const stage = stages[4];
+  const fixture = {
+    schemaVersion: 1, wallet: 0,
+    ranks: { 'warden-lantern': 3, patchcoat: 3, 'marsh-boots': 3, 'bell-charm': 3 },
+    equipment: { weapon: 'warden-lantern', armor: 'patchcoat', boots: 'marsh-boots', charm: 'bell-charm' },
+    cleared: stages.slice(0, 4).map(entry => entry.id), settled: [],
+    bestMs: Object.fromEntries(stages.slice(0, 4).map(entry => [entry.id, 150000])),
+  };
+  await installClock(page);
+  const initial = JSON.stringify(fixture);
+  await page.addInitScript(({ key, initial }) => localStorage.setItem(key, initial), { key: campaignKey, initial });
+  await page.goto(url);
+  await button(page, 'Campaign').click();
+  await button(page, 'Enter Hollow Belltower').click();
+  const run = model(initial)(stage);
+  let input = steer(run);
+  let captured = false;
+  const phases = new Set<number>();
+  while (!run.result) {
+    if (run.offer) {
+      const card = choose(run);
+      await expect(page.locator('.card').first()).toBeVisible({ timeout: 3000 });
+      await page.waitForTimeout(150);
+      await page.keyboard.press(String(run.offer.cards.indexOf(card) + 1));
+      run.choose(card);
+      input = steer(run);
+      continue;
+    }
+    const batch = { ...input };
+    let count = 0;
+    let hit = false;
+    do {
+      run.step(input);
+      input = { ...input, dash: false, burst: false, interact: false };
+      count++;
+      if (run.boss) phases.add(run.boss.phase);
+      hit ||= !captured && !run.offer && run.tick > 300 && run.spellEffects.some(effect => effect.kind === 'hit' &&
+        (effect.spell === 'wick-dart' || effect.spell === 'comet-thread'));
+      run.clearSpellEffects();
+      run.cues.length = 0;
+    } while (run.tick % 12 && !run.offer && !run.result && !hit);
+    await advance(page, batch, count);
+    if (hit) {
+      await frame(page, info, 'warden-lantern-plus3-confirmed-hit');
+      captured = true;
+    }
+    if (run.tick % 12 === 0) input = steer(run);
+  }
+  expect(captured).toBe(true);
+  expect([...phases]).toEqual([1, 2, 3]);
+  expect(run.result).toBe('victory');
+  await expect(page.getByRole('heading', { name: 'Campaign complete' })).toBeVisible();
+  writeFileSync(info.outputPath('warden-plus3.json'), JSON.stringify({
+    duration: run.elapsed, kills: run.kills, damageTaken: [...run.damageTakenBy.values()].reduce((sum, amount) => sum + amount, 0),
+    hp: run.player.hp, stats: run.kit, phases: [...phases],
+  }, null, 2) + '\n');
 });

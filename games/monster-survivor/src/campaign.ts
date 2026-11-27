@@ -1,23 +1,29 @@
 import { enemies, rules } from './content.ts';
-import { campaignHash, gear, items, layouts, point, safetyTimeout } from './campaign-content.ts';
-import type { Pack, Stage, Stats } from './campaign-content.ts';
+import { campaignHash, gear, items, layouts, point } from './campaign-content.ts';
+import type { Stage, Stats } from './campaign-content.ts';
+import type { Encounter, Pack } from './campaign-encounters.ts';
 import { GardenRun } from './slice.ts';
 import { distance, dt, heading, outsideSolids, random, solidHit, ticks, vector } from './sim.ts';
 import type { Foe, Input, Point } from './sim.ts';
 
-type Group = Point & {
-  key: string; objective: string; label: string; kind: 'patrol' | 'nest' | 'defense' | 'leader';
-  pack?: Pack; enemy?: string; health?: number; waves?: Pack[]; waveDelay?: number; hazardDelay?: number;
+type Group = Point & Encounter & {
+  key: string; objective: string; kind: 'patrol' | 'nest' | 'defense' | 'leader';
   state: 'waiting' | 'active' | 'done'; ids: Set<number>; wave: number; next: number;
+  primary?: number; leaderSpawned: boolean;
 };
 type DropKind = 'gold' | 'gear' | 'heart' | 'magnet' | 'power-charm';
 export type CampaignDrop = Point & { kind: DropKind; gold: number; item?: string; born: number };
 type Poison = Point & { radius: number; due: number; expires: number };
+type VenomLane = { from: Point; to: Point; due: number; expires: number; width: number };
 
 const economy = gear.earnedGold;
 const balance = gear.combat;
 const activation = 190;
 const interactReach = 57;
+const leaderLootSeed: Record<string, string> = {
+  thornback: 'thornback-3', keeper: 'marsh-keeper-3', 'crypt-bell': 'crypt-bell-1',
+  'north-key': 'two-keys-0', 'south-key': 'two-keys-1', warden: 'hollow-warden-2',
+};
 const nestDef = { ...enemies.get('seedling')!, radius: 24 };
 
 export class CampaignRun extends GardenRun {
@@ -34,6 +40,9 @@ export class CampaignRun extends GardenRun {
   readonly pending = { gold: 0, gear: [] as string[] };
   drops: CampaignDrop[] = [];
   pools: Poison[] = [];
+  venomLanes: VenomLane[] = [];
+  private nextLane = 0;
+  private laneSide = 1;
   charge = balance.lanternBurst.chargeInitial;
   lantern?: Point & { hp: number; maxHp: number };
   lanternLost = false;
@@ -47,6 +56,8 @@ export class CampaignRun extends GardenRun {
   private burstKills = new Set<number>();
   private nests = new Set<number>();
   private keepers = new Set<number>();
+  private thornbacks = new Set<number>();
+  readonly wardenGuards = new Set<number>();
   private defenseAttack = new Map<number, number>();
   private cleared = new Set<string>();
   private objectiveIndex = 0;
@@ -80,38 +91,18 @@ export class CampaignRun extends GardenRun {
     this.spellSpeed = 1 - kit.spellCooldownReductionPercent / 100;
     this.mainDamage = kit.flatMainDamage;
     this.splashAdd = kit.splashRadiusAddPx;
-    const add = (objective: string, anchor: number[], label: string, detail: Pick<Group, 'kind' | 'pack' | 'enemy' | 'health' | 'waves' | 'waveDelay' | 'hazardDelay'>) => {
-      this.groups.push({ ...point(anchor), ...detail, objective, key: objective + '-' + this.groups.length,
-        label, state: 'waiting', ids: new Set(), wave: 0, next: 0 });
-    };
-    for (const objective of stage.objectives) {
-      switch (objective.kind) {
-        case 'clear-patrols':
-          objective.anchors.forEach((anchor, index) => add(objective.id, anchor, 'Patrol ' + (index + 1), { kind: 'patrol', pack: objective.packs[index] }));
-          break;
-        case 'destroy-nests':
-          objective.anchors.forEach((anchor, index) => add(objective.id, anchor, 'Venom Nest ' + (index + 1),
-            { kind: 'nest', pack: objective.guard, health: objective.hp, hazardDelay: objective.hazardSec }));
-          break;
-        case 'defend-lantern':
-          add(objective.id, objective.anchor, 'Defend the lantern', { kind: 'defense', health: objective.lanternHp,
-            waves: objective.waves, waveDelay: objective.nextWaveAfterClearSec });
-          break;
-        case 'hunt-elites':
-        case 'defeat-arena-leader':
-          for (const hunt of objective.kind === 'hunt-elites' ? objective.hunts : [objective]) {
-            const def = enemies.get(hunt.enemy)!;
-            add(objective.id, hunt.anchor, hunt.enemy === 'bottle' ? 'Marsh Keeper' : def.name,
-              { kind: 'leader', enemy: hunt.enemy, health: Math.round(def.hp * hunt.hpScale), pack: hunt.adds });
-          }
-          break;
+    for (const sweep of stage.sweeps) {
+      for (const encounter of sweep.encounters) {
+        const kind = encounter.defenseHp ? 'defense' : encounter.nestHp ? 'nest' : encounter.enemy ? 'leader' : 'patrol';
+        this.groups.push({ ...encounter, ...point(encounter.at), kind, objective: sweep.id, key: encounter.id,
+          state: 'waiting', ids: new Set(), wave: 0, next: 0, leaderSpawned: false });
       }
     }
   }
 
   override get xpGoal() {
     const n = this.level - 1;
-    return n === 0 ? 10 : 13 + 3 * n + Math.floor(.13 * n * n);
+    return n === 0 ? 10 : 14 + 4 * n + Math.floor(.46 * n * n);
   }
 
   override skillRank(id: string, rank: number) {
@@ -128,22 +119,28 @@ export class CampaignRun extends GardenRun {
 
   get burstReady() { return this.charge >= balance.lanternBurst.chargeMax; }
   get burstRadius() { return balance.lanternBurst.radiusPx + this.kit.burstRadiusAddPx; }
-  get exitOpen() { return this.objectiveIndex >= this.stage.objectives.length; }
-  get activeObjective() { return this.stage.objectives[this.objectiveIndex]?.id; }
+  get exitOpen() { return this.objectiveIndex >= this.stage.sweeps.length; }
+  get activeObjective() { return this.stage.sweeps[this.objectiveIndex]?.id; }
   get activeGroups() { return this.groups.filter(group => group.objective === this.activeObjective); }
   get objectivePoint() {
-    return this.exitOpen ? this.exit : this.activeGroups.filter(group => group.state !== 'done')
+    if (this.exitOpen) return this.exit;
+    const groups = this.activeGroups;
+    return groups.find(group => group.state === 'active') ?? groups.filter(group => group.state === 'waiting')
       .reduce<Group | undefined>((best, group) => !best || distance(group, this.player) < distance(best, this.player) ? group : best, undefined);
   }
   get objectiveText() {
     if (this.exitOpen) return 'Reach the exit and confirm';
+    if (this.wardenGuards.size) return 'Break the Warden’s guard · ' + this.wardenGuards.size + ' left';
     const groups = this.activeGroups;
-    if (this.lantern && groups[0].kind === 'defense') {
-      const { wave, waves, next } = groups[0];
-      const countdown = next > this.tick ? ' · Next in ' + Math.ceil((next - this.tick) * dt) + ' s' : '';
-      return `Wave ${wave}/${waves!.length} · ${Math.ceil(this.lantern.hp)} HP${countdown}`;
+    const phase = `Phase ${this.objectiveIndex + 1}/${this.stage.sweeps.length}`;
+    const active = groups.find(group => group.state === 'active');
+    if (!active) return phase + ' · ' + this.stage.sweeps[this.objectiveIndex].label;
+    if (this.lantern && active.kind === 'defense') {
+      const assault = active.recoveryAfter ? (active.wave > active.recoveryAfter ? 'Assault 2' : 'Assault 1') : 'Ambush';
+      return `${phase} · ${assault} · ${Math.ceil(this.lantern.hp)} HP`;
     }
-    return `${groups.filter(group => group.state === 'done').length}/${groups.length} · ${groups.some(group => group.state === 'active') ? 'Fight' : 'Approach'}`;
+    if (active.leaderSpawned || active.nestHp && active.wave === active.waves.length) return phase + ' · Defeat the target';
+    return `${phase} · Wave ${active.wave}/${active.waves.length}`;
   }
   get canInteract() {
     if (this.exitOpen && this.reachable(this.exit)) return 'Exit';
@@ -158,11 +155,12 @@ export class CampaignRun extends GardenRun {
   protected override hurt(amount: number, source = 'hazard') {
     const reduction = source === 'bog-brewer-shot' ? this.kit.projectileReductionPercent :
       enemies.has(source) ? this.kit.contactReductionPercent : 0;
-    const scale = this.stage.order === 1 ? .72 : this.stage.order === 2 ? .79 : .87;
+    const scale = this.stage.order === 1 ? .66 : this.stage.order === 2 ? .73 : .82;
     super.hurt(Math.max(1, Math.round(amount * scale * (1 - reduction / 100))), source);
   }
 
   protected override hit(foe: Foe, amount: number, source: string, at?: Point, angle?: number) {
+    if (foe.def.role === 'boss' && this.wardenGuards.size) return;
     super.hit(foe, amount * (this.tick < this.powerUntil ? 1.18 : 1), source, at, angle);
   }
 
@@ -170,9 +168,10 @@ export class CampaignRun extends GardenRun {
     return distance(at, this.player) <= interactReach && solidHit(this.player, at, 0, this.arena) === Infinity;
   }
 
-  private findSpawn(at: Point, radius: number, minimum: number, reach: number) {
+  private findSpawn(at: Point, radius: number, minimum: number, reach: number, flank?: number) {
     for (let i = 0; i < 36; i++) {
-      const angle = this.localRng() * Math.PI * 2;
+      const roll = this.localRng();
+      const angle = flank === undefined ? roll * Math.PI * 2 : flank + (roll - .5) * (i < 22 ? 1.4 : Math.PI * 2);
       const direction = vector(angle);
       const gap = reach * (.62 + this.localRng() * .38);
       const margin = 40 + radius;
@@ -185,11 +184,11 @@ export class CampaignRun extends GardenRun {
     return undefined;
   }
 
-  private spawnPack(at: Point, pack: Pack, minimum: number, reach: number, group?: Group) {
+  private spawnPack(at: Point, pack: Pack, minimum: number, reach: number, group?: Group, flank?: number) {
     for (const [id, count] of Object.entries(pack)) {
       const def = enemies.get(id)!;
       for (let index = 0; index < count; index++) {
-        const spot = this.findSpawn(at, def.radius, minimum, reach);
+        const spot = this.findSpawn(at, def.radius, minimum, reach, flank);
         if (!spot) continue;
         const hp = id === 'seedling' ? [20, 29, 31, 35, 38][this.stage.order - 1]
           : id === 'moth' && this.stage.order === 2 ? 30 : def.hp;
@@ -201,26 +200,50 @@ export class CampaignRun extends GardenRun {
 
   private activate(group: Group) {
     group.state = 'active';
-    if (group.kind === 'defense') {
-      this.lantern = { x: group.x, y: group.y, hp: group.health!, maxHp: group.health! };
-      group.next = this.tick;
+    group.next = this.tick;
+    if (group.defenseHp) {
+      this.lantern = { x: group.x, y: group.y, hp: group.defenseHp, maxHp: group.defenseHp };
     }
-    if (group.pack) this.spawnPack(group, group.pack, 115, group.kind === 'leader' ? 175 : 145, group.kind === 'patrol' ? group : undefined);
-    if (group.kind === 'nest' || group.kind === 'leader') {
-      const foe = this.spawn(group.enemy ?? 'seedling', group.health, group)!;
-      group.ids.add(foe.id);
-      if (group.kind === 'nest') {
-        foe.def = nestDef;
-        this.nests.add(foe.id);
-        group.next = this.tick + ticks(2);
-      } else if (group.enemy === 'bottle') {
-        foe.def = { ...foe.def, name: 'Marsh Keeper', role: 'elite', radius: 24 };
-        foe.state = 'arrival';
-        foe.until = this.tick + ticks(1);
-        this.keepers.add(foe.id);
-      }
-      if (group.kind === 'leader') this.emit(group.enemy === 'warden' ? 'boss-arrival' : 'elite', foe);
+  }
+
+  private startWave(group: Group) {
+    const wave = group.waves[group.wave++];
+    this.spawnPack(group, wave.pack, group.defenseHp ? 145 : 115,
+      wave.reach ?? (group.defenseHp ? 260 : 195), group, wave.flank);
+  }
+
+  private spawnLeader(group: Group) {
+    const id = group.enemy ?? 'seedling';
+    const def = enemies.get(id)!;
+    const foe = this.spawn(id, group.nestHp ?? Math.round(def.hp * (group.hpScale ?? 1)), group)!;
+    group.ids.add(foe.id);
+    group.primary = foe.id;
+    group.leaderSpawned = true;
+    if (group.nestHp) {
+      foe.def = nestDef;
+      this.nests.add(foe.id);
+      group.next = this.tick + ticks(1.6);
+      return;
     }
+    if (id === 'bottle') {
+      foe.def = { ...foe.def, name: 'Marsh Keeper', role: 'elite', radius: 24 };
+      foe.state = 'arrival';
+      foe.until = this.tick + ticks(1);
+      this.keepers.add(foe.id);
+    }
+    if (id === 'thornback') this.thornbacks.add(foe.id);
+    this.emit(id === 'warden' ? 'boss-arrival' : 'elite', foe);
+  }
+
+  private venomLane() {
+    const p = this.player;
+    const horizontal = this.laneSide > 0;
+    this.laneSide *= -1;
+    const from = horizontal ? { x: p.x - 250, y: p.y } : { x: p.x, y: p.y - 210 };
+    const to = horizontal ? { x: p.x + 250, y: p.y } : { x: p.x, y: p.y + 210 };
+    const due = this.tick + ticks(1.2);
+    this.venomLanes.push({ from, to, due, expires: due + ticks(1.45), width: 28 });
+    this.emit('telegraph', p);
   }
 
   private poison(at: Point, radius: number, delay: number) {
@@ -237,31 +260,72 @@ export class CampaignRun extends GardenRun {
       this.spawnPack(start, { seedling: 8 }, 128, 90);
     }
     const alive = this.foes.filter(foe => foe.def.role === 'normal').length;
-    const current = this.stage.objectives[this.objectiveIndex];
-    const ambientCap = current?.kind === 'clear-patrols' ? current.ambientNormalCap : 15;
-    if (!this.exitOpen && !this.boss && !this.activeGroups.some(group => group.kind === 'leader' && group.state === 'active') &&
-        this.tick >= this.ambientAt && alive < ambientCap) {
-      this.ambientAt = this.tick + ticks(this.stage.order === 1 ? 8 : 6);
-      const foe = this.stage.order > 1 && this.localRng() < .55 ? 'moth' : 'seedling';
-      this.spawnPack(this.player, { [foe]: Math.min(5, ambientCap - alive) }, 225, 350);
+    const groups = this.activeGroups;
+    if (!this.exitOpen && !this.boss && !groups.some(group => group.leaderSpawned && group.enemy && group.state === 'active') &&
+        this.tick >= this.ambientAt && alive < this.stage.ambientCap) {
+      this.ambientAt = this.tick + ticks(this.stage.ambientSec);
+      const id = this.stage.order > 1 && this.localRng() < .55 ? 'moth' : 'seedling';
+      const number = this.stage.order <= 2 ? 6 : 7;
+      this.spawnPack(this.player, { [id]: Math.min(number, this.stage.ambientCap - alive) }, 225, 350);
     }
-    for (const group of this.activeGroups) {
-      if (group.state === 'waiting' && distance(this.player, group) <= activation) this.activate(group);
-      if (group.state !== 'active') continue;
-      if (group.kind === 'nest' && this.tick >= group.next && distance(this.player, group) < 270) {
-        group.next = this.tick + ticks(5);
-        this.poison({ x: this.player.x + this.facing.x * 30, y: this.player.y + this.facing.y * 30 }, 57, group.hazardDelay!);
+    const choice = this.stage.sweeps[this.objectiveIndex]?.chooseCrossing;
+    for (const group of groups) {
+      if (group.state === 'waiting' && !groups.some(other => other.state === 'active') && distance(this.player, group) <= activation) {
+        this.activate(group);
+        if (choice) for (const other of groups) if (other !== group) other.state = 'done';
       }
-      if (group.kind === 'defense' && !group.ids.size && group.wave < group.waves!.length && this.tick >= group.next) {
-        this.spawnPack(group, group.waves![group.wave], 145, 275, group);
-        group.wave++;
+      if (group.state !== 'active' || this.tick < group.next) continue;
+      if (!group.ids.size) {
+        if (group.wave < group.waves.length) this.startWave(group);
+        else if (!group.leaderSpawned && (group.enemy || group.nestHp)) this.spawnLeader(group);
       }
+      if (group.nestHp && group.primary && group.ids.has(group.primary) && distance(this.player, group) < 290) {
+        group.next = this.tick + ticks(4.1);
+        if (this.stage.order === 2) this.venomLane();
+        else this.poison(this.player, 49, 1.05);
+      }
+    }
+    const marsh = this.stage.order === 2 && groups.some(group => group.state === 'active') && !this.exitOpen;
+    if (marsh && this.tick >= this.nextLane) {
+      this.nextLane = this.tick + ticks(8);
+      if (!this.venomLanes.length) this.venomLane();
     }
     this.pools = this.pools.filter(pool => pool.expires > this.tick);
+    this.venomLanes = this.venomLanes.filter(lane => lane.expires > this.tick);
+  }
+
+  protected override updateBoss(foe: Foe, range: number) {
+    const phase = foe.phase;
+    const attack = foe.state === 'attack';
+    super.updateBoss(foe, range);
+    if (foe.phase !== phase) {
+      this.dropRecovery(foe, 'heart');
+      const start = this.foes.length;
+      this.spawnPack(foe, foe.phase === 2 ? { moth: 10, scarab: 6, bottle: 4 } : { moth: 12, scarab: 5, bells: 7, bottle: 4 },
+        165, 315);
+      for (const guard of this.foes.slice(start)) this.wardenGuards.add(guard.id);
+    } else if (foe.phase === 3 && attack && foe.state === 'recover' && foe.attack === 'lanes') {
+      // A shorter pause queues the cleave. The completed lane attack has ended before its tell begins.
+      foe.until = this.tick + ticks(.4);
+    }
+  }
+
+  private dropRecovery(at: Point, kind: 'heart' | 'power-charm' = 'heart') {
+    const spot = this.findSpawn(at, 10, 0, 78) ?? at;
+    this.addDrop({ ...spot, kind, gold: 0, born: this.tick });
   }
 
   protected override foeAction(foe: Foe) {
     if (this.nests.has(foe.id)) return true;
+    if (this.thornbacks.has(foe.id) && this.stage.order === 1 && foe.hp < foe.maxHp * .56) {
+      if (foe.state === 'recover' && this.tick >= foe.until) {
+        const fast = ++foe.casts % 2 === 1;
+        foe.def = { ...foe.def, behavior: { ai: 'charge',
+          windup: fast ? .78 : 1.06, chargeSpeed: fast ? 337 : 232,
+          chargeSec: fast ? .43 : .7, triggerRange: fast ? 210 : 260, recovery: fast ? 1.25 : 1.1,
+        } };
+      }
+    }
     if (this.keepers.has(foe.id)) {
       const def = foe.def.behavior;
       const range = distance(foe, this.player);
@@ -300,13 +364,23 @@ export class CampaignRun extends GardenRun {
     return true;
   }
 
+  inVenomLane(lane: VenomLane, at: Point) {
+    return at.x >= lane.from.x - lane.width && at.x <= lane.to.x + lane.width &&
+      at.y >= lane.from.y - lane.width && at.y <= lane.to.y + lane.width;
+  }
+
   protected override action(input: Input) {
     for (const pool of this.pools) {
       if (pool.due > this.tick || distance(this.player, pool) > pool.radius) continue;
       this.hurt(10, 'venom-pool');
       this.slowUntil = this.tick + ticks(.45);
     }
-    if (this.player.hp <= 0 || this.lantern?.hp === 0 || this.tick >= ticks(safetyTimeout)) return;
+    for (const lane of this.venomLanes) {
+      if (this.tick < lane.due || !this.inVenomLane(lane, this.player)) continue;
+      this.hurt(9, 'venom-lane');
+      this.slowUntil = this.tick + ticks(.35);
+    }
+    if (this.player.hp <= 0 || this.lantern?.hp === 0 || this.tick >= ticks(this.stage.safetyTimeout)) return;
     if (input.burst && this.burstReady) {
       const burst = balance.lanternBurst;
       this.charge = 0;
@@ -354,6 +428,7 @@ export class CampaignRun extends GardenRun {
   }
 
   protected override death(foe: Foe) {
+    if (this.wardenGuards.delete(foe.id) && !this.wardenGuards.size) this.emit('ward', foe);
     if (this.nests.delete(foe.id)) {
       this.groups.find(group => group.ids.has(foe.id))?.ids.delete(foe.id);
       this.gainXp(12);
@@ -364,7 +439,14 @@ export class CampaignRun extends GardenRun {
     const tracked = this.groups.find(group => group.ids.has(foe.id));
     if (tracked) {
       tracked.ids.delete(foe.id);
-      if (tracked.kind === 'defense' && !tracked.ids.size) tracked.next = this.tick + ticks(tracked.waveDelay!);
+      if (!tracked.ids.size && tracked.wave < tracked.waves.length) {
+        const rest = tracked.recoveryAfter === tracked.wave;
+        tracked.next = this.tick + ticks(rest ? 4 : tracked.kind === 'defense' ? 1.2 : 0);
+        if (rest) {
+          this.dropRecovery(tracked);
+          if (this.lantern) this.lantern.hp = Math.min(this.lantern.maxHp, this.lantern.hp + 38);
+        }
+      }
     }
     const leader = foe.def.role !== 'normal';
     const drop = Math.min(leader ? economy.eliteKill : economy.normalKill, this.stage.enemyGoldCap - this.goldDropped);
@@ -378,9 +460,12 @@ export class CampaignRun extends GardenRun {
     }
     if (leader) {
       const pool = gear.chests.pools[this.stage.chests[0].pool];
-      this.dropGear({ x: foe.x - 16, y: foe.y }, pool, tracked?.key ?? foe.def.id);
+      const offset = { x: foe.x - 16, y: foe.y };
+      this.dropGear(outsideSolids(offset, rules.player.radius, this.arena) ? offset : foe,
+        pool, tracked ? leaderLootSeed[tracked.key] ?? tracked.key : foe.def.id);
       if (foe.def.role === 'boss') this.drop(foe, 'chest', 1);
       this.keepers.delete(foe.id);
+      this.thornbacks.delete(foe.id);
     } else if (this.kills >= this.nextBoostAt) {
       const booster = (['heart', 'magnet', 'power-charm'] as const)[Math.floor(this.nextBoostAt / 15 - 1) % 3];
       this.addDrop({ x: foe.x + 12, y: foe.y, kind: booster, gold: 0, born: this.tick });
@@ -427,14 +512,19 @@ export class CampaignRun extends GardenRun {
     if (!groups.length || this.lantern?.hp === 0 && groups[0].kind === 'defense') return;
     for (const group of groups) {
       if (group.state !== 'active') continue;
-      if (group.ids.size || group.kind === 'defense' && group.wave < group.waves!.length) continue;
+      if (group.ids.size || group.wave < group.waves.length || !group.leaderSpawned && (group.nestHp || group.enemy)) continue;
       group.state = 'done';
       this.gainXp(5);
     }
     if (groups.every(group => group.state === 'done')) {
       this.cleared.add(this.activeObjective!);
       this.objectiveIndex++;
+      this.venomLanes.length = 0;
       if (this.exitOpen) this.emit('exit-open', this.exit);
+      else {
+        this.addDrop({ ...this.player, kind: 'heart', gold: 0, born: this.tick });
+        this.emit('ward', this.player);
+      }
     }
   }
 
@@ -446,6 +536,6 @@ export class CampaignRun extends GardenRun {
     else if (this.lantern?.hp === 0 && this.activeGroups.some(group => group.kind === 'defense')) {
       this.lanternLost = true;
       this.result = 'rite';
-    } else if (this.tick >= ticks(safetyTimeout)) this.result = 'time';
+    } else if (this.tick >= ticks(this.stage.safetyTimeout)) this.result = 'time';
   }
 }

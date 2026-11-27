@@ -299,53 +299,15 @@ button[data-action^="scarf-"][aria-pressed="true"] { outline: 2px solid var(--go
   z-index: 1;
 }
 
-.camp-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.camp-gold { color: var(--gold); white-space: nowrap; font-weight: 700; }
-.camp .camp-tabs { margin-top: 4px; }
+.camp-head { display: flex; justify-content: space-between; }
+.camp-gold { white-space: nowrap; font-weight: 700; }
 .camp [aria-pressed='true'] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
-.camp-stages, .camp-slots { display: grid; gap: 7px; margin: 15px 0 10px; }
-.camp-stages { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-.camp-slots { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-.stage-choice, .slot-choice { display: grid; gap: 5px; align-content: center; text-align: left; min-height: 68px; padding: 8px 10px; }
+.stage-choice, .slot-choice { display: grid; gap: 5px; align-content: center; text-align: left; padding: 8px 10px; }
 .stage-choice small, .slot-choice small { font-weight: 500; color: var(--muted); }
-.slot-choice small { text-transform: capitalize; }
-.camp-inventory { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(95px, .8fr); gap: 10px; }
-.camp .camp-items { margin: 0; align-content: start; }
-.camp-compare { padding: 9px 12px; background: #101c20; border: 1px solid var(--line); border-radius: 5px; }
-.camp-compare strong, .camp-compare small { display: block; }
-.camp-compare small { color: var(--muted); }
-.camp-compare p, .camp-compare ul { margin: 6px 0 0; font-size: .88rem; }
-.camp-compare ul { padding-left: 18px; color: var(--ink); }
 .camp-note { margin: 8px 0 0; font-size: .84rem; }
 .camp-note:empty { display: none; }
 [data-rarity='uncommon'] { color: #a6f4f3; }
 [data-rarity='rare'] { color: #deb8ff; }
-.camp-weapon {
-  --core: #ffdf9a;
-  --trail: #e28b3d;
-  position: relative;
-  overflow: hidden;
-  min-height: 62px;
-  background: radial-gradient(ellipse at center, #72512d5c, #131e22);
-  border: 1px solid var(--line);
-  border-radius: 5px;
-}
-.camp-weapon[data-weapon='ember-lantern'] { --trail: #fa7138; }
-.camp-weapon[data-weapon='prism-lantern'] { --core: #e7d2ff; --trail: #a588eb; }
-.camp-weapon[data-weapon='warden-lantern'] { --core: #fff9dc; --trail: #ab6e35; }
-.camp-weapon i, .camp-weapon b { position: absolute; top: 48%; left: 22%; height: 10px; width: 57px; animation: shot-preview 1.15s ease-out infinite; }
-.camp-weapon i {
-  background: linear-gradient(90deg, transparent, var(--trail), var(--core) 82%, #fffbed);
-  clip-path: polygon(100% 50%, 77% 0, 63% 30%, 0 46%, 63% 67%, 77% 100%);
-}
-.camp-weapon b { height: 15px; background: var(--trail); opacity: .55; clip-path: polygon(84% 20%, 0 0, 49% 36%, 64% 50%, 51% 65%, 0 100%, 83% 82%, 94% 50%); }
-.camp-weapon[data-weapon='starter'] b { display: none; }
-.camp-weapon[data-rank='0'] b { width: 29px; }
-.camp-weapon[data-rank='1'] b { width: 40px; }
-.camp-weapon[data-rank='2'] b { width: 49px; }
-@keyframes shot-preview { from { transform: translateX(-52%); } to { transform: translateX(55%); } }
-@media (prefers-reduced-motion: reduce) { .camp-weapon i, .camp-weapon b { animation: none; } }
-#game.reduced-motion .camp-weapon i, #game.reduced-motion .camp-weapon b { animation: none; }
 .hud-bottom:has(#campaign-combat:not([hidden])) { grid-template-columns: minmax(95px, 1fr) auto auto minmax(122px, .55fr); }
 #campaign-combat { min-width: 120px; }
 #campaign-combat .burst span { background: #f3bd6b; }
@@ -362,18 +324,6 @@ button[data-action^="scarf-"][aria-pressed="true"] { outline: 2px solid var(--go
 .touch-actions button { pointer-events: auto; touch-action: none; user-select: none; }
 .touch-actions #burst, .touch-actions #interact { min-height: 49px; color: #ffe3a6; background: #3d3021f2; border-color: #d7af77; }
 .touch-actions #interact { margin-bottom: 28px; }
-@media (max-width: 740px) {
-  .camp-stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .camp-slots { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .camp-inventory { grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr); }
-  .camp-weapon { grid-column: 1 / -1; }
-}
 @media (max-height: 520px) and (orientation: landscape) {
-  .camp-stages { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .camp-slots { grid-template-columns: repeat(4, minmax(0, 1fr)); }
-  .camp-inventory { grid-template-columns: minmax(0, 1fr) minmax(0, 1.45fr) minmax(80px, .6fr); }
-  .camp-weapon { grid-column: auto; }
-  .stage-choice, .slot-choice { min-height: 47px; gap: 2px; }
-  .camp-compare { padding: 5px 8px; }
   .touch-actions { bottom: max(48px, calc(env(safe-area-inset-bottom) + 46px)); }
 }

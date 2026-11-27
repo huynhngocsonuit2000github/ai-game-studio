@@ -1,5 +1,7 @@
 import gear from '../production/features/ms-campaign-v1/gear.json' with { type: 'json' };
 import data from '../production/features/ms-campaign-v1/stages.json' with { type: 'json' };
+import { pacing } from './campaign-encounters.ts';
+import type { Sweep } from './campaign-encounters.ts';
 import type { Point } from './sim.ts';
 
 export const slots = ['weapon', 'armor', 'boots', 'charm'] as const;
@@ -27,22 +29,21 @@ export function statsFor(item?: Gear, rank = 0): Stats {
   return stats;
 }
 
-export type Pack = Record<string, number>;
-type Hunt = { anchor: number[]; enemy: string; hpScale: number; adds?: Pack };
-type Objective =
-  | { id: string; kind: 'clear-patrols'; anchors: number[][]; packs: Pack[]; ambientNormalCap: number }
-  | { id: string; kind: 'destroy-nests'; anchors: number[][]; hp: number; guard: Pack; hazardSec: number }
-  | { id: string; kind: 'defend-lantern'; anchor: number[]; lanternHp: number; waves: Pack[]; nextWaveAfterClearSec: number }
-  | ({ id: string; kind: 'defeat-arena-leader' } & Hunt)
-  | { id: string; kind: 'hunt-elites'; hunts: Hunt[] };
 type Chest = { id: string; at: number[]; pool: keyof typeof gear.chests.pools; after?: string };
 export type Stage = {
   id: string; order: number; name: string; size: number[]; start: number[]; exit: number[];
-  look: string; objectives: Objective[]; chests: Chest[]; firstClearGear: string; goldClear: number; enemyGoldCap: number;
+  look: string; sweeps: Sweep[]; safetyTimeout: number; ambientCap: number; ambientSec: number;
+  chests: Chest[]; firstClearGear: string; goldClear: number; enemyGoldCap: number;
 };
-export const stages = data.stages as Stage[];
+export const stages: Stage[] = data.stages.map(({ objectives, ...stage }) => {
+  void objectives;
+  const chests: Chest[] = stage.chests as Chest[];
+  return {
+    ...stage, ...pacing[stage.id], chests: chests.map(chest =>
+      stage.order === 1 && chest.id === 'orchard-fork' ? { ...chest, at: [850, 553], after: 'patrols' } : chest),
+  };
+});
 export { gear };
-export const safetyTimeout = data.setup.safetyTimeoutSec;
 export const point = ([x, y]: number[]): Point => ({ x, y });
 export const campaignHash = (id: string) => Array.from(id).reduce((hash, c) => Math.imul(hash ^ c.charCodeAt(0), 16777619), 2166136261) >>> 0;
 

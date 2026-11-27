@@ -1,14 +1,14 @@
 {
   "schemaVersion": 1,
   "gameId": "monster-survivor",
-  "baselineCommit": "85955db765164f52ea2cea2c4c0878321e81fc4c",
+  "baselineCommit": "1dc171a729dd958c686583061aecbf8bfffda2b5",
   "records": [
     {
       "id": "bellgrave-garden",
       "kind": "level",
       "intendedBehavior": "In the Normal candidate, light any two wards and defeat the three-phase Hollow Warden before 15:30.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "reports/RELEASE_QA.md",
@@ -17,10 +17,10 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": "private-fixture",
+        "target": "assembled-pages",
         "result": "PASS",
         "evidence": [
-          "reports/RELEASE_QA.md"
+          "reports/CAMPAIGN_QA.md"
         ]
       }
     },
@@ -135,7 +135,7 @@
       "kind": "feature",
       "intendedBehavior": "Play the full Normal schedule with three wards, 16 skills, two elites, all four evolutions and all Warden phases.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "reports/RELEASE_QA.md",
@@ -144,10 +144,10 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": "private-fixture",
+        "target": "assembled-pages",
         "result": "PASS",
         "evidence": [
-          "reports/RELEASE_QA.md"
+          "reports/CAMPAIGN_QA.md"
         ]
       }
     },
@@ -177,7 +177,7 @@
       "kind": "feature",
       "intendedBehavior": "Enter Lantern Camp, clear and replay all five stages, and complete the Campaign after beating all three Warden phases.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/campaign.ts",
@@ -197,7 +197,7 @@
       "kind": "feature",
       "intendedBehavior": "Collect and bank gold and permanent gear, equip four independent slots, and upgrade items through +3 across reloads.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/campaign-save.ts",
@@ -217,7 +217,7 @@
       "kind": "feature",
       "intendedBehavior": "Play stronger early combat with splash, visibly different weapons and rank feedback, spell effects, and Lantern Burst.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "src/weapon-vfx.ts",
@@ -237,7 +237,7 @@
       "kind": "level",
       "intendedBehavior": "Clear three patrols, defeat Thornback and confirm the exit.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "production/features/ms-campaign-v1/stages.json",
@@ -257,7 +257,7 @@
       "kind": "level",
       "intendedBehavior": "Break three nests, dodge the Marsh Keeper\u2019s poison and projectiles, and confirm the exit.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "production/features/ms-campaign-v1/stages.json",
@@ -277,7 +277,7 @@
       "kind": "level",
       "intendedBehavior": "Defend the lantern through two waves, defeat Discord Bell and confirm the exit.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "production/features/ms-campaign-v1/stages.json",
@@ -297,7 +297,7 @@
       "kind": "level",
       "intendedBehavior": "Hunt both elites in either order to open the gate.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "production/features/ms-campaign-v1/stages.json",
@@ -317,7 +317,7 @@
       "kind": "level",
       "intendedBehavior": "Clear two patrols and all three Hollow Warden phases before confirming the final exit.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "production/features/ms-campaign-v1/stages.json",
@@ -331,14 +331,73 @@
           "reports/CAMPAIGN_QA.md"
         ]
       }
+    },
+    {
+      "id": "ms-campaign-polish-pacing",
+      "kind": "feature",
+      "intendedBehavior": "Clear three phases per Campaign stage with alternative Marsh crossings, distinct defense waves and Warden guard breaks.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "reports/CAMPAIGN_POLISH_QA.md",
+        "src/campaign-encounters.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_POLISH_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-campaign-polish-armory",
+      "kind": "feature",
+      "intendedBehavior": "Inspect, equip and forge permanent gear in a two-screen camp with detailed prices and upgrade confirmation.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "reports/CAMPAIGN_POLISH_QA.md",
+        "src/camp-view.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_POLISH_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-campaign-polish-lantern-art",
+      "kind": "feature",
+      "intendedBehavior": "Show the four supplied lantern portraits and distinct Campaign weapon effects at the selected rank.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "reports/CAMPAIGN_POLISH_QA.md",
+        "src/weapon-vfx.ts"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/CAMPAIGN_POLISH_QA.md"
+        ]
+      }
     }
   ],
   "knownGaps": [
-    "G4 Normal Producer playtest and explicit release approval are pending.",
-    "Firefox and WebKit installation was blocked. Physical Android and iOS and representative desktop hardware remain unchecked.",
-    "The existing In Development preview ran the pinned Normal build per deployment HTTP and revision checks. Producer acceptance and any Released catalog change are separate decisions.",
-    "The Campaign candidate awaits Producer playtest, manual merge, and Pages deployment verification.",
-    "Scripted Campaign clears were below the target playtest duration band. Representative player pacing and physical-device performance remain unmeasured."
+    "Normal G4 Producer playtest and explicit release approval remain pending.",
+    "Firefox, WebKit and physical devices remain unverified.",
+    "The Campaign Polish candidate awaits Producer playtest, manual merge and Pages verification.",
+    "Polish pacing measurements use comparable scripted gameplay. Representative human pacing is unmeasured."
   ],
   "save": {
     "schema": "ai-game-studio:monster-survivor:v1",
@@ -350,7 +409,8 @@
       "reports/RELEASE_QA.md",
       "src/campaign-save.ts",
       "production/features/ms-campaign-v1/SAVE_AND_QA.md",
-      "reports/CAMPAIGN_QA.md"
+      "reports/CAMPAIGN_QA.md",
+      "reports/CAMPAIGN_POLISH_QA.md"
     ]
   },
   "publication": {
@@ -361,30 +421,32 @@
       "production/DECISIONS.md",
       "production/RIGHTS.md",
       "production/RELEASE.md",
-      "reports/CAMPAIGN_QA.md"
+      "reports/CAMPAIGN_QA.md",
+      "production/features/ms-campaign-polish-1/ASSET_RIGHTS.md",
+      "reports/CAMPAIGN_POLISH_QA.md"
     ]
   },
   "deployment": {
-    "deployedCommit": "85955db765164f52ea2cea2c4c0878321e81fc4c",
+    "deployedCommit": "1dc171a729dd958c686583061aecbf8bfffda2b5",
     "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/monster-survivor/",
-    "observedAt": "2026-11-27T05:57:13.866Z",
+    "observedAt": "2026-11-27T07:02:13.020Z",
     "checks": {
       "revision": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45955280202/job/140361494930"
         ]
       },
       "http": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45948588293/job/140339577138"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/45955280202/job/140361494930"
         ]
       },
       "gameplay": {
-        "result": "NOT_RUN",
+        "result": "BLOCKED",
         "evidence": [
-          "reports/CAMPAIGN_QA.md"
+          "reports/CAMPAIGN_POLISH_QA.md"
         ]
       }
     }

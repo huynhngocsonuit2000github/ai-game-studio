@@ -545,7 +545,7 @@ export class Run {
   protected hit(foe: Foe, amount: number, source: string, at: Point = foe, angle?: number) {
     if (foe.hp <= 0 || foe.state === 'arrival') return;
     const armor = this.normal && foe.def.role === 'boss' && foe.state !== 'recover'
-      ? this.campaign ? .58 : rules.normal.wardenArmorMultiplier : 1;
+      ? this.campaign ? .28 : rules.normal.wardenArmorMultiplier : 1;
     const damage = Math.max(1, Math.round(amount * armor * (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus)));
     this.damage.set(source, (this.damage.get(source) ?? 0) + Math.min(foe.hp, damage));
     foe.hp -= damage;

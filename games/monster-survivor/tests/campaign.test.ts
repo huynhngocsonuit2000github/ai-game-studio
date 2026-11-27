@@ -154,39 +154,66 @@ test('an early hybrid draft keeps Dart II available and locked exits cannot sett
     assert.ok(run.offer?.cards.includes('wick-dart'));
     run.choose(run.offer!.cards.find(id => id !== 'wick-dart')!);
   }
-  run.tick = ticks(420) - 1;
+  run.tick = ticks(stage.safetyTimeout) - 1;
   run.step(idle);
   assert.equal(run.result, 'time');
 });
 
-test('the crypt lantern takes real damage and its second wave starts four seconds after the first clears', () => {
-  const stage = stages[2];
+test('the crypt lantern takes damage and the assaults have a four-second recovery pickup', () => {
+  const crypt = stages[2];
+  const stage = { ...crypt, sweeps: [crypt.sweeps[1]] };
   const run = new Fixture(stage, 42, statsFor(), undefined, 0, new Set());
-  Object.assign(run.player, run.groups[0]);
-  run.step(idle);
   const group = run.groups[0];
+  Object.assign(run.player, group);
+  run.step(idle);
   assert.equal(group.wave, 1);
-  assert.equal(run.lantern?.hp, 150);
+  assert.equal(run.lantern?.hp, 200);
   const attacker = run.foes.find(foe => group.ids.has(foe.id))!;
   attacker.x = run.lantern!.x + enemies.get('seedling')!.radius;
   attacker.y = run.lantern!.y;
   run.step(idle);
-  assert.ok(run.lantern!.hp < 150);
-  for (const foe of run.foes) if (group.ids.has(foe.id)) foe.hp = 0;
+  assert.ok(run.lantern!.hp < 200);
+  const finishFront = () => {
+    for (const foe of run.foes) if (group.ids.has(foe.id)) foe.hp = 0;
+    run.step(idle);
+    run.offer = null;
+  };
+  finishFront();
+  assert.equal(group.next, run.tick + ticks(1.2));
+  run.tick = group.next - 1;
   run.step(idle);
-  const due = run.tick + 240;
-  assert.equal(group.next, due);
   run.offer = null;
+  assert.equal(group.wave, 2);
+  finishFront();
+  const due = run.tick + ticks(4);
+  assert.equal(group.next, due);
+  assert.ok(run.drops.some(drop => drop.kind === 'heart'));
   run.tick = due - 2;
   run.step(idle);
-  assert.equal(group.wave, 1);
+  assert.equal(group.wave, 2);
   run.offer = null;
   run.step(idle);
-  assert.equal(group.wave, 2);
+  assert.equal(group.wave, 3);
   run.lantern!.hp = 0;
   run.offer = null;
   run.step(idle);
   assert.equal(run.result, 'rite');
+});
+
+test('the Marsh commits either crossing and Gold remains capped across reinforcements', () => {
+  const marsh = stages[1];
+  const stage = { ...marsh, sweeps: [marsh.sweeps[1]], enemyGoldCap: 4 };
+  for (const selected of [0, 1]) {
+    const run = new Fixture(stage, 42, statsFor(), undefined, 0, new Set());
+    Object.assign(run.player, run.groups[selected]);
+    run.step(idle);
+    assert.equal(run.groups[selected].state, 'active');
+    assert.equal(run.groups[1 - selected].state, 'done');
+    assert.ok(run.venomLanes.length);
+    for (const foe of run.foes) if (run.groups[selected].ids.has(foe.id)) foe.hp = 0;
+    run.step(idle);
+    assert.equal(run.goldDropped, 4);
+  }
 });
 
 test('the same Venom Marsh opening pack clears faster with Ember Lantern +1', () => {
