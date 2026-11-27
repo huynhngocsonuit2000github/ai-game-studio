@@ -88,3 +88,7 @@ node games/midnight-greenhouse/tests/playtest.mjs dome-touch
 ```
 
 The main run verifies end-to-end campaign progression. The separate touch replay starts Đài Chớp from a fixture with Sân Mưa and Hầm Bơm completed. [Exact input routes](../tests/campaign-routes.json)
+
+[Active Sân Mưa](screenshots/s05-san-mua.webp) · [Hầm Bơm valve warning](screenshots/s05-ham-bom.webp) · [Đài Chớp phase one warning](screenshots/s05-dai-chop-pha-mot.webp) · [Đài Chớp phase two lock](screenshots/s05-dai-chop-pha-hai.webp).
+
+The 844×390 emulated touch sample had 1,350 frames with median 16.7 ms and p95 49.9 ms while other checks shared the Cloud instance. This exceeds the 45 ms comparison target. A physical Android measurement is still pending.
