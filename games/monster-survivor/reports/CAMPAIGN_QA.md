@@ -1,0 +1,39 @@
+# Monster Survivor Campaign v1 QA
+
+The [approved brief](../production/features/ms-campaign-v1/BRIEF.md), [save contract](../production/features/ms-campaign-v1/SAVE_AND_QA.md), and [weapon presentation](../production/features/ms-campaign-v1/WEAPON_VFX.md) define the batch. Campaign uses the existing In Development route and ships alongside Survival.
+
+## Build and provenance
+
+- The trusted validator staged pack `monster-survivor-campaign-v2` against clean `85955db765164f52ea2cea2c4c0878321e81fc4c` with SHA-256 `08ab02235596655e2a68ed40f137145b9a99cbc936fba1bc8a9e370126e44d06`, five additive destinations and zero replacements. Their committed SHA-256 values match the validator receipt. GitHub `main` was identical to the pinned revision at handoff.
+- Production source tested locally at `c1c7f92bbe55820052839dff543c84ab3cb39a8e`. The canonical artifact was served under `/ai-game-studio/` using the locked Node 24.22.3 and pnpm 11.25.0 toolchain. The hosted Pages job includes the exact tested revision and browser evidence.
+- Browser environment was headless Chromium 156.0.8078.79 on a Linux x64 cloud VM with five logical Intel Xeon Platinum 8573C CPUs. Desktop viewport was 1366×768. Touch tests emulated 844×390 landscape. Test scripts drive the shipped keyboard and touch handlers, control the animation clock, and seed the browser before boot. Scripted input is repeatable and aids functional verification.
+
+## Acceptance
+
+| ID | Result | Observed evidence |
+| --- | --- | --- |
+| MSC-A01 | PASS | Campaign has default title focus. A fresh camp shows stage 1 ready and four locked requirements. The production artifact accepted keyboard navigation and mobile emulation verified joystick movement, a contextual chest tap, Burst, equipment and upgrade taps. |
+| MSC-A02 | PASS for progression. Pacing open. | Browser cleared Bell Orchard, Venom Marsh, Candle Crypt, Thorn Gate and Hollow Belltower in order via their real stage entry and exit controls. It saw all three Warden phases and reached Campaign complete. Scripted times were 42.62, 48.42, 39.02, 53.02 and 103.42 seconds. These clears are below the 3–5 minute playtest band. Human pacing remains unmeasured. |
+| MSC-A03 | PASS for early power and paired comparison. | Base Dart does 20 damage every 0.60 s. Fresh stage 1 Seedlings have 20 HP and Moths have 38 HP. First scripted draft opened at 2.88 s with Rank II and a different spell. Stage 1 banked 119 gold, including a duplicate conversion, against a 35-gold +1 cost. Using the same seed, starting position, movement path and Rank II in Venom Marsh, Ember Lantern +0 cleared the initial eight Seedlings in 361 ticks (6.02 s), and +1 in 258 ticks (4.30 s), 28.5% faster in this fixture. |
+| MSC-A04 | PASS for exercised systems | Connected clearance checked for every chest, exit and objective. Data checks cover 12 items across four slots and +0 through +3 stats. Collectible tests exercise the actual hit, chest, no-recursion splash, Burst and pickup paths. The Crypt fixture confirms enemies damage the lantern and wave 2 starts 240 ticks after wave 1 clears. Full Survival exercised evolution, dash and Warden tells. |
+| MSC-A05 | PASS | Chromium banked stage 1, upgraded Ember Lantern, equipped gear, reloaded, and entered stage 2 with the persisted +7 main-shot bonus and 114 base HP from Patchcoat. The original Survival settings, cosmetic and record bytes matched through all five Campaign clears. Unit tests cover duplicate settlement, defeat payout, duplicate equipment, missing gold, +3 cap, replay/best time, stale observed rank, unavailable storage, corrupt fallback and untouched future-version bytes. |
+| MSC-A06 | PASS on configured Chromium | Assembled Pages library covers, both game launches, direct routes and returns were exercised. Candidate Survival won at 748.85 s with 1,782 kills, 67 HP and Comet Thread, matching the pinned Normal run. Forest Adventure regression exercised its published campaign and save migration. Other browser engines and physical devices remain NOT_RUN. |
+| MSC-A07 | PASS locally | Frozen install, Studio lint/typecheck/unit tests, Python pack-validator tests, game unit/typecheck, build, canonical Pages assembly and verification, adopted state and trusted path scope. Review evidence includes assembled desktop and mobile frames. |
+| MSC-A08 | BLOCKED pending release sequence | The Producer’s manual merge and the existing Pages deployment must precede live verification. The cloud environment's request to the public build marker failed at the outbound proxy, so the public baseline observed by this session is unknown. |
+| MSC-A09 | PASS for capture and matched combat. Performance follow-up open. | The browser captured starter Dart, Rank II splash, Ember Lantern +1, loot and shop, Prism +2 against a dense Belltower group in both detail modes, Burst across the Warden telegraph, and the finale. The matched states ended at 99/126 HP, 38 kills and identical spell damage. See the checks and performance notes below. |
+
+## Frames and timing
+
+The game Playwright configuration writes full-resolution PNGs and measurements to the GitHub Actions `browser-evidence` artifact. Open these sequences in filename order.
+
+- Dart and progression — `01-starter-dart`, `02-first-draft`, `03-rank-ii-splash`, `04-orchard-loot`, `05-camp-ember-lantern`, `06-ember-lantern-volley`. The same logical zoom is used in combat.
+- Prism and Low Detail — paired `normal-detail-*` and `low-detail-*` frames at the first selected splash and 70, 145 and 230 ticks later. The 4.2-second comparison branch reached 43 foes overall and 23 within the sampled window. The report includes identical HUD, HP, kills and damage for both modes. The earlier pinned Normal render is available in the [Normal combat frame](https://github.com/huynhngocsonuit2000github/ai-game-studio/blob/85955db765164f52ea2cea2c4c0878321e81fc4c/games/monster-survivor/reports/release-evidence/combat-240.png).
+- Boss, outcome and touch — `09-warden-phase-*`, `10-burst-vs-warden-*` spanning ignition through aftermath, `11-campaign-complete`, and `mobile-*`.
+
+A normal-detail run used a 1920×1080 Canvas with a high-DPR headless window and Low Detail used 1200×675. Local measurements are short stress samples. The 90-second physical-device frame-time and memory budgets remain NOT_RUN. The existing asset bundle and the candidate game artifact are approximately 5.3 MiB. Candidate headless Survival loaded approximately 1.37 MiB to title. The Campaign renderer caches decorative stage props on the stage floor and uses bounded event, trail and particle budgets. Render settings consume no simulation RNG.
+
+## Reproduction and rollback
+
+Run `pnpm build && pnpm assemble:pages && pnpm verify:pages`, then `node scripts/test-pages-games.mjs`. Run `pnpm --filter @studio/monster-survivor test` for settlement and simulation fixtures. The assembled browser run compares each stage payout and saved best time with an independent simulation driven by the same inputs.
+
+Rollback is a scoped revert through the Studio release process. Preserve both published game entry and cover paths, and leave the Campaign storage key dormant. Rebuild the full Pages artifact for the reverted revision, run both game suites, and compare the live marker after the reviewed revert merges. Producer playtest and acceptance are pending.
