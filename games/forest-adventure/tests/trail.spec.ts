@@ -14,7 +14,9 @@ const routeEvidenceTicks: Record<string, number> = { 'trail-02': 96, 'trail-06':
 const prefix = '/ai-game-studio/';
 const detail = `${prefix}#/games/forest-adventure`;
 const game = `${prefix}games/forest-adventure/index.html`;
-const coverPath = `${prefix}games/forest-adventure/cover.webp`;
+const coverEntry = 'games/forest-adventure/cover.webp';
+const coverPath = `${prefix}${coverEntry}`;
+const coverSelector = `img[src$="/${coverEntry}"]`;
 
 // Use an exact 60 Hz frame source for the campaign routes. This controls
 // elapsed time only. The browser still receives real keyboard events and
@@ -88,8 +90,9 @@ test('clears the whole campaign by keyboard from the Studio catalog and returns 
   await page.goto(detail);
   await expect(page.getByRole('heading', { name: 'Forest Adventure 2D' })).toBeVisible();
   await expect(page.getByText(released ? 'Released' : 'In Development', { exact: true })).toBeVisible();
-  await expect(page.locator('img[src$="/cover.webp"]')).toBeVisible();
-  await page.locator('img[src$="/cover.webp"]').evaluate((node: HTMLImageElement) => node.decode());
+  const detailCover = page.locator(coverSelector);
+  await expect(detailCover).toBeVisible();
+  await detailCover.evaluate((node: HTMLImageElement) => node.decode());
   await page.getByRole('link', { name: released ? 'Play Now' : 'Play preview' }).click();
   await expect(page).toHaveURL(game);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
@@ -303,7 +306,7 @@ test('clears the whole campaign by keyboard from the Studio catalog and returns 
   await page.getByRole('link', { name: 'Back to Studio' }).click();
   await expect(page).toHaveURL(`${prefix}#/`);
   await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
-  const libraryCover = page.getByRole('list', { name: 'Game results' }).locator('img[src$="/cover.webp"]');
+  const libraryCover = page.getByRole('list', { name: 'Game results' }).locator(coverSelector);
   await expect(libraryCover).toBeVisible();
   await libraryCover.evaluate((node: HTMLImageElement) => node.decode());
   await page.waitForLoadState('networkidle');
