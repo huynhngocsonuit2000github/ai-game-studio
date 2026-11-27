@@ -33,3 +33,14 @@ Pack `monster-survivor-production-v1` · design and assets staged for handoff. S
 - The canonical Pages build and Forest Adventure regression passed, including the full public campaign and save migration. The candidate has its own local project-subpath preview and independent static build. Shared desktop preview access was blocked by the environment.
 - Producer playtest and acceptance pending at G2. Next authorized work after approval is MS-410. S04–S06 remain pending. Registry and Pages approval are separate. Keep merge manual.
 - Review is open in [PR #24](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/24) on `prod/monster-survivor/vertical-slice`. The verified gameplay evidence is committed at `17c2eab978002ebe6a859cc553fc3632e89edd05`.
+
+## Monster Survivor First Release · S04–S06
+
+- G2 accepted for the live S03 preview on 2026-11-27. Both intermediate Producer reviews deferred under the named batch. G4 playtest, release, catalog changes and merge remain pending.
+- Intake baseline `ff54db3` includes S03, publication registration, and both Studio verification repairs. Approved scope is this game directory. Starting MS-410 and MS-420.
+
+### S04 · MS-410 / MS-420 · technical PASS
+
+- Normal starts from the production title. Verified all four recipes, two distinct rites and a disabled third ward, unique boons, Overrun, all normal foes and elites, and all three Warden phases. Field Guide, records and Dawn Scarf use the existing v1 save contract.
+- Twenty simulation and persistence checks passed. The built production game cleared a full seeded run on Chromium at 12:11.10 with 1,780 kills. Two rites, Comet Thread, Crown of Glass, all Warden phases, retry and the existing S03 save passed with zero observed game or HTTP errors. The browser clock advanced the full authored schedule using keyboard and menu events.
+- G3 content verification passed for the exercised scope. G4 human playtest remains open under the named batch. Baseline level 39 and an 11.1-second duel exceeded the progression and damage targets. S05 starts with that measured balance gap.

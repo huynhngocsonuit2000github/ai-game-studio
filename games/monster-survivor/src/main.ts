@@ -1,6 +1,6 @@
 import './style.css';
-import { garden, orchard, rules, skills, validateContent } from './content.ts';
-import { Slice, wardPoint } from './slice.ts';
+import { enemies, garden, rules, skills, validateContent } from './content.ts';
+import { GardenRun } from './slice.ts';
 import { Clock, distance, heading } from './sim.ts';
 import { Renderer, loadArt, skillIcon } from './render.ts';
 import { Records } from './save.ts';
@@ -28,7 +28,7 @@ const library = '<a class="nav-link" href="../../#/">← Game Library</a>';
 
 type Mode = 'loading' | 'title' | 'running' | 'reward' | 'paused' | 'settings' | 'guide' | 'result' | 'rotate' | 'confirm';
 let mode: Mode = 'loading';
-let run: Slice | null = null;
+let run: GardenRun | null = null;
 let renderer: Renderer;
 let runId = '';
 let settingsOrigin: 'title' | 'paused' = 'title';
@@ -62,7 +62,7 @@ const headingPanel = (name: string, body: string, extra = '') =>
 
 hud.innerHTML = `
   <div class="hud-top">
-    <div class="hud-chip vitals"><div class="readout"><span>Wick</span><span id="health"></span></div><div class="meter hp"><span id="hp-fill"></span></div></div>
+    <div class="hud-chip vitals"><div class="readout"><span>Wick</span><span id="health"></span></div><small id="guards" hidden></small><div class="meter hp"><span id="hp-fill"></span></div></div>
     <div class="hud-chip clock"><strong id="run-time">00:00</strong><small id="run-chapter">Bellgrave Garden</small></div>
     <div class="objective-stack">
       <div class="hud-chip objective"><span id="ward-arrow" aria-hidden="true">➜</span><div><b id="ward-title">Orchard Ward</b><small id="ward-info"></small></div></div>
@@ -85,7 +85,7 @@ function setText(id: string, value: string) {
 }
 function meter(id: string, ratio: number) { get(id).style.width = percent(Math.min(1, ratio)); }
 
-const sliceSynergies: Record<string, string> = {
+const shortSynergies: Record<string, string> = {
   'wick-dart': 'Marks enemies for Prism Ring. At rank V it can evolve with Thread Lens II.',
   'prism-ring': '+9 damage when a blade hits a target marked by Wick Dart.',
   'bog-bloom': 'Lantern Oil widens pools. Root Charm extends the poison.',
@@ -109,6 +109,14 @@ function spellStats(id: string, rank: Record<string, number>) {
   switch (id) {
     case 'wick-dart': return `${rank.count} dart${rank.count === 1 ? '' : 's'} × ${rank.damage} damage every ${rank.intervalSec} s${rank.pierce ? ` · Pierce +${rank.pierce}` : ''}.`;
     case 'comet-thread': return `3 bolts × ${rank.damage} damage · ${rank.splashDamage} splash on final hit.`;
+    case 'crown-of-glass': return `${rank.count} blades at ${rank.damage} damage · ${rank.pulseDamage} damage per full orbit.`;
+    case 'green-midnight': return `${rank.tickDamage} damage per tick · ${percent(rank.moveSlow)} chill · poison spreads on a kill.`;
+    case 'lantern-pack': return `${rank.count} familiars at ${rank.damage} damage · ${rank.dashBurstDamage} damage at the dash endpoint.`;
+    case 'foxfire': return `${rank.count} familiar${rank.count === 1 ? '' : 's'} · ${rank.damage} damage per shot · ${rank.intervalSec} s recast.`;
+    case 'hex-bell': return `${rank.damage} pulse damage · ${rank.radius} px radius · +35% against poisoned enemies.`;
+    case 'mirror-ward': return `${rank.charges} guard · ${rank.rechargeSec} s recharge · ${rank.burstDamage} damage on block.`;
+    case 'starfall': return `${rank.damage} impact damage · ${rank.radius} px radius · ${rank.delaySec} s tell.`;
+    case 'heart-husk': return `+${rank.maxHpBonus} maximum HP · +${rank.pickupRadiusBonus} px ember reach.`;
     case 'prism-ring': return `${rank.count} orbiting blades · ${rank.damage} damage per hit · ${rank.radius} px orbit.`;
     case 'bog-bloom': return `${rank.tickDamage} damage per poison tick · ${rank.radius} px pool · ${rank.intervalSec} s recast.`;
     case 'gale-laces': return `+${percent(rank.speedBonus)} speed and −${rank.dashCooldownReductionSec} s dash cooldown.`;
@@ -121,7 +129,7 @@ function titleView() {
     <img class="title-art" src="${keyArt}" alt="">
     <div class="title-content">
       <p class="eyebrow">Bellgrave Garden</p>${title}
-      <p>Carry Wick’s lantern through the swarm. Rekindle the Orchard Ward and defeat the Hollow Warden.</p>
+      <p>Carry Wick’s lantern through the swarm. Rekindle two wards and defeat the Hollow Warden.</p>
       <div class="actions">${primary(startLabel, 'start')}${normalButton('Field Guide', 'guide')}${normalButton('Settings', 'settings')}</div>
       ${library}
     </div>
@@ -141,16 +149,26 @@ function settingsView() {
     <fieldset><legend>Display</legend>
       ${check('reducedMotion', 'Reduce motion')}${check('highContrast', 'High contrast')}${check('damageNumbers', 'Damage numbers')}
     </fieldset>
+    ${records.data.cosmetics.unlocked.includes('dawn-scarf') ? `<fieldset><legend>Wick’s scarf</legend>
+      ${normalButton('Original', 'scarf-original', `aria-pressed="${records.data.cosmetics.selected === ''}"`)}
+      ${normalButton('Dawn Scarf', 'scarf-dawn', `aria-pressed="${records.data.cosmetics.selected === 'dawn-scarf'}"`)}
+    </fieldset>` : ''}
     <p class="settings-note" id="storage-note" role="status">${records.status}</p>
     <div class="actions">${primary('Back', 'settings-back')}</div>`);
 }
 
 function guideView() {
+  const known = new Set(records.data.discoveredSkillIds);
+  const collection = [...skills.values()].map(skill => `<li><b>${skill.name}</b> · ${known.has(skill.id) ? skill.behavior
+    : skill.recipe ? `Evolve ${skills.get(skill.recipe.active)!.name} V with ${skills.get(skill.recipe.passive)!.name} II and a catalyst.`
+    : 'Learn this from an upgrade draft.'}</li>`).join('');
+  const lifetime = records.data.lifetime;
   const data: Record<string, string> = {
-    Controls: `<ul><li><b>Move</b> with WASD, arrow keys, or the touch joystick.</li><li><b>Dash</b> with Space or the touch button. Dash through monsters to avoid damage.</li><li>Spells cast automatically. Sweep back over fallen monsters to gather their embers.</li><li>Stand in the Orchard Ward ring for 6 seconds. Rekindle it before 04:00, then defeat the Warden by 05:30.</li></ul>`,
-    Threats: `<ul><li><b>Seedling</b> closes on foot. <b>Velvet Moth</b> circles toward your flank.</li><li><b>Bramble Scarab</b> and <b>Thornback Captain</b> lock a striped charge lane. Step sideways.</li><li><b>Hollow Warden</b> aims a cleave and tolls an expanding ring. Run through the gap.</li></ul>`,
-    Spells: `<ul><li><b>Wick Dart</b> marks enemies with Sparked.</li><li><b>Prism Ring</b> blades consume Sparked for bonus damage. <b>Bog Bloom</b> poisons monsters in pools.</li><li><b>Comet Thread</b> needs Wick Dart V, Thread Lens II and Thornback’s catalyst.</li></ul>
-      <p>Discovered · ${records.data.discoveredSkillIds.map(id => skills.get(id)?.name).filter(Boolean).join(', ')}</p>`,
+    Controls: `<ul><li><b>Move</b> with WASD, arrows, or the touch joystick. <b>Dash</b> with Space.</li><li>Spells cast automatically. Sweep back over fallen monsters to collect their embers.</li><li>Stand inside any two ward circles for nine seconds each. After 12:00 the Warden can awaken. Finish the rites by 13:30 and defeat him by 15:30.</li><li>Defeat Thornback and Discord Bell to collect evolution catalysts.</li></ul>`,
+    Threats: `<ul>${[...enemies.values()].map(enemy => `<li><b>${enemy.name}</b> · ${enemy.cue}</li>`).join('')}</ul>`,
+    Spells: `<ul>${collection}</ul>`,
+    Records: `<dl class="summary"><div><dt>Runs</dt><dd>${lifetime.runs}</dd></div><div><dt>Victories</dt><dd>${lifetime.wins}</dd></div><div><dt>Best clear</dt><dd>${lifetime.bestClearMs === null ? '—' : time(lifetime.bestClearMs / 1000)}</dd></div><div><dt>Longest run</dt><dd>${time(lifetime.longestMs / 1000)}</dd></div><div><dt>Record kills</dt><dd>${lifetime.recordKills}</dd></div></dl>
+      <p>${records.data.cosmetics.unlocked.includes('dawn-scarf') ? 'Dawn Scarf unlocked. Equip it in Settings.' : 'Defeat the Hollow Warden to unlock the Dawn Scarf.'}</p>`,
   };
   return headingPanel('Field Guide', `
     <div class="guide-nav actions" aria-label="Guide topics">${Object.keys(data).map(name => normalButton(name, 'tab-' + name, `aria-pressed="${name === guidePage}"`)).join('')}</div>
@@ -162,8 +180,8 @@ function rewardView() {
   const headings = { level: 'Choose an upgrade', boon: 'Choose a ward boon', evolution: 'Evolve your lantern' };
   const lead = {
     level: `Level ${offer.level} · Choose one card.`,
-    boon: 'The Orchard Ward is lit. Choose a boon for this run.',
-    evolution: `Wick Dart V + Thread Lens II · ${run!.catalysts} catalyst available.`,
+    boon: `${run!.lastWard?.name ?? 'The ward'} is lit. Choose a boon for this run.`,
+    evolution: `${run!.catalysts} catalyst${run!.catalysts === 1 ? '' : 's'} available · Replace one spell.`,
   };
   return headingPanel(headings[offer.kind], `
     <p>${lead[offer.kind]}</p>
@@ -171,7 +189,7 @@ function rewardView() {
       const def = skills.get(id);
       const rank = (run!.build.get(id) ?? 0) + 1;
       const [name, details, synergy] = def
-        ? [def.name, spellStats(id, def.ranks[rank - 1]), sliceSynergies[id]]
+        ? [def.name, spellStats(id, def.ranks[rank - 1]), shortSynergies[id] ?? def.synergy]
         : cardNotes[id];
       const label = def ? (def.type === 'evolution' ? 'Evolution' : rank > 1 ? `Rank ${rank - 1} → ${rank}` : 'Learn · Rank 1') : '';
       return `<button type="button" class="card" data-card="${i}" ${i ? '' : 'data-focus'}>${def ? skillIcon(id) : ''}
@@ -190,14 +208,14 @@ function resultView() {
   const copy = {
     victory: ['Garden rekindled', 'The Hollow Warden fell. Wick’s lantern lights the garden again.'],
     hp: ['The lantern went out', 'Wick ran out of health. Keep moving and dash through danger.'],
-    rite: ['The ward fell silent', 'The Orchard Ward had to be rekindled by 04:00.'],
-    time: ['The final toll', 'The Warden was still standing at 05:30.'],
+    rite: ['The wards fell silent', 'Two wards had to be rekindled by 13:30.'],
+    time: ['The final toll', 'The Warden was still standing at 15:30.'],
   }[active.result!];
   return headingPanel(copy[0], `<p>${copy[1]}</p>
-    <dl class="summary"><div><dt>Time</dt><dd>${time(active.elapsed)}</dd></div><div><dt>Monsters</dt><dd>${active.kills}</dd></div><div><dt>Ward rites</dt><dd>${Number(active.wardComplete)}/1</dd></div></dl>
+    <dl class="summary"><div><dt>Time</dt><dd>${time(active.elapsed)}</dd></div><div><dt>Monsters</dt><dd>${active.kills}</dd></div><div><dt>Ward rites</dt><dd>${active.rites}/${active.settings.ritesRequired}</dd></div></dl>
     <h3>Final build</h3>
     <div class="final-build">${[...active.build].map(([id, rank]) => {
-      const damage = active.damage.get(id === 'comet-thread' ? 'wick-dart' : id);
+      const damage = active.damage.get(skills.get(id)?.recipe?.active ?? id);
       return `<div><span>${skills.get(id)!.name} · R${rank}</span><span>${damage === undefined ? '' : `${damage.toLocaleString('en')} damage`}</span></div>`;
     }).join('')}</div>
     <div class="actions">${primary('Retry', 'start')}${normalButton('Title', 'title')}${library}</div>`);
@@ -268,7 +286,7 @@ function announce(text: string, duration = 300) {
 
 function start() {
   if (coarse.matches && portrait.matches) { view('rotate'); return; }
-  run = new Slice(crypto.getRandomValues(new Uint32Array(1))[0]);
+  run = new GardenRun(crypto.getRandomValues(new Uint32Array(1))[0]);
   runId = crypto.randomUUID();
   sound.clearEffects();
   sound.theme('through-the-garden');
@@ -290,7 +308,7 @@ function select(index: number) {
   const id = run?.offer?.cards[index];
   if (!id || !run?.choose(id)) return;
   if (id === 'comet-thread') announce('Comet Thread evolved');
-  if (run.picks === 1 && !run.wardComplete) announce('Follow the arrow to the Orchard Ward');
+  if (run.picks === 1 && !run.wardComplete) announce('Follow the arrow to the nearest ward');
   view(run.offer ? 'reward' : 'running');
 }
 function finish() {
@@ -321,6 +339,11 @@ screen.addEventListener('click', event => {
   }
   if (action === 'restart' || action === 'quit') { confirming = action; view('confirm'); }
   if (action === 'confirm') { if (confirming === 'restart') start(); else backToTitle(); }
+  if (action === 'scarf-original' || action === 'scarf-dawn') {
+    records.selectScarf(action === 'scarf-dawn' ? 'dawn-scarf' : '');
+    applySettings();
+    view('settings');
+  }
   if (action === 'reroll') { run?.reroll(); view('reward'); }
 });
 
@@ -340,6 +363,7 @@ function applySettings() {
     renderer.motion = !s.reducedMotion && !systemReduced.matches;
     renderer.numbers = s.damageNumbers;
     renderer.contrast = s.highContrast;
+    renderer.dawnScarf = records.data.cosmetics.selected === 'dawn-scarf';
   }
   game.classList.toggle('high-contrast', s.highContrast);
   sound.apply(s);
@@ -374,7 +398,7 @@ window.addEventListener('keydown', event => {
     else if (mode === 'guide' || mode === 'rotate' && !run) backToTitle();
     return;
   }
-  if (mode === 'reward' && /^Digit[1-3]$/.test(event.code)) {
+  if (mode === 'reward' && /^Digit[1-4]$/.test(event.code)) {
     event.preventDefault();
     select(Number(event.code.at(-1)) - 1);
     return;
@@ -442,27 +466,31 @@ function renderHud() {
   setText('health', `${player.hp} / ${player.maxHp} HP`);
   meter('hp-fill', player.hp / player.maxHp);
   setText('run-time', time(run.elapsed));
-  setText('run-chapter', boss ? `Final toll in ${time(Math.ceil(rules.slice.hardLimitSec - run.elapsed))}` : 'Bellgrave Garden');
+  setText('run-chapter', boss
+    ? run.elapsed >= rules.normal.enrageSec ? `Final toll in ${time(Math.ceil(run.settings.hardLimitSec - run.elapsed))}` : 'Warden duel'
+    : run.overrun ? `Overrun · ${time(Math.ceil(run.settings.riteDeadlineSec - run.elapsed))}` : 'Bellgrave Garden');
   setText('level', `Lv ${run.level}`);
   setText('xp', `${Math.floor(run.xp)} / ${run.xpGoal} XP`);
   meter('xp-fill', run.xp / run.xpGoal);
   const dashReady = tick >= run.dashReady;
   setText('dash-state', dashReady ? 'Dash ready' : `Dash ${((run.dashReady - tick) / 60).toFixed(1)} s`);
   dashControl.dataset.ready = String(dashReady);
-  const wardDistance = distance(player, wardPoint);
+  const ward = run.nearestWard;
   const arrow = get('ward-arrow');
   arrow.hidden = Boolean(boss);
-  arrow.style.transform = `rotate(${heading(player, wardPoint)}rad)`;
-  arrow.textContent = run.wardComplete ? '✓' : '➜';
-  if (run.wardComplete) arrow.style.transform = '';
-  setText('ward-title', run.wardComplete ? 'Ward Rites 1 / 1' : 'Orchard Ward');
-  const wardDetail = wardDistance <= orchard.radius || run.wardCharge > 0
-    ? `${fmt(run.wardCharge)} / ${rules.slice.riteChargeSec} s charged`
-    : `${Math.round(wardDistance)} px · ${run.elapsed >= 210 ? time(Math.ceil(240 - run.elapsed)) + ' left' : 'Rite 0 / 1'}`;
-  setText('ward-info', run.wardComplete ? (boss ? 'The Warden is awake' : 'Hold until 04:00') : wardDetail);
+  arrow.style.transform = ward ? `rotate(${heading(player, ward)}rad)` : '';
+  arrow.textContent = ward ? '➜' : '✓';
+  setText('ward-title', ward?.name ?? `Ward Rites ${run.rites} / ${run.settings.ritesRequired}`);
+  setText('ward-info', ward
+    ? distance(player, ward) <= ward.radius || ward.charge > 0
+      ? `${fmt(ward.charge)} / ${run.settings.riteChargeSec} s · Rites ${run.rites}/2`
+      : `${Math.round(distance(player, ward))} px · Rites ${run.rites}/2`
+    : boss ? 'The Warden is awake' : 'Hold until 12:00');
+  get('guards').hidden = !run.build.has('mirror-ward');
+  setText('guards', `Guard ${run.guards}/${run.rank('mirror-ward').charges ?? 0}`);
   get('boss-meter').hidden = !boss;
   if (boss) {
-    setText('boss-phase', boss.phase === 1 ? 'Sentinel' : 'Briar');
+    setText('boss-phase', ['Sentinel', 'Briar', 'Midnight'][boss.phase - 1]);
     meter('boss-fill', boss.hp / boss.maxHp);
   }
   const build = [...run.build].map(([id, rank]) => `${id}:${rank}`).join('/');
@@ -500,9 +528,9 @@ function frame(now: number) {
         announce('The Hollow Warden awakens');
         sound.theme('warden-toll');
       }
-      if (cue.id === 'boss-phase') announce('Briar phase · Read the toll’s safe gap', 210);
-      if (cue.id === 'elite') announce('Thornback Captain · Defeat it for a catalyst');
-      if (cue.id === 'ward') announce('Orchard Ward rekindled');
+      if (cue.id === 'boss-phase') announce(run.boss?.phase === 3 ? 'Midnight · Watch for the second toll' : 'Briar · Find the gap between lanes', 210);
+      if (cue.id === 'elite') announce(`${run.elite?.def.name ?? 'Elite'} · Defeat it for a catalyst`);
+      if (cue.id === 'ward') announce(`${run.lastWard?.name ?? 'Ward'} rekindled`);
       sound.play(cue.id);
     }
     renderer.draw(run, cues);
