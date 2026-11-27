@@ -417,7 +417,7 @@ function frame(timestamp: number) {
       accumulated -= interval;
       for (const effect of game.effects) {
         if (effect.at !== game.now || !cues.has(effect.kind)) continue;
-        sound.cue(effect.kind as Cue);
+        void sound.cue(effect.kind as Cue);
         if (effect.kind === 'breach') announce.textContent = `Địch đã lọt qua luống ${effect.lane + 1}. Hạt Tim còn ${game.core}.`;
         if (effect.kind === 'warning') announce.textContent = `Đợt mới sắp đến luống ${effect.lane + 1}.`;
       }

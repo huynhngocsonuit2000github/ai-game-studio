@@ -1,4 +1,5 @@
 /* global document, window, localStorage */
+import { observeWebAudio } from "./audio-observer.mjs";
 import console from "node:console";
 import { URL } from "node:url";
 import { chromium } from '@playwright/test';
@@ -27,18 +28,7 @@ const clock = async (page, t) => {
 };
 async function profile(name, viewport, touch, run) {
   const device = await browser.newContext({viewport, hasTouch: touch, isMobile: touch});
-  await device.addInitScript(() => {
-    window.heard = {};
-    const original = window.Audio;
-    window.Audio = class extends original {
-      constructor(source) {
-        super(source);
-        this.addEventListener('timeupdate', () => {
-          if (this.volume > 0) window.heard[source] = Math.max(window.heard[source] ?? 0, this.currentTime);
-        });
-      }
-    };
-  });
+  await device.addInitScript(observeWebAudio);
   const page = await device.newPage();
   const issues = [];
   page.on('pageerror', error => issues.push(error.message));
@@ -51,8 +41,8 @@ async function profile(name, viewport, touch, run) {
   await page.locator('#start').click();
   const start = Date.now();
   try {
-    await run(page, touch ? 'tap' : 'click');
-    const heard = await page.evaluate(() => window.heard);
+    const heardBeforeReload = await run(page, touch ? 'tap' : 'click');
+    const heard = heardBeforeReload ?? await page.evaluate(() => [...new Set(window.greenhouseAudio.starts.map(({ url }) => url?.split('/').at(-1)))].sort());
     console.log(name, 'elapsedSeconds', (Date.now()-start)/1000, 'audio advancing', JSON.stringify(heard), 'issues', JSON.stringify(issues));
     assert.deepEqual(issues, []);
   } finally { await device.close(); }
@@ -92,10 +82,12 @@ async function clear(name, route, touch) {
     assert.match(summary, /Hạt Tim 3\/3/);
     const saveBefore = await page.evaluate(() => localStorage.getItem('midnight-greenhouse.progress.v1'));
     await page.screenshot({path:results + '/' + name + '-win.png'});
+    const heard = await page.evaluate(() => [...new Set(window.greenhouseAudio.starts.map(({ url }) => url?.split('/').at(-1)))].sort());
     await page.reload();
     await page.getByRole('button',{name:'Chơi lại Sân Mưa'}).waitFor();
     assert.equal(await page.evaluate(() => localStorage.getItem('midnight-greenhouse.progress.v1')), saveBefore);
     console.log(name, 'result', JSON.stringify(summary), 'record', saveBefore);
+    return heard;
   });
 }
 async function lose() {

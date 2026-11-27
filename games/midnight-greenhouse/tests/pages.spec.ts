@@ -4,6 +4,7 @@ import process from "node:process";
 import { fileURLToPath, URL } from "node:url";
 import { test, expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { observeWebAudio } from './audio-observer.mjs';
 
 const root = '/ai-game-studio/';
 const game = root + 'games/midnight-greenhouse/index.html';
@@ -93,6 +94,43 @@ test('direct route has tappable outer lanes, rotate hint and persistent audio se
     await page.getByRole('button', { name: 'Cài đặt' }).tap();
     await expect(page.getByLabel('Tắt tiếng')).toBeChecked();
     await expect(page.getByLabel('Giảm chuyển động')).toBeChecked();
+    expect(errors).toEqual([]);
+  } finally { await context.close(); }
+});
+
+test('gesture-unlocked rain, music and delayed combat effects survive a pause and respect mute', async ({ browser }) => {
+  test.setTimeout(60_000);
+  const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
+  await context.addInitScript(observeWebAudio);
+  const page = await context.newPage();
+  const errors = clientErrors(page);
+  try {
+    await page.goto(game);
+    await start(page);
+    await page.getByRole('button', { name: /Lan Sét/ }).click();
+    await page.getByRole('button', { name: /Luống 2, ô 8/ }).click();
+    await page.getByRole('button', { name: /Tưới luống 2/ }).click();
+    const isPlaying = (cue: string) => page.waitForFunction((name) => {
+      const running = (window as unknown as { greenhouseAudio: { starts: { url?: string; context: AudioContext; time: number }[] } }).greenhouseAudio;
+      return running.starts.some(({ url, context, time }) =>
+        url?.endsWith('/' + name + '.ogg') && context.state === 'running' && context.currentTime - time > 0.01);
+    }, cue, { timeout: 43_000 });
+    await isPlaying('ambient-rain');
+    await isPlaying('music-watch');
+    await page.getByRole('button', { name: 'Tạm dừng' }).click();
+    await page.waitForFunction(() => {
+      const { master } = (window as unknown as { greenhouseAudio: { master: GainNode } }).greenhouseAudio;
+      return master.context.state === 'suspended';
+    });
+    await page.getByRole('dialog').getByRole('button', { name: 'Tiếp tục', exact: true }).click();
+    await isPlaying('shock');
+    await page.getByRole('button', { name: 'Cài đặt' }).click();
+    await page.getByLabel('Tắt tiếng').check();
+    await page.getByRole('button', { name: 'Xong' }).click();
+    await page.waitForFunction(() => {
+      const { master } = (window as unknown as { greenhouseAudio: { master: GainNode } }).greenhouseAudio;
+      return master.gain.value === 0;
+    });
     expect(errors).toEqual([]);
   } finally { await context.close(); }
 });

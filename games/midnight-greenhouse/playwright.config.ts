@@ -9,7 +9,7 @@ export default defineConfig({
   testMatch: 'pages.spec.ts',
   outputDir: 'test-results/pages-browser',
   timeout: 35_000,
-  use: { baseURL: origin, launchOptions: { executablePath: process.env.STUDIO_CHROMIUM_PATH } },
+  use: { baseURL: origin, launchOptions: { executablePath: process.env.STUDIO_CHROMIUM_PATH, args: ['--autoplay-policy=user-gesture-required'] } },
   webServer: {
     command: `pnpm --filter @studio/portal preview --host 127.0.0.1 --port 4189 --strictPort --base ${base} --outDir ../deployment/dist`,
     cwd: new URL('../..', import.meta.url).pathname,
