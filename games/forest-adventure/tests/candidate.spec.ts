@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { SAVE_KEY } from '../src/save.ts';
+import { EXPANSION_SAVE_KEY, SAVE_KEY } from '../src/save.ts';
 
 const game = '/ai-game-studio/games/forest-adventure/index.html';
 
@@ -39,7 +39,9 @@ test('recovers from a missing required texture and supports keyboard settings', 
 
 test('corrupt and unavailable storage retain a playable first trail', async ({ page }) => {
   await page.goto(game);
-  await page.evaluate(key => localStorage.setItem(key, '{broken'), SAVE_KEY);
+  await page.evaluate(keys => {
+    for (const key of keys) localStorage.setItem(key, '{broken');
+  }, [SAVE_KEY, EXPANSION_SAVE_KEY]);
   await page.reload();
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
   await expect(page.getByRole('button', { name: 'Continue' })).toHaveCount(0);
@@ -161,4 +163,32 @@ test('retries a deferred backdrop, keeps saved progress and fits the supported d
   await expect(page.getByRole('button', { name: 'Resume' })).toBeFocused();
   expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key) ?? '{}').bestByLevel, SAVE_KEY))
     .toEqual({ 'fernlight-trail': { ticks: 1100, fireflies: 8 } });
+});
+
+test('an existing Lantern Oak clear migrates to exactly one new trail and leaves the original save intact', async ({ page }) => {
+  const legacy = JSON.stringify({
+    schemaVersion: 1,
+    unlockedLevelIds: ['fernlight-trail', 'willow-run', 'lantern-oak'],
+    bestByLevel: { 'lantern-oak': { ticks: 900, fireflies: 7 } },
+    settings: { master: .32, muted: true, reducedMotion: true },
+  }, null, 2);
+  await page.addInitScript(({ key, legacy }) => {
+    if (!localStorage.getItem(key)) localStorage.setItem(key, legacy);
+  }, { key: SAVE_KEY, legacy });
+  await page.goto(game);
+  await page.getByRole('button', { name: 'Choose a trail' }).click();
+  await expect(page.getByRole('dialog').getByRole('button')).toHaveText([
+    'Fernlight Trail', 'Willow Run', 'Lantern Oak', 'Acorn Causeway', 'Title screen',
+  ]);
+  await page.getByRole('button', { name: 'Title screen' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('region', { name: 'Acorn Causeway playfield' })).toBeFocused();
+  await page.keyboard.press('Escape');
+  await page.getByRole('button', { name: 'Settings' }).click();
+  await expect(page.getByRole('slider', { name: 'Master volume' })).toHaveValue('32');
+  await expect(page.getByRole('checkbox', { name: 'Mute audio' })).toBeChecked();
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByRole('region', { name: 'Acorn Causeway playfield' })).toBeFocused();
+  expect(await page.evaluate(key => localStorage.getItem(key), SAVE_KEY)).toBe(legacy);
 });

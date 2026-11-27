@@ -1,5 +1,5 @@
 import './style.css';
-import { fernlight, levels, type Level } from './level.ts';
+import { classicLevels, expansionLevels, fernlight, levels, type Level } from './level.ts';
 import { SaveStore } from './save.ts';
 import { campaignPreview } from './preview.ts';
 import { mountTrail } from './trail-scene.ts';
@@ -114,7 +114,8 @@ function showResults(result: Result) {
   trail.setRunning(false);
   audio?.setActive(false, true);
   const next = playable[playable.indexOf(currentLevel) + 1];
-  const finale = campaignPreview && currentLevel === levels.at(-1);
+  const classicFinale = campaignPreview && currentLevel === classicLevels.at(-1);
+  const finale = campaignPreview && currentLevel === expansionLevels.at(-1);
   const run = `${time(result.ticks)} · ${result.fireflies}/8 fireflies · ${result.deaths} ${result.deaths === 1 ? 'fall or defeat' : 'falls or defeats'}`;
   const summary = [run];
   if (result.fireflies === 8) summary.push('Firefly stamp');
@@ -129,15 +130,18 @@ function showResults(result: Result) {
     record.className = 'record';
     if (best) record.textContent = `Best time ${time(best.ticks)} · Best fireflies ${best.fireflies}/8`;
     actions.push({ label: 'Trail selection', run: chooseTrail });
-    if (finale) {
+    if (classicFinale || finale) {
       const ending = document.createElement('p');
-      ending.textContent = 'Pip returned the Heartseeds. Light has come back to the forest.';
+      ending.textContent = finale
+        ? 'Pip returned the last Heartseeds and explored every trail.'
+        : 'Pip returned the Heartseeds. Light has come back to the forest.';
       const finaleDetails = document.createElement('div');
       finaleDetails.append(ending, record);
       record = finaleDetails;
     }
   }
-  display(finale ? 'The Lantern Oak wakes' : 'Trail cleared', summary.join(' · '), actions, currentLevel.name, record);
+  const title = finale ? 'Forest Adventure complete' : classicFinale ? 'The Lantern Oak wakes' : 'Trail cleared';
+  display(title, summary.join(' · '), actions, currentLevel.name, record);
 }
 
 const [previewArt, audioModule] = campaignPreview
@@ -148,7 +152,12 @@ if (previewArt) {
   document.documentElement.style.setProperty('--hud-art', `url("${previewArt.hud}")`);
 }
 const motionPreference = matchMedia('(prefers-reduced-motion: reduce)');
-const save = new SaveStore(playable.map(({ id }) => id), motionPreference.matches);
+const save = new SaveStore(
+  playable.map(({ id }) => id),
+  motionPreference.matches,
+  undefined,
+  campaignPreview ? classicLevels.map(({ id }) => id) : undefined,
+);
 function applyMotionPreference() {
   document.documentElement.dataset.reducedMotion = String(campaignPreview ? save.data.settings.reducedMotion : motionPreference.matches);
 }
@@ -303,7 +312,7 @@ function beginAttempt(level: Level) {
   chapterName.textContent = level.name;
   playfield.setAttribute('aria-label', `${level.name} playfield`);
   audio?.stopEffects();
-  audio?.playLevel(level.id === 'lantern-oak');
+  audio?.playLevel(level.backdrop === 'oak');
   enterGame();
   write(notice, '');
   seeds.dataset.charged = 'false';

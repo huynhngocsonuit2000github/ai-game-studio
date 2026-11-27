@@ -124,16 +124,16 @@ class TrailScene extends Phaser.Scene {
   }
 
   needsBackdrop(level: Level) {
-    return level !== fernlight && !this.textures.exists(level.id);
+    return !this.textures.exists(level.backdrop);
   }
 
   async loadBackdrop(level: Level) {
-    const url = level.id === 'willow-run' ? this.previewArt?.willow : this.previewArt?.oak;
+    const url = level.backdrop === 'willow' ? this.previewArt?.willow : this.previewArt?.oak;
     if (!url) throw new Error('Missing trail backdrop');
     const image = new Image();
     image.src = url;
     await image.decode();
-    if (!this.textures.exists(level.id)) this.textures.addImage(level.id, image);
+    if (this.needsBackdrop(level)) this.textures.addImage(level.backdrop, image);
   }
 
   private loadNearLayer() {
@@ -156,7 +156,9 @@ class TrailScene extends Phaser.Scene {
     const previousLevel = this.session.level;
     if (level !== previousLevel) {
       this.drawLevel(level);
-      if (previousLevel !== fernlight) this.textures.remove(previousLevel.id);
+      if (previousLevel.backdrop !== 'forest' && previousLevel.backdrop !== level.backdrop) {
+        this.textures.remove(previousLevel.backdrop);
+      }
     }
     this.session = new Session(level);
     this.loadNearLayer();
@@ -274,8 +276,8 @@ class TrailScene extends Phaser.Scene {
 
     this.cameras.main.setBounds(0, 0, level.width, level.height);
     this.cameras.main.setScroll(0, level.height - HEIGHT);
-    this.backdrop.setTexture(level === fernlight ? 'forest' : level.id);
-    const isOak = level.id === 'lantern-oak';
+    this.backdrop.setTexture(level.backdrop);
+    const isOak = level.backdrop === 'oak';
     // Frame the first oak in the mirrored artwork throughout the final trail.
     const scale = HEIGHT / this.backdrop.height * (isOak ? 1.66 : 1);
     this.backdrop.setScale(scale).setY(isOak ? -64 : 0);
