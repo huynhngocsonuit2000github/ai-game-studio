@@ -81,7 +81,7 @@ try {
   const press = name => page.getByRole('button', { name, exact: true }).click();
   const navigation = performance.now();
   await page.goto(url);
-  await page.getByRole('button', { name: 'Start Run', exact: true }).waitFor();
+  await page.getByRole('button', { name: 'Survival', exact: true }).waitFor();
   const readyMs = performance.now() - navigation;
   const initialTransfer = await page.evaluate(() => performance.getEntriesByType('navigation')[0].transferSize
     + performance.getEntriesByType('resource').reduce((bytes, entry) => bytes + entry.transferSize, 0));
@@ -89,7 +89,7 @@ try {
     offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1,
   });
   await screenshot('title');
-  await press('Start Run');
+  await press('Survival');
   const run = new GardenRun(seed);
   const started = performance.now();
   let frozenMs = 0;

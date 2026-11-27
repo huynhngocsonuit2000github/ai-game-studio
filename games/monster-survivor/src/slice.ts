@@ -1,5 +1,5 @@
 import { garden, orchard, rules, skills, waves } from './content.ts';
-import { Run, angleDistance, distance, dt, heading, move, random, ticks, vector } from './sim.ts';
+import { Run, angleDistance, distance, dt, heading, random, ticks, vector } from './sim.ts';
 import type { Foe, Point } from './sim.ts';
 
 export const wardPoint = { x: orchard.point[0], y: orchard.point[1] };
@@ -129,7 +129,7 @@ export class GardenRun extends Run {
     for (const foe of this.foes) {
       if (foe.def.role !== 'normal' || distance(foe, ward) > 160) continue;
       const direction = vector(heading(ward, foe));
-      move(foe, direction.x * 100, direction.y * 100, foe.def.radius, false);
+      this.translate(foe, direction.x * 100, direction.y * 100, foe.def.radius, false);
       foe.vx = 0;
       foe.vy = 0;
     }
@@ -141,7 +141,7 @@ export class GardenRun extends Run {
   private walkable(target: Point, reach: number) {
     const current = { ...this.player };
     if (distance(current, target) > reach) return false;
-    return !move(current, target.x - current.x, target.y - current.y, rules.player.radius, false);
+    return !this.translate(current, target.x - current.x, target.y - current.y, rules.player.radius, false);
   }
 
   private tollAngle(foe: Foe) {

@@ -13,7 +13,7 @@ test('starts Normal from the assembled library and keeps both public routes play
     if (response.status() >= 400) faults.push(`${response.status()} ${response.url()}`);
   });
   const games = [
-    { id: 'monster-survivor', start: 'Start Run' },
+    { id: 'monster-survivor', start: 'Survival' },
     { id: 'forest-adventure', start: 'Play' },
   ];
   const manifest = JSON.parse(readFileSync(artifact + '/release-manifest.json', 'utf8'));

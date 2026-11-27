@@ -6,8 +6,14 @@ export const ticks = (seconds: number) => Math.round(seconds * 60);
 const tau = 2 * Math.PI;
 const unlearned: Readonly<Record<string, number>> = Object.freeze({});
 export type Point = { x: number; y: number };
-export type Input = Point & { dash: boolean };
+export type Input = Point & { dash: boolean; burst?: boolean; interact?: boolean };
 export type Cue = { id: string; point?: Point; damage?: number };
+export type SpellEffect = {
+  spell: string; kind: 'hit' | 'cast' | 'ring' | 'spread'; at: Point; tick: number;
+  radius?: number; angle?: number; to?: Point;
+};
+export type Arena = { width: number; height: number; blockers: { x: number; y: number; r: number; sprite: string }[] };
+const gardenArena: Arena = { width, height, blockers: garden.blockers };
 type Foe = Point & {
   id: number; def: EnemyDef; hp: number; maxHp: number; vx: number; vy: number;
   state: 'idle' | 'windup' | 'attack' | 'recover' | 'arrival';
@@ -17,7 +23,7 @@ type Foe = Point & {
 };
 type Bolt = Point & { vx: number; vy: number; left: number; damage: number; pierce: number; hits: number[]; source: 'wick-dart' | 'foxfire'; comet: boolean };
 type Loot = Point & { value: number; kind: 'ember' | 'potion' | 'chest'; expires: number };
-type Patch = Point & { radius: number; until: number; damage: number; spread: boolean };
+type Patch = Point & { born?: number; radius: number; until: number; damage: number; spread: boolean };
 type Shot = Point & { vx: number; vy: number; until: number; damage: number };
 type Meteor = Point & { radius: number; until: number; damage: number };
 export type WaveBand = typeof waves.slice[number];
@@ -40,8 +46,8 @@ export function random(seed: number) {
   };
 }
 
-export function outsideSolids(p: Point, radius: number) {
-  return garden.blockers.every(block => distance(p, block) >= block.r + radius);
+export function outsideSolids(p: Point, radius: number, arena = gardenArena) {
+  return arena.blockers.every(block => distance(p, block) >= block.r + radius);
 }
 
 function segmentHit(a: Point, b: Point, p: Point, radius: number) {
@@ -60,27 +66,27 @@ function segmentHit(a: Point, b: Point, p: Point, radius: number) {
   return t <= 1 ? t : Infinity;
 }
 
-export function solidHit(a: Point, b: Point, radius: number) {
+export function solidHit(a: Point, b: Point, radius: number, arena = gardenArena) {
   let hit = Infinity;
-  for (const block of garden.blockers) hit = Math.min(hit, segmentHit(a, b, block, radius + block.r));
+  for (const block of arena.blockers) hit = Math.min(hit, segmentHit(a, b, block, radius + block.r));
   return hit;
 }
 
-export function move(p: Point, dx: number, dy: number, radius: number, slide = true) {
+export function move(p: Point, dx: number, dy: number, radius: number, slide = true, arena = gardenArena) {
   const margin = garden.boundaryMargin + radius;
   const target = {
-    x: clamp(p.x + dx, margin, width - margin),
-    y: clamp(p.y + dy, margin, height - margin),
+    x: clamp(p.x + dx, margin, arena.width - margin),
+    y: clamp(p.y + dy, margin, arena.height - margin),
   };
   const boundary = target.x !== p.x + dx || target.y !== p.y + dy;
-  const hit = solidHit(p, target, radius);
+  const hit = solidHit(p, target, radius, arena);
   if (hit === Infinity) {
     Object.assign(p, target);
     return boundary;
   }
   if (slide) {
-    move(p, dx, 0, radius, false);
-    move(p, 0, dy, radius, false);
+    move(p, dx, 0, radius, false, arena);
+    move(p, 0, dy, radius, false, arena);
   } else {
     const t = Math.max(0, hit - .001);
     p.x += (target.x - p.x) * t;
@@ -89,10 +95,10 @@ export function move(p: Point, dx: number, dy: number, radius: number, slide = t
   return true;
 }
 
-export function camera(p: Point): Point {
+export function camera(p: Point, arena = gardenArena): Point {
   return {
-    x: clamp(p.x - viewWidth / 2, 0, width - viewWidth),
-    y: clamp(p.y - viewHeight / 2, 0, height - viewHeight),
+    x: clamp(p.x - viewWidth / 2, 0, arena.width - viewWidth),
+    y: clamp(p.y - viewHeight / 2, 0, arena.height - viewHeight),
   };
 }
 
@@ -129,6 +135,40 @@ export class Run {
   private guardNext = 0;
   private dashBurst = false;
   cues: Cue[] = [];
+  readonly spellEffects: SpellEffect[] = [];
+  readonly campaign: boolean = false;
+  arena = gardenArena;
+  protected spellSpeed = 1;
+  protected speedCap = .35;
+  protected mainDamage = 0;
+  protected splashAdd = 0;
+
+  clearSpellEffects() { this.spellEffects.length = 0; }
+
+  protected effect(spell: string, kind: SpellEffect['kind'], at: Point, detail: Pick<SpellEffect, 'radius' | 'angle' | 'to'> = {}) {
+    if (!this.campaign) return;
+    if (this.spellEffects.length >= 80) {
+      const decorative = this.spellEffects.findIndex(fx => fx.kind === 'hit');
+      if (decorative >= 0) this.spellEffects.splice(decorative, 1);
+      else if (kind === 'hit') return;
+      else this.spellEffects.shift();
+    }
+    this.spellEffects.push({ spell, kind, at: { x: at.x, y: at.y }, tick: this.tick, ...detail });
+  }
+
+  get emberReach() {
+    const reach = rules.player.pickupRadius + this.pickupBonus + (this.rank('heart-husk').pickupRadiusBonus ?? 0);
+    return this.campaign ? Math.min(160, reach) : reach;
+  }
+
+  protected movementScale() { return 1; }
+  protected action(_input: Input) { void _input; }
+  protected foeAction(_foe: Foe) { void _foe; return false; }
+  protected death(_foe: Foe) { void _foe; return false; }
+
+  protected translate(p: Point, dx: number, dy: number, radius: number, slide = true) {
+    return move(p, dx, dy, radius, slide, this.arena);
+  }
   build = new Map<string, number>([[rules.startingSkill, 1]]);
   damage = new Map<string, number>();
   xp = 0;
@@ -181,7 +221,11 @@ export class Run {
   get elite() { return this.foes.find(foe => foe.def.role === 'elite'); }
 
   rank(id: string) {
-    return skills.get(id)?.ranks[(this.build.get(id) ?? 0) - 1] ?? unlearned;
+    return this.skillRank(id, this.build.get(id) ?? 0);
+  }
+
+  skillRank(id: string, rank: number) {
+    return skills.get(id)?.ranks[rank - 1] ?? unlearned;
   }
 
   step(input: Input) {
@@ -192,6 +236,8 @@ export class Run {
     this.indexFoes();
     this.updateFoes();
     this.indexFoes();
+    this.action(input);
+    if (this.result) return;
     if (this.tick >= this.dashUntil) this.burstDash();
     this.cast();
     this.moveBolts();
@@ -224,11 +270,12 @@ export class Run {
     }
     if (this.tick < this.dashUntil) {
       const speed = p.dashDistance / ticks(p.dashDurationSec);
-      if (move(this.player, this.dashVector.x * speed, this.dashVector.y * speed, p.radius, false)) this.dashUntil = this.tick;
+      if (this.translate(this.player, this.dashVector.x * speed, this.dashVector.y * speed, p.radius, false)) this.dashUntil = this.tick;
       return;
     }
-    const speed = p.speed * (1 + Math.min(.35, (laces.speedBonus ?? 0) + this.movementBonus));
-    move(this.player, direction.x * speed * dt, direction.y * speed * dt, p.radius);
+    const speed = p.speed * (1 + Math.min(this.speedCap, (laces.speedBonus ?? 0) + this.movementBonus));
+    const scale = this.movementScale();
+    this.translate(this.player, direction.x * speed * dt * scale, direction.y * speed * dt * scale, p.radius);
   }
 
   private burstDash() {
@@ -238,6 +285,7 @@ export class Run {
     if (pack.dashBurstDamage) {
       this.pulse(this.player, pack.dashBurstRadius, pack.dashBurstDamage, 'foxfire');
       this.emit('bloom', this.player);
+      this.effect('lantern-pack', 'ring', this.player, { radius: this.area(pack.dashBurstRadius), angle: Math.atan2(this.dashVector.y, this.dashVector.x) });
     }
   }
 
@@ -250,6 +298,7 @@ export class Run {
       if (!this.guardNext) this.guardNext = this.tick + ticks(mirror.rechargeSec ?? 8);
       if (mirror.burstDamage) this.pulse(this.player, mirror.radius, mirror.burstDamage, 'mirror-ward');
       this.emit('shield', this.player);
+      this.effect('mirror-ward', 'ring', this.player, { radius: mirror.burstDamage ? this.area(mirror.radius) : 31 });
       return;
     }
     this.player.hp = Math.max(0, this.player.hp - amount);
@@ -261,7 +310,7 @@ export class Run {
 
   protected spawn(id: string, hp?: number, position?: Point): Foe | undefined {
     const def = enemies.get(id)!;
-    const view = camera(this.player);
+    const view = camera(this.player, this.arena);
     let spot = position;
     const padding = garden.spawnTargetPadding;
     const margin = garden.boundaryMargin + def.radius;
@@ -269,10 +318,10 @@ export class Run {
       const direction = vector(this.waveRng() * tau);
       const reach = 290 + this.waveRng() * 380;
       const candidate = {
-        x: clamp(this.player.x + direction.x * reach, margin, width - margin),
-        y: clamp(this.player.y + direction.y * reach, margin, height - margin),
+        x: clamp(this.player.x + direction.x * reach, margin, this.arena.width - margin),
+        y: clamp(this.player.y + direction.y * reach, margin, this.arena.height - margin),
       };
-      if (distance(candidate, this.player) < garden.spawnMinFromPlayer || !outsideSolids(candidate, def.radius)) continue;
+      if (distance(candidate, this.player) < garden.spawnMinFromPlayer || !outsideSolids(candidate, def.radius, this.arena)) continue;
       if (candidate.x < view.x - padding || candidate.x > view.x + viewWidth + padding ||
           candidate.y < view.y - padding || candidate.y > view.y + viewHeight + padding) spot = candidate;
       if (!spot && def.role !== 'normal' && attempt > 28) spot = candidate;
@@ -323,6 +372,7 @@ export class Run {
         if (this.tick >= foe.until) foe.state = 'idle';
         continue;
       }
+      if (this.foeAction(foe)) continue;
       if (foe.def.role === 'boss') {
         this.updateBoss(foe, range);
       } else {
@@ -351,7 +401,7 @@ export class Run {
     }
     foe.vx += clamp(x * speed - foe.vx, -accel * dt, accel * dt);
     foe.vy += clamp(y * speed - foe.vy, -accel * dt, accel * dt);
-    move(foe, foe.vx * dt, foe.vy * dt, foe.def.radius);
+    this.translate(foe, foe.vx * dt, foe.vy * dt, foe.def.radius);
   }
 
   private updateMob(foe: Foe, range: number) {
@@ -369,7 +419,7 @@ export class Run {
       if (foe.state === 'attack') {
         const dir = vector(foe.angle);
         const speed = behavior.chargeSpeed! * dt;
-        const stop = move(foe, dir.x * speed, dir.y * speed, foe.def.radius, false);
+        const stop = this.translate(foe, dir.x * speed, dir.y * speed, foe.def.radius, false);
         if (stop || this.tick >= foe.until) {
           foe.state = 'recover';
           foe.until = this.tick + ticks(behavior.recovery!);
@@ -427,7 +477,7 @@ export class Run {
     const [inner, outer] = b.desiredBand ?? [0, b.triggerRange!];
     if (range < inner) {
       this.steer(foe, toward + Math.PI, foe.def.speed, range);
-    } else if (range > outer || (ranged && solidHit(foe, this.player, 0) !== Infinity)) {
+    } else if (range > outer || (ranged && solidHit(foe, this.player, 0, this.arena) !== Infinity)) {
       this.steer(foe, toward, foe.def.speed, range);
     } else {
       foe.state = 'windup';
@@ -442,7 +492,7 @@ export class Run {
     this.shots = this.shots.filter(shot => {
       if (shot.until <= this.tick) return false;
       const end = { x: shot.x + shot.vx * dt, y: shot.y + shot.vy * dt };
-      const wall = solidHit(shot, end, 4);
+      const wall = solidHit(shot, end, 4, this.arena);
       const contact = distance(shot, this.player) <= rules.player.radius + 5
         ? 0 : segmentHit(shot, end, this.player, rules.player.radius + 5);
       if (contact < wall && contact <= 1) {
@@ -450,7 +500,7 @@ export class Run {
         return false;
       }
       Object.assign(shot, end);
-      return wall === Infinity && end.x >= 0 && end.y >= 0 && end.x <= width && end.y <= height;
+      return wall === Infinity && end.x >= 0 && end.y >= 0 && end.x <= this.arena.width && end.y <= this.arena.height;
     });
   }
 
@@ -469,7 +519,7 @@ export class Run {
     }
   }
 
-  private *neighbors(p: Point, radius: number) {
+  protected *neighbors(p: Point, radius: number) {
     const left = Math.max(0, Math.floor((p.x - radius) / 80));
     const right = Math.min(31, Math.floor((p.x + radius) / 80));
     for (let y = Math.max(0, Math.floor((p.y - radius) / 80)); y <= Math.floor((p.y + radius) / 80); y++) {
@@ -485,21 +535,25 @@ export class Run {
     for (const foe of this.neighbors(this.player, range)) {
       const gap = distance(foe, this.player);
       if (foe.hp <= 0 || foe.state === 'arrival' || gap > range || (gap === range && best && best.id < foe.id)) continue;
-      if (solidHit(this.player, foe, 0) !== Infinity) continue;
+      if (solidHit(this.player, foe, 0, this.arena) !== Infinity) continue;
       best = foe;
       range = gap;
     }
     return best;
   }
 
-  private hit(foe: Foe, amount: number, source: string) {
+  protected hit(foe: Foe, amount: number, source: string, at: Point = foe, angle?: number) {
     if (foe.hp <= 0 || foe.state === 'arrival') return;
     const armor = this.normal && foe.def.role === 'boss' && foe.state !== 'recover'
-      ? rules.normal.wardenArmorMultiplier : 1;
+      ? this.campaign ? .58 : rules.normal.wardenArmorMultiplier : 1;
     const damage = Math.max(1, Math.round(amount * armor * (this.rank('thread-lens').damageMultiplier ?? 1) * (1 + this.damageBonus)));
     this.damage.set(source, (this.damage.get(source) ?? 0) + Math.min(foe.hp, damage));
     foe.hp -= damage;
     this.emit('impact', foe, damage);
+    if (this.campaign) {
+      const spell = [...this.build.keys()].find(id => skills.get(id)?.recipe?.active === source) ?? source;
+      this.effect(spell, 'hit', at, { angle });
+    }
   }
 
   private cast() {
@@ -509,14 +563,15 @@ export class Run {
     if (this.tick >= (this.nextCast.get(id) ?? 0)) {
       const target = this.target(dart.range);
       if (target) {
-        this.nextCast.set(id, this.tick + ticks(dart.intervalSec));
+        this.nextCast.set(id, this.tick + ticks(dart.intervalSec * this.spellSpeed));
         this.emit(comet ? 'meteor' : 'dart', this.player);
+        this.effect(id, 'cast', this.player, { angle: heading(this.player, target) });
         for (let i = 0; i < dart.count && this.bolts.length < rules.caps.projectiles; i++) {
           const angle = heading(this.player, target) + (i - (dart.count - 1) / 2) * (comet ? .175 : .279);
           const dir = vector(angle);
           this.bolts.push({
             x: this.player.x, y: this.player.y, vx: dir.x * 540, vy: dir.y * 540,
-            left: dart.range, damage: dart.damage, pierce: dart.pierce, hits: [], source: 'wick-dart', comet,
+            left: dart.range, damage: dart.damage + this.mainDamage, pierce: dart.pierce, hits: [], source: 'wick-dart', comet,
           });
         }
       }
@@ -530,10 +585,11 @@ export class Run {
     if (crown && this.ready('glass-pulse', ring.periodSec, true)) {
       this.pulse(this.player, ring.pulseRadius, ring.pulseDamage, 'prism-ring', 'spark');
       this.emit('glass', this.player);
+      this.effect('crown-of-glass', 'ring', this.player, { radius: this.area(ring.pulseRadius) });
     }
     this.orbit.length = 0;
     for (let i = 0; i < (ring.count ?? 0); i++) {
-      const dir = vector(tau * (i / ring.count + this.elapsed / ring.periodSec));
+      const dir = vector(tau * (i / ring.count + this.elapsed / (ring.periodSec * (crown ? this.spellSpeed : 1))));
       const p = { x: this.player.x + dir.x * ring.radius * area, y: this.player.y + dir.y * ring.radius * area };
       this.orbit.push(p);
       for (const foe of this.neighbors(p, 65)) {
@@ -548,9 +604,9 @@ export class Run {
     const bloom = this.rank(midnight ? 'green-midnight' : 'bog-bloom');
     if (bloom.tickDamage && this.tick >= (this.nextCast.get('bog-bloom') ?? 0)) {
       const target = this.target(bloom.range) ?? { x: this.player.x + this.facing.x * 70, y: this.player.y + this.facing.y * 70 };
-      this.nextCast.set('bog-bloom', this.tick + ticks(bloom.intervalSec));
+      this.nextCast.set('bog-bloom', this.tick + ticks(bloom.intervalSec * this.spellSpeed));
       if (this.patches.length === 3) this.patches.shift();
-      this.patches.push({ x: target.x, y: target.y, radius: bloom.radius * area, until: this.tick + ticks(bloom.durationSec * duration), damage: bloom.tickDamage, spread: false });
+      this.patches.push({ x: target.x, y: target.y, radius: bloom.radius * area, born: this.tick, until: this.tick + ticks(bloom.durationSec * duration), damage: bloom.tickDamage, spread: false });
       this.emit('bloom', target);
     }
     this.patches = this.patches.filter(patch => patch.until >= this.tick);
@@ -581,16 +637,18 @@ export class Run {
   private ready(id: string, seconds: number, delayFirst = false) {
     const due = this.nextCast.get(id);
     if (due === undefined && delayFirst) {
-      this.nextCast.set(id, this.tick + ticks(seconds));
+      this.nextCast.set(id, this.tick + ticks(seconds * this.spellSpeed));
       return false;
     }
     if (due !== undefined && this.tick < due) return false;
-    this.nextCast.set(id, this.tick + ticks(Math.max(.25, seconds)));
+    this.nextCast.set(id, this.tick + ticks(Math.max(.25, seconds * this.spellSpeed)));
     return true;
   }
 
+  private area(radius: number) { return radius * (this.rank('lantern-oil').areaMultiplier ?? 1); }
+
   private pulse(center: Point, radius: number, damage: number, source: string, bonus?: 'spark' | 'poison', push = 0) {
-    radius *= this.rank('lantern-oil').areaMultiplier ?? 1;
+    radius = this.area(radius);
     for (const foe of this.neighbors(center, radius)) {
       if (foe.state === 'arrival' || foe.hp <= 0 || distance(center, foe) > radius) continue;
       const extra = bonus === 'spark' && foe.spark > this.tick ? 9 : 0;
@@ -600,7 +658,7 @@ export class Run {
       if (push && foe.def.role !== 'boss') {
         const dir = vector(heading(center, foe));
         const reach = foe.def.role === 'elite' ? push / 2 : push;
-        move(foe, dir.x * reach, dir.y * reach, foe.def.radius, false);
+        this.translate(foe, dir.x * reach, dir.y * reach, foe.def.radius, false);
       }
     }
   }
@@ -618,18 +676,20 @@ export class Run {
         if (!target || this.bolts.length >= rules.caps.projectiles ||
             !this.ready('fox-' + i, fox.intervalSec, i > 0)) continue;
         for (let j = i + 1; j < fox.count; j++) {
-          if (!this.nextCast.has('fox-' + j)) this.nextCast.set('fox-' + j, this.tick + ticks(fox.intervalSec * (j - i) / fox.count));
+          if (!this.nextCast.has('fox-' + j)) this.nextCast.set('fox-' + j, this.tick + ticks(fox.intervalSec * this.spellSpeed * (j - i) / fox.count));
         }
         const aim = vector(heading(p, target));
         this.bolts.push({ ...p, vx: aim.x * fox.boltSpeed, vy: aim.y * fox.boltSpeed, left: fox.range,
           damage: fox.damage, pierce: 0, hits: [], source: 'foxfire', comet: false });
         this.emit('dart', p);
+        this.effect(this.build.has('lantern-pack') ? 'lantern-pack' : 'foxfire', 'cast', p, { angle: heading(p, target) });
       }
     }
     const bell = this.rank('hex-bell');
     if (bell.damage && this.ready('hex-bell', bell.intervalSec)) {
       this.pulse(this.player, bell.radius, bell.damage, 'hex-bell', 'poison', bell.pushPx);
       this.emit('bell', this.player);
+      this.effect('hex-bell', 'ring', this.player, { radius: this.area(bell.radius) });
     }
     const mirror = this.rank('mirror-ward');
     if (mirror.charges && this.guard < mirror.charges) {
@@ -665,6 +725,7 @@ export class Run {
         if (distance(foe, meteor) <= meteor.radius) this.hit(foe, meteor.damage * (foe.spark > this.tick ? 1.25 : 1), 'starfall');
       }
       this.emit('meteor', meteor);
+      this.effect('starfall', 'ring', meteor, { radius: meteor.radius });
       return false;
     });
   }
@@ -672,24 +733,35 @@ export class Run {
   private moveBolts() {
     for (const bolt of this.bolts) {
       const end = { x: bolt.x + bolt.vx * dt, y: bolt.y + bolt.vy * dt };
-      const wall = solidHit(bolt, end, 3);
+      const wall = solidHit(bolt, end, 3, this.arena);
       const hits: { foe: Foe; time: number }[] = [];
       for (const foe of this.neighbors(bolt, 70)) {
         if (foe.state === 'arrival' || foe.hp <= 0 || bolt.hits.includes(foe.id)) continue;
         const time = distance(bolt, foe) <= foe.def.radius + 4 ? 0 : segmentHit(bolt, end, foe, foe.def.radius + 4);
         if (time < wall && time <= 1) hits.push({ foe, time });
       }
-      for (const { foe } of hits.sort((a, b) => a.time - b.time || a.foe.id - b.foe.id)) {
-        this.hit(foe, bolt.damage, bolt.source);
+      for (const { foe, time } of hits.sort((a, b) => a.time - b.time || a.foe.id - b.foe.id)) {
+        const at = this.campaign ? { x: bolt.x + (end.x - bolt.x) * time, y: bolt.y + (end.y - bolt.y) * time } : foe;
+        this.hit(foe, bolt.damage, bolt.source, at, this.campaign ? Math.atan2(bolt.vy, bolt.vx) : undefined);
         if (bolt.source === 'wick-dart') foe.spark = this.tick + ticks(3);
         bolt.hits.push(foe.id);
+        const dart = this.rank('wick-dart');
+        if (this.campaign && bolt.source === 'wick-dart' && !bolt.comet && dart.splashFraction) {
+          const radius = this.area(dart.splashRadius + this.splashAdd);
+          this.effect('wick-dart', 'ring', at, { radius });
+          this.emit('splash', at);
+          for (const other of this.neighbors(at, radius)) {
+            if (other !== foe && distance(other, at) <= radius) this.hit(other, bolt.damage * dart.splashFraction, 'wick-dart');
+          }
+        }
         if (bolt.pierce-- > 0) continue;
         bolt.left = 0;
         if (bolt.comet) {
           const rank = this.rank('comet-thread');
-          const radius = rank.splashRadius * (this.rank('lantern-oil').areaMultiplier ?? 1);
-          for (const other of this.neighbors(foe, radius)) {
-            if (other !== foe && distance(other, foe) <= radius) this.hit(other, rank.splashDamage, 'wick-dart');
+          const radius = this.area(rank.splashRadius);
+          this.effect('comet-thread', 'ring', at, { radius });
+          for (const other of this.neighbors(at, radius)) {
+            if (other !== foe && distance(other, at) <= radius) this.hit(other, rank.splashDamage, 'wick-dart');
           }
         }
         break;
@@ -720,6 +792,7 @@ export class Run {
       next.poisonDamage = foe.poisonDamage;
       next.poison = foe.poison;
       next.poisonNext = this.tick + ticks(.5);
+      this.effect('green-midnight', 'spread', foe, { to: { x: next.x, y: next.y } });
       if (++spread === 3) break;
     }
   }
@@ -727,6 +800,7 @@ export class Run {
   private resolveDeaths() {
     for (const foe of this.foes) {
       if (foe.hp > 0) continue;
+      if (this.death(foe)) continue;
       this.kills++;
       this.emit('kill', foe);
       this.spreadPoison(foe);
@@ -735,11 +809,11 @@ export class Run {
         continue;
       }
       if (foe.def.role === 'elite') this.eliteDefeated(foe);
-      if (foe.def.role === 'normal' && ++this.normalKills % 45 === 0 && !this.loot.some(item => item.kind === 'potion')) {
+      if (!this.campaign && foe.def.role === 'normal' && ++this.normalKills % 45 === 0 && !this.loot.some(item => item.kind === 'potion')) {
         this.drop(foe, 'potion', 18, this.tick + ticks(20));
       }
       let xp = foe.def.xp;
-      if (this.normal && foe.def.role === 'normal') {
+      if (this.normal && !this.campaign && foe.def.role === 'normal') {
         let multiplier = 1;
         for (const band of rules.normal.emberBands) {
           if (this.elapsed < band.atSec) break;
@@ -790,7 +864,7 @@ export class Run {
         this.emit('xp', item);
         return false;
       }
-      if (gap < rules.player.pickupRadius + this.pickupBonus + (this.rank('heart-husk').pickupRadiusBonus ?? 0)) {
+      if (gap < this.emberReach) {
         const dir = vector(heading(item, this.player));
         item.x += dir.x * 390 * dt;
         item.y += dir.y * 390 * dt;
@@ -828,7 +902,8 @@ export class Run {
       if (rank) return rank < skill.maxRank;
       return count(skill.type) < (skill.type === 'active' ? rules.slots.active : rules.slots.passive);
     });
-    const pool = legal.filter(id => !excluded.includes(id));
+    const preserveDart = this.campaign && this.build.get('wick-dart') === 1;
+    const pool = legal.filter(id => !excluded.includes(id) || preserveDart && id === 'wick-dart');
     const cards: string[] = [];
     const take = (id: string | undefined) => {
       if (!id) return;
@@ -844,8 +919,9 @@ export class Run {
         pool.find(id => id === 'wick-dart') ??
         pool.find(id => id === 'thread-lens' && (this.build.get(id) ?? 0) < 2));
     }
+    if (preserveDart) take(pool.find(id => id === 'wick-dart'));
     if (this.normal && level <= 5) {
-      if (level > 2) take(pool.find(id => this.build.has(id)));
+      if (level > 2 && !cards.length) take(pool.find(id => this.build.has(id)));
       const fresh = pool.filter(id => !this.build.has(id) && (level > 2 || skills.get(id)?.type === 'active'));
       take(fresh[Math.floor(this.draftRng() * fresh.length)]);
     }
