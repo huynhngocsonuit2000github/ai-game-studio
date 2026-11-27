@@ -8,6 +8,12 @@ const dist = new URL('../deployment/dist/', import.meta.url);
 const registry = JSON.parse(readFileSync(new URL('../registry/games.json', import.meta.url), 'utf8'));
 const games = publicGames(parseRegistry(registry));
 const manifest = JSON.parse(readFileSync(new URL('release-manifest.json', dist), 'utf8'));
+for (const { id, entry, version, status, visibility } of registry.games) {
+  if (status === 'development' && visibility === 'public' &&
+      !manifest.games.some((game) => game.id === id && game.entry === entry && game.version === version)) {
+    throw new Error(`Pages manifest is missing the approved public preview: ${id}`);
+  }
+}
 if (!isDeepStrictEqual(manifest.games, games.map(({ id, entry, version }) => ({ id, entry, version })))) {
   throw new Error('Pages manifest does not match the released catalog.');
 }
