@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 1,
+  "normal": [
+    {
+      "startSec": 0,
+      "endSec": 45,
+      "eventsPerSec": 0.66,
+      "groups": [
+        [
+          "seedling",
+          1,
+          1
+        ]
+      ],
+      "cap": 32
+    },
+    {
+      "startSec": 45,
+      "endSec": 120,
+      "eventsPerSec": 0.87,
+      "groups": [
+        [
+          "seedling",
+          1,
+          5
+        ],
+        [
+          "moth",
+          2,
+          2
+        ]
+      ],
+      "cap": 48
+    },
+    {
+      "startSec": 120,
+      "endSec": 240,
+      "eventsPerSec": 1.06,
+      "groups": [
+        [
+          "seedling",
+          2,
+          5
+        ],
+        [
+          "moth",
+          2,
+          4
+        ],
+        [
+          "scarab",
+          1,
+          2
+        ],
+        [
+          "bottle",
+          1,
+          1
+        ]
+      ],
+      "cap": 78
+    },
+    {
+      "startSec": 240,
+      "endSec": 360,
+      "eventsPerSec": 1.18,
+      "groups": [
+        [
+          "seedling",
+          3,
+          3
+        ],
+        [
+          "moth",
+          2,
+          4
+        ],
+        [
+          "scarab",
+          1,
+          3
+        ],
+        [
+          "bottle",
+          1,
+          3
+        ],
+        [
+          "bells",
+          1,
+          2
+        ]
+      ],
+      "cap": 112
+    },
+    {
+      "startSec": 360,
+      "endSec": 480,
+      "eventsPerSec": 1.3,
+      "groups": [
+        [
+          "seedling",
+          3,
+          2
+        ],
+        [
+          "moth",
+          2,
+          4
+        ],
+        [
+          "scarab",
+          2,
+          3
+        ],
+        [
+          "bottle",
+          2,
+          3
+        ],
+        [
+          "bells",
+          2,
+          3
+        ]
+      ],
+      "cap": 134
+    },
+    {
+      "startSec": 480,
+      "endSec": 600,
+      "eventsPerSec": 1.44,
+      "groups": [
+        [
+          "seedling",
+          4,
+          3
+        ],
+        [
+          "moth",
+          3,
+          4
+        ],
+        [
+          "scarab",
+          2,
+          3
+        ],
+        [
+          "bottle",
+          2,
+          3
+        ],
+        [
+          "bells",
+          2,
+          4
+        ]
+      ],
+      "cap": 152
+    },
+    {
+      "startSec": 600,
+      "endSec": 720,
+      "eventsPerSec": 1.57,
+      "groups": [
+        [
+          "seedling",
+          4,
+          3
+        ],
+        [
+          "moth",
+          3,
+          3
+        ],
+        [
+          "scarab",
+          2,
+          3
+        ],
+        [
+          "bottle",
+          2,
+          3
+        ],
+        [
+          "bells",
+          2,
+          5
+        ]
+      ],
+      "cap": 180
+    }
+  ],
+  "elites": [
+    {
+      "atSec": 195,
+      "id": "thornback"
+    },
+    {
+      "atSec": 445,
+      "id": "discord"
+    }
+  ],
+  "overrun": {
+    "startSec": 720,
+    "endSec": 810,
+    "eventsPerSec": 0.95,
+    "groups": [
+      [
+        "moth",
+        2,
+        1
+      ],
+      [
+        "bottle",
+        1,
+        1
+      ],
+      [
+        "seedling",
+        3,
+        2
+      ]
+    ],
+    "cap": 140
+  },
+  "slice": [
+    {
+      "startSec": 0,
+      "endSec": 35,
+      "eventsPerSec": 0.79,
+      "groups": [
+        [
+          "seedling",
+          1,
+          1
+        ]
+      ],
+      "cap": 30
+    },
+    {
+      "startSec": 35,
+      "endSec": 95,
+      "eventsPerSec": 0.97,
+      "groups": [
+        [
+          "seedling",
+          2,
+          3
+        ],
+        [
+          "moth",
+          2,
+          2
+        ]
+      ],
+      "cap": 45
+    },
+    {
+      "startSec": 95,
+      "endSec": 240,
+      "eventsPerSec": 1.1,
+      "groups": [
+        [
+          "seedling",
+          2,
+          4
+        ],
+        [
+          "moth",
+          2,
+          4
+        ],
+        [
+          "scarab",
+          1,
+          2
+        ]
+      ],
+      "cap": 64
+    }
+  ],
+  "sliceElites": [
+    {
+      "atSec": 105,
+      "id": "thornback",
+      "hpOverride": 280
+    }
+  ]
+}

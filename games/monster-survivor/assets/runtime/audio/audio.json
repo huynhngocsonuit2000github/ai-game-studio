@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "sampleRate": 24000,
+  "music": {
+    "moonlit-gate": {
+      "file": "moonlit-gate.wav",
+      "bpm": 82,
+      "bars": 8,
+      "loopStartFrame": 0,
+      "loopEndFrame": 561951
+    },
+    "through-the-garden": {
+      "file": "through-the-garden.wav",
+      "bpm": 104,
+      "bars": 12,
+      "loopStartFrame": 0,
+      "loopEndFrame": 664615
+    },
+    "warden-toll": {
+      "file": "warden-toll.wav",
+      "bpm": 122,
+      "bars": 8,
+      "loopStartFrame": 0,
+      "loopEndFrame": 377705
+    }
+  },
+  "sfx": {
+    "dart": "dart.wav",
+    "impact": "impact.wav",
+    "xp": "xp.wav",
+    "dash": "dash.wav",
+    "hurt": "hurt.wav",
+    "level": "level.wav",
+    "select": "select.wav",
+    "ward": "ward.wav",
+    "telegraph": "telegraph.wav",
+    "bell": "bell.wav",
+    "bloom": "bloom.wav",
+    "shield": "shield.wav",
+    "meteor": "meteor.wav",
+    "elite": "elite.wav",
+    "boss-arrival": "boss-arrival.wav",
+    "win": "win.wav",
+    "lose": "lose.wav"
+  }
+}

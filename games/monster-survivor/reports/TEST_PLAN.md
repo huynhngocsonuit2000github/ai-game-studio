@@ -1,0 +1,28 @@
+# Test plan
+
+Record each test ID against the actual candidate SHA, browser/device or tool version, reproduction command, status (PASS/FAIL/NOT_RUN/BLOCKED), and artifact or defect. Separate code, production-assembled Pages simulation, real live deployment and human approval. Test through normal input with a production bundle for key flows. A deterministic test-only clock/input adapter may accelerate rare edges, provided it is excluded from production bundles and at least one normal slice and Normal run are exercised on their authored schedule.
+
+| ID | Layer | Scenario and expected result |
+| --- | --- | --- |
+| T01 | Import | Trusted validator stages exact digest and bytes with external approval, rejects traversal/case collisions and wrong digest or destinations, leaves repo and siblings intact. Assets/paths/ranks/recipes are validated. |
+| T02 | Simulation + browser | Keyboard walk/dash, same speed on all diagonals, paused by blur, cannot dash during cooldown. Swept obstacles stop dash without passing walls. DOM focus and pointer input clear on cancel. |
+| T03 | Simulation | Known seed/input produces identical summaries and spawn queues at 30/60/120 render cadence; clock clamp handles background tabs. Full frame phase order produces one terminal outcome. |
+| T04 | Simulation | Spawn mix and caps, swept shots, rarity order, line-of-sight and telegraphs. Tests exercise each AI. No damage in windup, no damage twice from one tick, stat scaling matches bands. |
+| T05 | Simulation + browser | Dart kills Seedling, boots into visible XP pickups, collects enough to draft, modal freezes real active countdown, card applies rank after one key/click. Test full slots, reroll, duplicate key and overflow XP. |
+| T06 | Simulation + browser | Elite chest → bank → eligible evolution → replace base skill without a fifth slot. Invalid recipes and duplicate picks rejected. Verify all four on Normal and Later queue behavior. |
+| T07 | Simulation + browser | Charge meter enters/exits, grace and decay, two unique normal wards, inactive third, boon then level ordering. Show offscreen pointer, frozen timer and Overrun. Slice uses Orchard only. |
+| T08 | Simulation + browser | Dash i-frames, player damage grace, guard charges spent first. Poison/mark/chill tests check tick and apply order. Shield never consumes while dashing. Player can walk out of tells, including boss. |
+| T09 | Simulation + browser | Defeat on HP, no ward by deadline, living boss at hard limit. Victory triggers after required rites + boss, same-tick priority deterministic. Retry resets waves, pools and modal queue. |
+| T10 | Simulation + gameplay | All Warden thresholds, recovery, clears and one-time adds. Geometry finds reachable safety on seeded layout. Check blocking/telegraph overlap and two simultaneous phase thresholds. |
+| T11 | Browser | Runtime asset URLs work across boot/combat/draft/boss. Required file 404 gives retryable failure. Audio failure remains silent. Zero uncaught errors/network errors on normal path. |
+| T12 | Simulation + browser | Settings and record persist after reload, storage denial and corrupt/future version recovery, no writes to sibling save keys. Finalize run once even with repeated result input. |
+| T13 | Browser/audio | User gesture unlocks, pause and tab restore respect volume, FX priority/voice caps, no duplicate loops after retries; no clipping at join or during busy fight. |
+| T14 | Browser | 1366×768 desktop and emulated mobile 844×390 / 390×844. Keyboard card selection, focus trap/restore, safe areas, rotate recovery, simultaneous movement/dash, responsive menu and controls. |
+| T15 | Browser/manual | Actual title, combat, reward, boss and result captures. Cue clarity independent of sound/color, visible text/focus contrast, reduced motion. Test 200% zoom on non-game screens. |
+| T16 | Browser | Full slice normal input on assembled or project-subpath preview; result to Retry and Game Library. Check title, motion/combat and final boss recording. Record build and test URL. |
+| T17 | Manual | No-coaching Producer G2 slice, then G4 Normal; feedback on start, route choice, first power spike and replay intent. Record issue IDs. Additional first-time players when available. |
+| T18 | Gameplay | Normal run balance bands measured on at least three distinct builds and one seeded additional recipe path; no single spell forced across wins. Preserve all designed variants, tally budget. |
+| T19 | Device/perf | Cold load, dense 90 s frames/heap/caps, three retries/disposal. Record physical vs emulated device and supported metric fields. Check Chromium and Firefox desktop, Chrome Android landscape and Safari iOS landscape if listed for release. |
+| T20 | Build/Pages | Frozen install, target build, Studio lint/typecheck/test/build/assembly/verify/Playwright. When candidate is intentionally private, verify real assembled output excludes it and stays regression-clean, and independently smoke-test the built candidate at identical subpath. If later authorized public, assemble with actual registry and verify catalog launch/direct load/return. |
+| T21 | Scope/regression | Trusted base checker on real base/head. No Forest source/registry edits; its public load, start, one short playable route and existing save behavior on candidate's assembled artifact. Test known production flags, preserve published manifest and entry. |
+| T22 | Live | After manual authorized merge, record stamped SHA and manifest. Verify displayed catalog, game direct/load/logs and launch/return on live Pages, plus old game route. If only the private slice was merged, verify the game stays absent live. Run the G4 user-approved release playtest when applicable. |

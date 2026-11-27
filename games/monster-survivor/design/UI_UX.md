@@ -1,0 +1,20 @@
+# UI and interaction
+
+The presentation is a small, elegant game frame. Use a Georgia-like local serif for short display text and system sans for UI. Keep body 16 px on desktop, 14 px minimum at compact supported widths. Colors follow Art Direction. Normal text contrast 4.5:1 and non-text/focus states 3:1. Use 44×44 CSS px minimum tap targets. DOM panels above canvas with actual buttons, headings, fieldsets and focus. Skip decorative badges or repeated headings. Let the image and gameplay carry the screen.
+
+| Screen | Layout and essential content | Interaction |
+| --- | --- | --- |
+| Loading | Key-art backdrop, name, visible progress/meaningful error and Retry | Start becomes interactive when required assets have decoded. |
+| Title | Banner/crop, title, single line objective, Start Run as clear default, Field Guide, Settings and Game Library | Keyboard starts from focused CTA. Remember settings. No intro forced before gameplay. |
+| Active HUD | Top-left HP text and bar, center clock and rites count, top-right nearest ward direction/pause, bottom XP/Lv/skills/dash ready. Boss bar below top-center pin with threshold markers. | HUD surfaces never intercept movement. Pause and touch layers have distinct hit targets. Tooltip describes icons on focus where available. |
+| Reward | Dim scene and centered heading. Three cards equal emphasis, icon, rank, specific numerical delta, one synergy clue. Reroll and remaining charge below. Stack or use scroll at compact widths. | Focus first valid card, trap focus, visible focus outline. 1/2/3, arrows, Enter and pointer. Brief opening input barrier, suppress held input. On pop return focus to game container. |
+| Evolution and boon | Reuse rewards with one less dense section. Evolution shows both ingredient IDs in display names and remaining catalysts. Boon shows one-time benefit. | Later allowed for evolution only. Announce effect and queue next modal if present. |
+| Pause/Settings | Resume, Restart, Settings, Quit. Settings has separate volume controls and toggles for motion, high contrast and damage numbers. | Losing window focus opens pause; tab return requires explicit resume. Confirm Restart/Quit while an active run exists. |
+| Victory/defeat | Opinionated title, time, clear reason, kills, wards, final build, per-family damage and optional cosmetic unlock. Primary Retry, secondary Title, plain Game Library link where already supported. | Persist once, permit restart without reload. Defeat actions work for HP, objective timeout and hard deadline. |
+| Field Guide | Tabs for Spells, Threats and Controls; discoveries from current save, plus starter help. | Keyboard usable. Show discovery hint for locked entries. No modal in combat. |
+
+**Responsive rendering.** 16:9 world view with letterbox as needed and safe areas. Mobile landscape is the gameplay target. Left thumb joystick configurable origin within lower-left 42%, right-thumb separate dash, and pause at top edge. Touch pointer capture handles simultaneous movement and dash. At portrait keep title, settings and menus fully usable and offer Rotate to Play before starting; rotating in run pauses without loss. Zoom and scroll page accessibility remain available outside gameplay controls. Use native DOM for zoom-aware overlays.
+
+**HUD language.** `Ward Rites 1 / 2`, `Rekindle one more ward`, `Reach a ward by 13:30`, `Dash Ready`, `The Hollow Warden`. Show shield charges as pips with accessible label, never color alone. Use aria-live only for important state transitions and results, not clock or repeated hit counters. Settings include mute and low motion along OS preference; optional captions for elite/boss events aid play without audio.
+
+The provided static concept reference guides one normal combat frame. For G2 capture actual menu, combat, draft and boss/screens. Visual review at 1366×768 and 390×844 landscape emulation includes lit central character, coherent crops, margins, readability and absence of clipped cards. Interactions must be discoverable in a silent run.

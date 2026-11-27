@@ -1,0 +1,167 @@
+{
+  "schemaVersion": 1,
+  "enemies": [
+    {
+      "id": "seedling",
+      "name": "Seedling",
+      "role": "normal",
+      "sprite": "seedling",
+      "hp": 28,
+      "speed": 82,
+      "radius": 13,
+      "contactDamage": 8,
+      "xp": 2,
+      "behavior": {
+        "ai": "chase",
+        "accel": 460
+      },
+      "cue": "Coral cap, short ground bounce."
+    },
+    {
+      "id": "moth",
+      "name": "Velvet Moth",
+      "role": "normal",
+      "sprite": "moth",
+      "hp": 38,
+      "speed": 108,
+      "radius": 14,
+      "contactDamage": 8,
+      "xp": 4,
+      "behavior": {
+        "ai": "flank",
+        "orbitSideSeeded": true,
+        "leadPx": 95
+      },
+      "cue": "Lavender wings flutter and bank inward."
+    },
+    {
+      "id": "scarab",
+      "name": "Bramble Scarab",
+      "role": "normal",
+      "sprite": "scarab",
+      "hp": 126,
+      "speed": 57,
+      "radius": 20,
+      "contactDamage": 14,
+      "xp": 8,
+      "behavior": {
+        "ai": "charge",
+        "triggerRange": 171,
+        "windup": 0.8,
+        "chargeSpeed": 234,
+        "chargeSec": 0.42,
+        "recovery": 1.15
+      },
+      "cue": "Heavy jade dome, striped straight lane locks before charge."
+    },
+    {
+      "id": "bottle",
+      "name": "Bog Brewer",
+      "role": "normal",
+      "sprite": "bottle",
+      "hp": 83,
+      "speed": 67,
+      "radius": 15,
+      "contactDamage": 9,
+      "xp": 7,
+      "behavior": {
+        "ai": "ranged",
+        "desiredBand": [
+          160,
+          245
+        ],
+        "telegraph": 0.64,
+        "interval": 3,
+        "shotSpeed": 175,
+        "shotDamage": 11,
+        "shotLife": 2.7
+      },
+      "cue": "Pink vial tilts before one red outlined droplet."
+    },
+    {
+      "id": "bells",
+      "name": "Bellbone",
+      "role": "normal",
+      "sprite": "bells",
+      "hp": 109,
+      "speed": 74,
+      "radius": 18,
+      "contactDamage": 11,
+      "xp": 9,
+      "behavior": {
+        "ai": "pulse",
+        "triggerRange": 117,
+        "telegraph": 0.84,
+        "pulseRadius": 113,
+        "pulseDamage": 14,
+        "interval": 3.2
+      },
+      "cue": "Bronze bell silhouette and a segmented rust-orange disk."
+    },
+    {
+      "id": "thornback",
+      "name": "Thornback Captain",
+      "role": "elite",
+      "sprite": "scarab",
+      "hp": 640,
+      "speed": 71,
+      "radius": 27,
+      "contactDamage": 16,
+      "xp": 34,
+      "behavior": {
+        "ai": "charge",
+        "triggerRange": 225,
+        "windup": 0.92,
+        "chargeSpeed": 278,
+        "chargeSec": 0.53,
+        "recovery": 1.15,
+        "catalysts": 1
+      },
+      "cue": "Tall thorn silhouette with three gold chevrons and visible health bar."
+    },
+    {
+      "id": "discord",
+      "name": "Discord Bell",
+      "role": "elite",
+      "sprite": "bells",
+      "hp": 1300,
+      "speed": 79,
+      "radius": 25,
+      "contactDamage": 15,
+      "xp": 48,
+      "behavior": {
+        "ai": "pulse",
+        "triggerRange": 165,
+        "telegraph": 1.02,
+        "pulseRadius": 156,
+        "pulseDamage": 23,
+        "interval": 2.6,
+        "echoDelay": 0.58,
+        "echoRadius": 176,
+        "catalysts": 1
+      },
+      "cue": "White broken halo, separate echo telegraph and readable health bar."
+    },
+    {
+      "id": "warden",
+      "name": "The Hollow Warden",
+      "role": "boss",
+      "sprite": "warden",
+      "hp": 4800,
+      "speed": 58,
+      "radius": 52,
+      "contactDamage": 13,
+      "xp": 0,
+      "behavior": {
+        "ai": "warden",
+        "phases": [
+          1,
+          0.66,
+          0.33
+        ],
+        "sliceHp": 660
+      },
+      "cue": "Antlered owl, three segmented boss bar markers."
+    }
+  ]
+}

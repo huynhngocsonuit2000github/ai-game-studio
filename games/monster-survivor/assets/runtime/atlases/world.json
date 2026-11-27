@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "image": "world.png",
+  "size": [
+    576,
+    432
+  ],
+  "frames": {
+    "arch": {
+      "x": 8,
+      "y": 11,
+      "w": 128,
+      "h": 122,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 136
+    },
+    "thorn": {
+      "x": 152,
+      "y": 19,
+      "w": 128,
+      "h": 105,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 94
+    },
+    "stones": {
+      "x": 296,
+      "y": 29,
+      "w": 128,
+      "h": 86,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 88
+    },
+    "mushrooms": {
+      "x": 442,
+      "y": 8,
+      "w": 124,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 66
+    },
+    "stump": {
+      "x": 8,
+      "y": 160,
+      "w": 128,
+      "h": 112,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 73
+    },
+    "broken-bell": {
+      "x": 152,
+      "y": 158,
+      "w": 128,
+      "h": 115,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 84
+    },
+    "ember": {
+      "x": 314,
+      "y": 152,
+      "w": 91,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 17
+    },
+    "potion": {
+      "x": 449,
+      "y": 152,
+      "w": 110,
+      "h": 128,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 26
+    },
+    "chest": {
+      "x": 8,
+      "y": 300,
+      "w": 128,
+      "h": 120,
+      "pivot": [
+        0.5,
+        0.89
+      ],
+      "displayMaxPx": 46
+    }
+  }
+}

@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "gameId": "monster-survivor",
+  "baselineCommit": "f46ee26e4c0402dcd3d9c84504380af27c48e644",
+  "packId": "monster-survivor-production-v1",
+  "features": [
+    {
+      "id": "MS-CORE",
+      "intendedBehavior": "Movement, auto-spells, dash, XP and upgrades",
+      "implementationStatus": "designed",
+      "acceptanceStatus": "NOT_RUN",
+      "evidence": "design/GDD.md"
+    },
+    {
+      "id": "MS-RITES",
+      "intendedBehavior": "Three ward positions, activate two on Normal",
+      "implementationStatus": "designed",
+      "acceptanceStatus": "NOT_RUN",
+      "evidence": "design/WAVES_AND_MAP.md"
+    },
+    {
+      "id": "MS-BUILDS",
+      "intendedBehavior": "16 entries and four skill evolutions",
+      "implementationStatus": "designed",
+      "acceptanceStatus": "NOT_RUN",
+      "evidence": "design/SKILL_CATALOG.md"
+    },
+    {
+      "id": "MS-WARDEN",
+      "intendedBehavior": "Three boss phases with victory/defeat",
+      "implementationStatus": "designed",
+      "acceptanceStatus": "NOT_RUN",
+      "evidence": "design/BOSS_DESIGN.md"
+    },
+    {
+      "id": "MS-PLAYBACK",
+      "intendedBehavior": "Audio, accessibility, recap and local records",
+      "implementationStatus": "designed",
+      "acceptanceStatus": "NOT_RUN",
+      "evidence": "design/UI_UX.md"
+    }
+  ],
+  "levels": [
+    {
+      "id": "bellgrave-garden",
+      "designed": true,
+      "implemented": false,
+      "publiclyPlayable": false
+    }
+  ],
+  "save": {
+    "schemaVersion": 1,
+    "status": "designed",
+    "key": "ai-game-studio:monster-survivor:v1"
+  },
+  "publication": {
+    "repositoryMedia": "pending-producer-prompt",
+    "pages": "pending",
+    "registry": "absent-at-baseline"
+  },
+  "gates": {
+    "G0": "PENDING_PRODUCER",
+    "G1": "NOT_RUN",
+    "G2": "NOT_RUN",
+    "G3": "NOT_RUN",
+    "G4": "NOT_RUN"
+  },
+  "deployment": {
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
+    "deployedCommit": "f46ee26e4c0402dcd3d9c84504380af27c48e644",
+    "observedAt": "2026-11-27",
+    "gameEntry": null,
+    "checks": [
+      {
+        "id": "studio-commit-marker",
+        "result": "PASS"
+      },
+      {
+        "id": "studio-manifest-monster-survivor",
+        "result": "ABSENT_EXPECTED"
+      },
+      {
+        "id": "monster-survivor-live-play",
+        "result": "NOT_RUN"
+      }
+    ]
+  },
+  "knownGaps": [
+    "Game code and integrated gameplay pending.",
+    "Studio registration requires separate scope review.",
+    "Browser and target-device evidence pending.",
+    "Producer approvals and live Pages checks pending."
+  ],
+  "firstTask": "MS-000"
+}
