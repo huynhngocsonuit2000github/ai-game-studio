@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameId": "monster-survivor",
-  "baselineCommit": "1dc171a729dd958c686583061aecbf8bfffda2b5",
+  "baselineCommit": "2fef3a8e97ae219767bad273bd67ea6724408306",
   "records": [
     {
       "id": "bellgrave-garden",
@@ -255,7 +255,7 @@
     {
       "id": "venom-marsh",
       "kind": "level",
-      "intendedBehavior": "Break three nests, dodge the Marsh Keeper\u2019s poison and projectiles, and confirm the exit.",
+      "intendedBehavior": "Break three nests, dodge the Marsh Keeper’s poison and projectiles, and confirm the exit.",
       "implementation": "implemented",
       "publicAvailability": "public",
       "acceptance": "pending",
@@ -391,13 +391,100 @@
           "reports/CAMPAIGN_POLISH_QA.md"
         ]
       }
+    },
+    {
+      "id": "lantern-kin",
+      "kind": "feature",
+      "intendedBehavior": "Equip and feed one Lantern Kin companion, add one engraving to the active lantern, replay cleared Campaign maps at harder tiers, and choose English or Vietnamese.",
+      "implementation": "implemented",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [
+        "src/kin-save.ts",
+        "src/kin-view.ts",
+        "src/locale.ts",
+        "reports/LANTERN_KIN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/LANTERN_KIN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "mistwood",
+      "kind": "level",
+      "intendedBehavior": "Light three sequential waymarks, defeat the Fog Keeper, and exit to unlock Moon Owl.",
+      "implementation": "implemented",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [
+        "src/kin-maps.ts",
+        "src/campaign.ts",
+        "reports/LANTERN_KIN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/LANTERN_KIN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "ash-mine",
+      "kind": "level",
+      "intendedBehavior": "Defeat both guards in either order and defeat the Furnace Overseer. Rescue Moss Turtle by opening its cage and reaching the exit.",
+      "implementation": "implemented",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [
+        "src/kin-maps.ts",
+        "src/campaign.ts",
+        "reports/LANTERN_KIN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/LANTERN_KIN_QA.md"
+        ]
+      }
+    },
+    {
+      "id": "eclipse-temple",
+      "kind": "level",
+      "intendedBehavior": "Break both pillars and defeat the Eclipse Warden across its three phases. Confirm exit to earn the chapter trophy.",
+      "implementation": "implemented",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [
+        "src/kin-maps.ts",
+        "src/campaign.ts",
+        "reports/LANTERN_KIN_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/LANTERN_KIN_QA.md"
+        ]
+      }
     }
   ],
   "knownGaps": [
     "Normal G4 Producer playtest and explicit release approval remain pending.",
     "Firefox, WebKit and physical devices remain unverified.",
     "The Campaign Polish candidate awaits Producer playtest, manual merge and Pages verification.",
-    "Polish pacing measurements use comparable scripted gameplay. Representative human pacing is unmeasured."
+    "Polish pacing measurements use comparable scripted gameplay. Representative human pacing is unmeasured.",
+    "Lantern Kin candidate Producer acceptance, manual merge and live Pages gameplay verification are pending.",
+    "Scripted Lantern Kin Normal runs finished in under the authored 4–7 minute target. Human pacing and physical devices remain unverified."
   ],
   "save": {
     "schema": "ai-game-studio:monster-survivor:v1",
@@ -410,7 +497,10 @@
       "src/campaign-save.ts",
       "production/features/ms-campaign-v1/SAVE_AND_QA.md",
       "reports/CAMPAIGN_QA.md",
-      "reports/CAMPAIGN_POLISH_QA.md"
+      "reports/CAMPAIGN_POLISH_QA.md",
+      "src/kin-save.ts",
+      "src/locale.ts",
+      "tests/kin.test.ts"
     ]
   },
   "publication": {
@@ -423,7 +513,9 @@
       "production/RELEASE.md",
       "reports/CAMPAIGN_QA.md",
       "production/features/ms-campaign-polish-1/ASSET_RIGHTS.md",
-      "reports/CAMPAIGN_POLISH_QA.md"
+      "reports/CAMPAIGN_POLISH_QA.md",
+      "production/features/ms-lantern-kin-v1/ASSET_RIGHTS.md",
+      "reports/LANTERN_KIN_QA.md"
     ]
   },
   "deployment": {

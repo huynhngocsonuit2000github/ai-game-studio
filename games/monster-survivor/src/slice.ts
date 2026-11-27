@@ -15,7 +15,8 @@ export const laneHalfWidth = 26;
 export const tollGap = Math.PI * 52 / 360;
 
 export function bossLaneCenters(foe: Foe) {
-  return laneCenters.map(offset => foe.laneOrigin + offset);
+  const offsets = foe.def.id === 'eclipse-warden' || foe.def.id === 'furnace-overseer' ? [-110, 110] : laneCenters;
+  return offsets.map(offset => foe.laneOrigin + offset);
 }
 function laneCoord(foe: Foe, point: Point) {
   return foe.angle ? point.x - foe.x : point.y - foe.y;
@@ -156,7 +157,7 @@ export class GardenRun extends Run {
     return aim;
   }
 
-  private lanes(foe: Foe) {
+  protected lanes(foe: Foe) {
     const axis = this.bossRng() < .5 ? 0 : 1;
     for (const [direction, offset] of [[axis, 0], [axis, 32], [1 - axis, 0], [1 - axis, 32]]) {
       foe.angle = direction;
@@ -170,7 +171,7 @@ export class GardenRun extends Run {
     foe.laneOrigin = laneCoord(foe, this.player) + 63;
   }
 
-  private advancePhase(foe: Foe) {
+  protected advancePhase(foe: Foe) {
     const phase = this.normal && foe.hp <= foe.maxHp * .33 ? 3 : foe.hp <= foe.maxHp * .66 ? 2 : 1;
     if (phase <= foe.phase) return;
     foe.phase = phase;
@@ -183,6 +184,8 @@ export class GardenRun extends Run {
     for (let i = 0; i < 2; i++) this.spawn(id);
   }
 
+  protected patterns(foe: Foe): readonly Foe['attack'][] | undefined { void foe; return undefined; }
+
   protected override updateBoss(foe: Foe, range: number) {
     this.advancePhase(foe);
     if (foe.state === 'recover') {
@@ -194,7 +197,7 @@ export class GardenRun extends Run {
         this.steer(foe, heading(foe, this.player), foe.def.speed, range);
         return;
       }
-      const patterns = !this.normal && foe.phase === 2 ? ['toll', 'cleave'] as const : bossPatterns[foe.phase - 1];
+      const patterns = this.patterns(foe) ?? (!this.normal && foe.phase === 2 ? ['toll', 'cleave'] as const : bossPatterns[foe.phase - 1]);
       foe.attack = patterns[foe.casts % patterns.length];
       foe.casts++;
       foe.hit = false;

@@ -100,7 +100,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
   const original = await page.evaluate(key => localStorage.getItem(key), oldKey);
   await page.keyboard.press('Enter');
   await expect(page.getByRole('heading', { name: 'Lantern Camp' })).toBeVisible();
-  await expect(page.locator('.stage-choice:disabled')).toHaveCount(4);
+  await expect(page.locator('.stage-choice:disabled')).toHaveCount(7);
   const summaries = [];
   const beforeSeconds = [42.6167, 48.4167, 39.0167, 53.0167, 103.4167];
   for (const stage of stages) {
@@ -191,7 +191,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
       if (shot) await frame(page, info, shot);
       if (run.tick % 12 === 0 && !run.result && !run.offer) next = steer(run);
     }
-    const ending = stage.order === 5 ? 'Campaign complete' : stage.name + ' cleared';
+    const ending = stage.order === 5 ? 'Chapter complete' : stage.name + ' cleared';
     expect(run.result, stage.name).toBe('victory');
     await expect(page.getByRole('heading', { name: ending })).toBeVisible();
     const savedRaw = await page.evaluate(key => localStorage.getItem(key), campaignKey);
@@ -240,7 +240,7 @@ test('clears all five Campaign stages through the assembled game and reloads the
       await campAction(page, 'weapon', 'ember-lantern', true);
     }
   }
-  await expect(page.locator('.stage-choice:disabled')).toHaveCount(0);
+  await expect(page.locator('.stage-choice:disabled')).toHaveCount(2);
   await page.locator('[data-action="stage-bell-orchard"]').click();
   await button(page, 'Enter Bell Orchard').click();
   await advance(page, empty, 12);
@@ -545,7 +545,7 @@ test('clears Belltower with Warden Lantern +3 and captures a confirmed hit', asy
   expect(captured).toBe(true);
   expect([...phases]).toEqual([1, 2, 3]);
   expect(run.result).toBe('victory');
-  await expect(page.getByRole('heading', { name: 'Campaign complete' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Chapter complete' })).toBeVisible();
   writeFileSync(info.outputPath('warden-plus3.json'), JSON.stringify({
     duration: run.elapsed, kills: run.kills, damageTaken: [...run.damageTakenBy.values()].reduce((sum, amount) => sum + amount, 0),
     hp: run.player.hp, stats: run.kit, phases: [...phases],

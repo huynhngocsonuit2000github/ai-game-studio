@@ -5,7 +5,7 @@ const origin = 'http://127.0.0.1:4183';
 
 export default defineConfig({
   testDir: './tests',
-  testMatch: ['assembled.spec.ts', 'campaign.spec.ts'],
+  testMatch: ['assembled.spec.ts', 'campaign.spec.ts', 'kin.spec.ts'],
   outputDir: 'test-results/pages-browser',
   workers: 1,
   use: {

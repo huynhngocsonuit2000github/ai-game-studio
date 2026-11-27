@@ -189,3 +189,35 @@
 }
 #game.reduced-motion .armory * { animation: none !important; }
 #game.reduced-motion [data-playing='true'] .test-impact { opacity: .7; }
+
+.language-buttons, .kin-choices, .tier-options { display: flex; flex-wrap: wrap; gap: .45rem; }
+.language-buttons { margin-block: .65rem; }
+.language-buttons [aria-pressed='true'] { border-color: var(--gold); }
+.tier-options { margin: .7rem 0; }
+.tier-options small { display: block; }
+.camp-route { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.kin-habitat {
+  display: grid; place-items: center; min-height: 150px; padding: 12px; margin: 12px 0;
+  background: radial-gradient(ellipse at 50% 75%, #728054 0%, #314735 42%, #1c302b 73%);
+  border: 1px solid var(--inlay); border-radius: 9px;
+}
+.kin-habitat[data-pet='moon-owl'] { background: radial-gradient(ellipse at 50% 75%, #7a7295, #363653 43%, #222737 73%); }
+.kin-habitat[data-pet='ember-fox'] { background: radial-gradient(ellipse at 50% 75%, #95603a, #563d34 43%, #2d2a2b 73%); }
+.kin-habitat img { width: 142px; height: 142px; object-fit: contain; animation: kin-idle 3s ease-in-out infinite; }
+.kin-habitat[data-playing='true'] img { animation: kin-action .7s ease-out both; }
+.kin-engravings { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin-block: 10px; }
+.kin-engravings article { padding: 13px; background: #192c29; border: 1px solid var(--inlay); border-radius: 8px; }
+.kin-engravings h4, .kin-info h3 { margin: 0; }
+.kin-trophy { color: var(--gold); }
+@keyframes kin-idle { 50% { transform: translateY(-4px); } }
+@keyframes kin-action { 35% { transform: translateY(-14px) scale(1.1); filter: drop-shadow(0 3px 13px #edce88); } }
+.reduced-motion .kin-habitat img { animation: none; }
+.reduced-motion .kin-habitat[data-playing='true'] img { filter: drop-shadow(0 3px 13px #edce88); }
+@media (max-width: 560px) {
+  .camp-route { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kin-engravings { grid-template-columns: 1fr; }
+}
+@media (max-height: 460px) {
+  .kin-habitat { min-height: 96px; padding: 4px; }
+  .kin-habitat img { width: 96px; height: 96px; }
+}

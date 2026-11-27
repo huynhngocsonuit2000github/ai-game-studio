@@ -9,6 +9,9 @@ const buildOrder = {
   3: ['prism-ring', 'hex-bell', 'bog-bloom', 'lantern-oil', 'wick-dart', 'heart-husk'],
   4: ['wick-dart', 'thread-lens', 'foxfire', 'gale-laces', 'starfall'],
   5: ['wick-dart', 'thread-lens', 'prism-ring', 'lantern-oil', 'starfall', 'mirror-ward'],
+  6: ['wick-dart', 'prism-ring', 'thread-lens', 'hex-bell', 'starfall', 'mirror-ward'],
+  7: ['wick-dart', 'prism-ring', 'thread-lens', 'hex-bell', 'starfall', 'mirror-ward'],
+  8: ['wick-dart', 'prism-ring', 'thread-lens', 'hex-bell', 'starfall', 'mirror-ward'],
 };
 
 export function choose(run) {
@@ -48,10 +51,10 @@ function detour(run, target) {
   return best;
 }
 
-export function steer(run) {
+export function steer(run, sideTrip) {
   const p = run.player;
   const byDistance = (a, b) => distance(p, a) - distance(p, b);
-  const enemies = run.foes.filter(foe => foe.hp > 0 && foe.state !== 'arrival');
+  const enemies = run.foes.filter(foe => foe.hp > 0 && !foe.hidden && foe.state !== 'arrival');
   const nearby = enemies.filter(foe => distance(p, foe) < 280).sort(byDistance);
   const boss = run.boss;
   const group = run.activeGroups.find(entry => entry.state === 'active') ?? run.activeGroups.find(entry => entry === run.objectivePoint);
@@ -96,6 +99,11 @@ export function steer(run) {
   else if (wantedChest) target = wantedChest;
   else if (run.exitOpen && run.stage.order === 5 && p.x < 1510 && p.y < 570) target = { x: 1500, y: 625 };
   else if (ember && distance(p, ember) < 136 && !run.exitOpen) target = ember;
+  if (run.stage.order >= 6) {
+    if (sideTrip && !sideTrip.open && (run.exitOpen || sideTrip.beforeBoss && !boss)) target = sideTrip;
+    else if (run.lightTicks || run.canInteract === 'Light waymark') target = group ?? target;
+    else if (run.exitOpen) target = run.exit;
+  }
   const goal = detour(run, target);
   const stride = Math.max(17, Math.min(41, distance(p, goal)));
   let best = directions[4];
@@ -137,8 +145,8 @@ export function steer(run) {
     run.pools.some(pool => pool.due <= run.tick + 12 && distance(p, pool) < pool.radius - 12);
   const close = nearby.filter(foe => distance(p, foe) <= run.burstRadius);
   return {
-    ...best, interact: Boolean(run.canInteract && (run.canInteract !== 'Exit' || target === run.exit)),
+    ...(run.lightTicks ? directions[4] : best), interact: Boolean(run.canInteract && (run.canInteract !== 'Exit' || target === run.exit)),
     burst: run.burstReady && (close.length >= 4 || Boolean(boss && boss.state === 'windup' && distance(p, boss) < run.burstRadius)),
-    dash: danger && run.tick >= run.dashReady && Boolean(best.x || best.y),
+    dash: !run.lightTicks && danger && run.tick >= run.dashReady && Boolean(best.x || best.y),
   };
 }
