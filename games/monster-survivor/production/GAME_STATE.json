@@ -131,7 +131,7 @@
       "publicAvailability": "private",
       "acceptance": "pending",
       "evidence": [
-        "stages/S04/STAGE.md"
+        "production/PRODUCTION_PLAN.md"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
@@ -148,7 +148,7 @@
       "publicAvailability": "private",
       "acceptance": "pending",
       "evidence": [
-        "stages/S04/STAGE.md"
+        "production/PRODUCTION_PLAN.md"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
