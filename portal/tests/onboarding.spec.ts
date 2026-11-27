@@ -74,9 +74,12 @@ const contentTypes: Record<string, string> = {
 test('onboards isolated game packages and plays them from the assembled Pages site', async ({ page }, testInfo) => {
   test.setTimeout(120_000);
   const root = mkdtempSync(join(tmpdir(), 'studio-onboarding-'));
+  const env = { ...process.env };
+  // The fixture creates its own Git history.
+  delete env.STUDIO_PAGES_BASE_SHA;
   async function run(command: string, args: string[]) {
     try {
-      await execute(command, args, { cwd: root, timeout: 45_000 });
+      await execute(command, args, { cwd: root, env, timeout: 45_000 });
     } catch (error) {
       const output = error as { stdout?: string; stderr?: string };
       throw new Error(`${command} ${args.join(' ')} failed:\n${output.stdout ?? ''}${output.stderr ?? ''}`, { cause: error });

@@ -51,6 +51,35 @@ test('production handles direct links to unknown, malformed and development-only
   await expect(page.getByRole('listitem')).toHaveCount(expectedGames.length);
 });
 
+for (const game of expectedGames.filter(({ status }) => status === 'development')) {
+  test(`launches the ${game.id} preview and returns to the catalog`, async ({ page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    page.on('response', (response) => {
+      if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
+    });
+
+    await page.goto(pagesBase);
+    await page.getByRole('list', { name: 'Game results' }).locator(`a[href="#/games/${game.id}"]`).click();
+    await expect(page.getByRole('heading', { name: game.title, level: 1 })).toBeVisible();
+    await expect(page.getByText('In Development', { exact: true })).toBeVisible();
+    if (game.cover) {
+      const cover = page.locator('.detail-art img');
+      await expect(cover).toBeVisible();
+      await expect.poll(() => cover.evaluate((image: HTMLImageElement) => image.naturalWidth)).toBeGreaterThan(0);
+    }
+
+    const entry = `${pagesBase}${game.entry}`;
+    await page.getByRole('link', { name: 'Play preview' }).click();
+    await expect(page).toHaveURL(entry);
+    expect((await page.goto(entry))?.status()).toBe(200);
+    await page.getByRole('link', { name: /Back to Studio|Game Library/i }).click();
+    await expect(page).toHaveURL(`${pagesBase}#/`);
+    await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+}
+
 test('launches the Forest Adventure public preview from the assembled site', async ({ page }) => {
   const preview = expectedGames.find(({ id }) => id === 'forest-adventure');
   test.skip(!preview || preview.status !== 'development', 'Forest Adventure public preview is inactive');
