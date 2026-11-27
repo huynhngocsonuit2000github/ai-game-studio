@@ -1,0 +1,1 @@
+Static art is served from [public/art](../../public/art). Canvas art and audio compile from [src](../../src). See [the asset manifest](../../production/ASSET_MANIFEST.csv) for provenance and clearance.

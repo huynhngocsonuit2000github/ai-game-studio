@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "gameId": "mo-vang-nao-loan",
+  "baselineCommit": "ffc924d799d593a9918d079e9cb11daf62f94451",
+  "records": [
+    {
+      "id": "mine-one",
+      "kind": "level",
+      "intendedBehavior": "Bank 600 in Bãi Vàng Đầu Ca within 75 seconds.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "mine-two",
+      "kind": "level",
+      "intendedBehavior": "Work around blocking rocks and discover the cost of a poor angle.",
+      "implementation": "planned",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "mine-three",
+      "kind": "level",
+      "intendedBehavior": "Correct for the mine’s icy hook slip before release.",
+      "implementation": "planned",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "mine-four",
+      "kind": "level",
+      "intendedBehavior": "Track moving treasure in submerged corridors.",
+      "implementation": "planned",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "mine-five",
+      "kind": "level",
+      "intendedBehavior": "Interrupt the rat theft and finish the campaign.",
+      "implementation": "planned",
+      "publicAvailability": "unknown",
+      "acceptance": "pending",
+      "evidence": [],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "between-mine-shop",
+      "kind": "feature",
+      "intendedBehavior": "Spend the wallet on three supplies and carry them into a practice shift.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    }
+  ],
+  "knownGaps": [
+    "G2 Producer playtest and acceptance pending.",
+    "Mines 2–5 and their art and mechanics await G2.",
+    "Studio review and canonical catalog registration pending.",
+    "Physical phone performance and audio listening checks pending."
+  ],
+  "save": {
+    "schema": "studio.mo-vang-nao-loan.save",
+    "version": 1,
+    "evidence": [
+      "design/TECH_DESIGN.md",
+      "reports/QA_REPORT.md"
+    ]
+  },
+  "publication": {
+    "rights": "cleared",
+    "preview": "approved",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md"
+    ]
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": null,
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "http": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  }
+}
