@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 1,
+  "gameId": "monster-survivor",
+  "baselineCommit": "c790f520f96f6702fc2014f1c1524d2b01f341fa",
+  "records": [
+    {
+      "id": "bellgrave-garden",
+      "kind": "level",
+      "intendedBehavior": "Survive four minutes, light the Orchard Ward and defeat the Hollow Warden before the final toll.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-core",
+      "kind": "feature",
+      "intendedBehavior": "Move, dash, auto-cast, gather embers and draft spells or passives.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/sim.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-orchard-rite",
+      "kind": "feature",
+      "intendedBehavior": "Light the Orchard Ward and select a boon while the run is paused.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-comet-thread",
+      "kind": "feature",
+      "intendedBehavior": "Defeat Thornback, collect its catalyst and evolve Wick Dart V with Thread Lens II.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-warden-slice",
+      "kind": "feature",
+      "intendedBehavior": "Dodge Cleave and Toll across Sentinel and Briar phases and see the reason for either ending.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-playback",
+      "kind": "feature",
+      "intendedBehavior": "Play with keyboard or touch, adjust audio and accessibility settings, retry and keep local results.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/main.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-normal-campaign",
+      "kind": "feature",
+      "intendedBehavior": "Play the full Normal schedule with three wards and all authored skills, evolutions and Warden phases.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "stages/S04/STAGE.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "ms-records-expansion",
+      "kind": "feature",
+      "intendedBehavior": "Review expanded records and use cosmetic rewards.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "stages/S04/STAGE.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    }
+  ],
+  "knownGaps": [
+    "G2 Producer playtest pending. The next task is MS-410 after approval.",
+    "S04–S06, Normal and later game systems are pending.",
+    "Physical touch device, additional browsers and the producer audio listening pass are unverified.",
+    "Studio registry registration and Pages publication require separate approval.",
+    "Direct observation of the live Pages marker was blocked by the workspace network."
+  ],
+  "save": {
+    "schema": "ai-game-studio:monster-survivor:v1",
+    "version": 1,
+    "evidence": [
+      "src/save.ts",
+      "tests/sim.test.ts",
+      "reports/QA_REPORT.md"
+    ]
+  },
+  "publication": {
+    "rights": "cleared",
+    "preview": "pending",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md",
+      "production/RIGHTS.md",
+      "production/ASSET_MANIFEST.csv"
+    ]
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      },
+      "http": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "normal": {
+    "waveEndSec": 720,
+    "riteDeadlineSec": 810,
+    "enrageSec": 885,
+    "hardLimitSec": 930,
+    "ritesRequired": 2,
+    "riteChargeSec": 9,
+    "bossHp": 4800
+  },
+  "slice": {
+    "waveEndSec": 240,
+    "riteDeadlineSec": 240,
+    "hardLimitSec": 330,
+    "ritesRequired": 1,
+    "riteChargeSec": 6,
+    "bossHp": 660,
+    "skillPool": [
+      "wick-dart",
+      "prism-ring",
+      "bog-bloom",
+      "thread-lens",
+      "lantern-oil",
+      "root-charm",
+      "gale-laces"
+    ],
+    "evolutionPool": [
+      "comet-thread"
+    ],
+    "eliteCatalysts": 1
+  },
+  "player": {
+    "hp": 100,
+    "radius": 13,
+    "speed": 185,
+    "dashDistance": 180,
+    "dashDurationSec": 0.22,
+    "dashCooldownSec": 3.2,
+    "damageGraceSec": 0.7,
+    "blockGraceSec": 0.25,
+    "pickupRadius": 68
+  },
+  "xp": {
+    "start": 18,
+    "linear": 5,
+    "quadratic": 0.32,
+    "wardReward": 32
+  },
+  "caps": {
+    "normalEnemies": 180,
+    "elites": 2,
+    "boss": 1,
+    "projectiles": 300,
+    "hostileShots": 72,
+    "xpPickups": 220,
+    "particles": 360
+  },
+  "startingSkill": "wick-dart",
+  "slots": {
+    "active": 4,
+    "passive": 3
+  },
+  "maxRerolls": 1
+}

@@ -1,0 +1,156 @@
+{
+  "schemaVersion": 1,
+  "id": "bellgrave-garden",
+  "size": [
+    2400,
+    1600
+  ],
+  "logicalView": [
+    960,
+    540
+  ],
+  "playerStart": [
+    1190,
+    880
+  ],
+  "bossSpawnCandidates": [
+    [
+      1200,
+      650
+    ],
+    [
+      1120,
+      565
+    ],
+    [
+      1300,
+      560
+    ],
+    [
+      1460,
+      680
+    ],
+    [
+      950,
+      680
+    ]
+  ],
+  "wards": [
+    {
+      "id": "orchard-ward",
+      "name": "Orchard Ward",
+      "point": [
+        510,
+        470
+      ],
+      "radius": 90,
+      "slice": true
+    },
+    {
+      "id": "wet-bell-ward",
+      "name": "Wet Bell Ward",
+      "point": [
+        1880,
+        470
+      ],
+      "radius": 90
+    },
+    {
+      "id": "thorn-gate-ward",
+      "name": "Thorn Gate Ward",
+      "point": [
+        1310,
+        1260
+      ],
+      "radius": 90
+    }
+  ],
+  "blockers": [
+    {
+      "sprite": "arch",
+      "x": 590,
+      "y": 350,
+      "r": 40
+    },
+    {
+      "sprite": "thorn",
+      "x": 850,
+      "y": 380,
+      "r": 31
+    },
+    {
+      "sprite": "stump",
+      "x": 470,
+      "y": 680,
+      "r": 21
+    },
+    {
+      "sprite": "broken-bell",
+      "x": 1650,
+      "y": 400,
+      "r": 26
+    },
+    {
+      "sprite": "thorn",
+      "x": 1950,
+      "y": 650,
+      "r": 29
+    },
+    {
+      "sprite": "arch",
+      "x": 1990,
+      "y": 355,
+      "r": 41
+    },
+    {
+      "sprite": "broken-bell",
+      "x": 1540,
+      "y": 1170,
+      "r": 27
+    },
+    {
+      "sprite": "stump",
+      "x": 1070,
+      "y": 1170,
+      "r": 22
+    },
+    {
+      "sprite": "thorn",
+      "x": 1495,
+      "y": 1350,
+      "r": 37
+    },
+    {
+      "sprite": "arch",
+      "x": 680,
+      "y": 1065,
+      "r": 35
+    },
+    {
+      "sprite": "stump",
+      "x": 2080,
+      "y": 1070,
+      "r": 20
+    },
+    {
+      "sprite": "thorn",
+      "x": 865,
+      "y": 845,
+      "r": 26
+    },
+    {
+      "sprite": "arch",
+      "x": 1510,
+      "y": 820,
+      "r": 32
+    }
+  ],
+  "nonSolid": [
+    "mushrooms",
+    "stones"
+  ],
+  "boundaryMargin": 35,
+  "spawnMinFromPlayer": 265,
+  "spawnTargetPadding": 30,
+  "seedDecorCount": 125
+}

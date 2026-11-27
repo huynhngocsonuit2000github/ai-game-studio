@@ -1,0 +1,580 @@
+{
+  "schemaVersion": 1,
+  "skills": [
+    {
+      "id": "wick-dart",
+      "name": "Wick Dart",
+      "type": "active",
+      "family": "projectile",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "damage": 16,
+          "intervalSec": 0.82,
+          "count": 1,
+          "pierce": 0,
+          "range": 410
+        },
+        {
+          "damage": 21,
+          "intervalSec": 0.78,
+          "count": 1,
+          "pierce": 0,
+          "range": 425
+        },
+        {
+          "damage": 19,
+          "intervalSec": 0.76,
+          "count": 2,
+          "pierce": 0,
+          "range": 440
+        },
+        {
+          "damage": 23,
+          "intervalSec": 0.7,
+          "count": 2,
+          "pierce": 1,
+          "range": 460
+        },
+        {
+          "damage": 29,
+          "intervalSec": 0.64,
+          "count": 2,
+          "pierce": 1,
+          "range": 485
+        }
+      ],
+      "behavior": "Acquire nearest valid enemy in range, fire at 540 px/s. Multi-darts fire at -8/+8 degrees from aim. Pierce counts extra targets. Each projectile can hit a given target once. Apply Sparked for 3s.",
+      "synergy": "Prism Ring consumes Sparked; Starfall gains damage. Thread Lens II evolves this spell.",
+      "visualCue": "Amber diamond with translucent tail, amber pinprick on hit.",
+      "sfx": "dart",
+      "icon": "wick-dart"
+    },
+    {
+      "id": "prism-ring",
+      "name": "Prism Ring",
+      "type": "active",
+      "family": "orbit",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "damage": 13,
+          "count": 2,
+          "radius": 56,
+          "periodSec": 2.4,
+          "rehitSec": 0.65
+        },
+        {
+          "damage": 17,
+          "count": 2,
+          "radius": 62,
+          "periodSec": 2.25,
+          "rehitSec": 0.65
+        },
+        {
+          "damage": 17,
+          "count": 3,
+          "radius": 67,
+          "periodSec": 2.1,
+          "rehitSec": 0.6
+        },
+        {
+          "damage": 21,
+          "count": 3,
+          "radius": 72,
+          "periodSec": 2,
+          "rehitSec": 0.6
+        },
+        {
+          "damage": 24,
+          "count": 4,
+          "radius": 77,
+          "periodSec": 1.85,
+          "rehitSec": 0.55
+        }
+      ],
+      "behavior": "Per blade radius 12; same blade can rehit the same target at rank interval. Start equidistant; orbit clockwise from run clock. +9 base damage when consuming Sparked.",
+      "synergy": "Pairs with Wick Dart and high Lantern Oil ranks.",
+      "visualCue": "Lavender facets with thin orbit trace.",
+      "sfx": "impact",
+      "icon": "prism-ring"
+    },
+    {
+      "id": "bog-bloom",
+      "name": "Bog Bloom",
+      "type": "active",
+      "family": "dot",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "tickDamage": 6,
+          "intervalSec": 4.2,
+          "radius": 56,
+          "durationSec": 3,
+          "range": 300
+        },
+        {
+          "tickDamage": 8,
+          "intervalSec": 4,
+          "radius": 62,
+          "durationSec": 3,
+          "range": 310
+        },
+        {
+          "tickDamage": 10,
+          "intervalSec": 3.8,
+          "radius": 68,
+          "durationSec": 3.5,
+          "range": 320
+        },
+        {
+          "tickDamage": 12,
+          "intervalSec": 3.6,
+          "radius": 74,
+          "durationSec": 3.5,
+          "range": 330
+        },
+        {
+          "tickDamage": 14,
+          "intervalSec": 3.35,
+          "radius": 82,
+          "durationSec": 4,
+          "range": 345
+        }
+      ],
+      "behavior": "Seed nearest target's spot, or 70 px ahead if no target. Foes inside acquire poison until 1s after leaving, capped to 4s per application. Status ticks each 0.5s from initial application and refresh preserves tick phase. Max 3 live patches, oldest expires on overflow.",
+      "synergy": "Hex Bell hits poisoned enemies harder. Root Charm II evolves the patch.",
+      "visualCue": "Jade clover pool and small mint droplets.",
+      "sfx": "bloom",
+      "icon": "bog-bloom"
+    },
+    {
+      "id": "foxfire",
+      "name": "Foxfire",
+      "type": "active",
+      "family": "summon",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "damage": 10,
+          "count": 1,
+          "intervalSec": 0.98,
+          "range": 270,
+          "boltSpeed": 430
+        },
+        {
+          "damage": 14,
+          "count": 1,
+          "intervalSec": 0.9,
+          "range": 290,
+          "boltSpeed": 450
+        },
+        {
+          "damage": 11,
+          "count": 2,
+          "intervalSec": 0.88,
+          "range": 300,
+          "boltSpeed": 460
+        },
+        {
+          "damage": 16,
+          "count": 2,
+          "intervalSec": 0.82,
+          "range": 320,
+          "boltSpeed": 470
+        },
+        {
+          "damage": 15,
+          "count": 3,
+          "intervalSec": 0.76,
+          "range": 340,
+          "boltSpeed": 480
+        }
+      ],
+      "behavior": "Familiar follows at 48 px with fan offsets and auto-fires nearest target within range of Wick. Stagger familiars uniformly through attack interval. Each projectile stops on first hit.",
+      "synergy": "Distracts attention visually while Starfall hits a distant pack. Gale Laces II evolves this spell.",
+      "visualCue": "Cyan fox flame silhouette and mint streaks.",
+      "sfx": "dart",
+      "icon": "foxfire"
+    },
+    {
+      "id": "hex-bell",
+      "name": "Hex Bell",
+      "type": "active",
+      "family": "aoe",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "damage": 24,
+          "intervalSec": 3.35,
+          "radius": 108,
+          "pushPx": 34
+        },
+        {
+          "damage": 28,
+          "intervalSec": 3.2,
+          "radius": 115,
+          "pushPx": 37
+        },
+        {
+          "damage": 34,
+          "intervalSec": 3,
+          "radius": 124,
+          "pushPx": 42
+        },
+        {
+          "damage": 37,
+          "intervalSec": 2.7,
+          "radius": 133,
+          "pushPx": 43
+        },
+        {
+          "damage": 44,
+          "intervalSec": 2.45,
+          "radius": 144,
+          "pushPx": 46
+        }
+      ],
+      "behavior": "Emit a pulse centered on Wick. +35% base damage to enemies with poison. Push normals, half push on elites, no push on boss. Dash centers the next pulse at the new position.",
+      "synergy": "Bog Bloom is the strongest additive pairing; Lantern Oil improves area.",
+      "visualCue": "Thick bronze outer waves with indigo inner lines.",
+      "sfx": "bell",
+      "icon": "hex-bell"
+    },
+    {
+      "id": "mirror-ward",
+      "name": "Mirror Ward",
+      "type": "active",
+      "family": "shield",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "charges": 1,
+          "rechargeSec": 8,
+          "burstDamage": 16,
+          "radius": 70
+        },
+        {
+          "charges": 1,
+          "rechargeSec": 7,
+          "burstDamage": 23,
+          "radius": 78
+        },
+        {
+          "charges": 2,
+          "rechargeSec": 7,
+          "burstDamage": 23,
+          "radius": 83
+        },
+        {
+          "charges": 2,
+          "rechargeSec": 6,
+          "burstDamage": 30,
+          "radius": 93
+        },
+        {
+          "charges": 2,
+          "rechargeSec": 5,
+          "burstDamage": 37,
+          "radius": 103
+        }
+      ],
+      "behavior": "Grant charges on learn, regain one per interval while below cap; new cap does not refill. A blocked hit consumes one and emits one nearby burst. Damage grace and dash prevent charge consumption.",
+      "synergy": "Heart Husk raises the damage budget between blocks; dash protects scarce charges.",
+      "visualCue": "Visible mint kite shield pips, brittle glass break ring.",
+      "sfx": "shield",
+      "icon": "mirror-ward"
+    },
+    {
+      "id": "starfall",
+      "name": "Starfall",
+      "type": "active",
+      "family": "burst",
+      "maxRank": 5,
+      "ranks": [
+        {
+          "damage": 40,
+          "intervalSec": 4.3,
+          "radius": 74,
+          "delaySec": 0.65,
+          "range": 430
+        },
+        {
+          "damage": 48,
+          "intervalSec": 4.05,
+          "radius": 80,
+          "delaySec": 0.65,
+          "range": 450
+        },
+        {
+          "damage": 57,
+          "intervalSec": 3.9,
+          "radius": 87,
+          "delaySec": 0.6,
+          "range": 465
+        },
+        {
+          "damage": 69,
+          "intervalSec": 3.65,
+          "radius": 94,
+          "delaySec": 0.55,
+          "range": 480
+        },
+        {
+          "damage": 84,
+          "intervalSec": 3.35,
+          "radius": 105,
+          "delaySec": 0.55,
+          "range": 500
+        }
+      ],
+      "behavior": "Target highest density region using nearest candidates scored by neighbor count within impact radius; ties distance then ID. Ground locks during preview. +25% base damage to Sparked targets. Cast only if target exists.",
+      "synergy": "Wick Dart marks the cluster front. Bog Bloom keeps groups inside danger.",
+      "visualCue": "Lilac falling star and thin dotted forecast disk distinct from enemy orange hatch.",
+      "sfx": "meteor",
+      "icon": "starfall"
+    },
+    {
+      "id": "thread-lens",
+      "name": "Thread Lens",
+      "type": "passive",
+      "family": "damage",
+      "maxRank": 3,
+      "ranks": [
+        {
+          "damageMultiplier": 1.1
+        },
+        {
+          "damageMultiplier": 1.2
+        },
+        {
+          "damageMultiplier": 1.32
+        }
+      ],
+      "behavior": "Multiply outgoing spell damage including DoT and evolution.",
+      "synergy": "Wick Dart R5 evolves at R2.",
+      "visualCue": "Amber lens badge.",
+      "sfx": "select",
+      "icon": "thread-lens"
+    },
+    {
+      "id": "lantern-oil",
+      "name": "Lantern Oil",
+      "type": "passive",
+      "family": "area",
+      "maxRank": 3,
+      "ranks": [
+        {
+          "areaMultiplier": 1.1
+        },
+        {
+          "areaMultiplier": 1.2
+        },
+        {
+          "areaMultiplier": 1.3
+        }
+      ],
+      "behavior": "Multiply spell AoE radii and Prism Ring orbit radius, excluding projectile body and movement.",
+      "synergy": "Prism Ring R5 evolves at R2. Also increases Hex Bell reach.",
+      "visualCue": "Purple oil drop badge.",
+      "sfx": "select",
+      "icon": "lantern-oil"
+    },
+    {
+      "id": "root-charm",
+      "name": "Root Charm",
+      "type": "passive",
+      "family": "status",
+      "maxRank": 3,
+      "ranks": [
+        {
+          "durationMultiplier": 1.12
+        },
+        {
+          "durationMultiplier": 1.26
+        },
+        {
+          "durationMultiplier": 1.42
+        }
+      ],
+      "behavior": "Multiply poison refresh duration and patch duration, keeping tick rate fixed. Also multiply evolution chill duration.",
+      "synergy": "Bog Bloom R5 evolves at R2.",
+      "visualCue": "Mint root-clasp badge.",
+      "sfx": "select",
+      "icon": "root-charm"
+    },
+    {
+      "id": "gale-laces",
+      "name": "Gale Laces",
+      "type": "passive",
+      "family": "dash",
+      "maxRank": 3,
+      "ranks": [
+        {
+          "speedBonus": 0.06,
+          "dashCooldownReductionSec": 0.25
+        },
+        {
+          "speedBonus": 0.12,
+          "dashCooldownReductionSec": 0.55
+        },
+        {
+          "speedBonus": 0.18,
+          "dashCooldownReductionSec": 0.85
+        }
+      ],
+      "behavior": "Add move speed and subtract dash cooldown, preserving dash distance and duration.",
+      "synergy": "Foxfire R5 evolves at R2 and launches on dash.",
+      "visualCue": "Cyan swept ribbon badge.",
+      "sfx": "select",
+      "icon": "gale-laces"
+    },
+    {
+      "id": "heart-husk",
+      "name": "Heart Husk",
+      "type": "passive",
+      "family": "health",
+      "maxRank": 3,
+      "ranks": [
+        {
+          "maxHpBonus": 12,
+          "pickupRadiusBonus": 13
+        },
+        {
+          "maxHpBonus": 24,
+          "pickupRadiusBonus": 26
+        },
+        {
+          "maxHpBonus": 38,
+          "pickupRadiusBonus": 40
+        }
+      ],
+      "behavior": "Add max HP and pickup radius. Increase current HP by the max HP delta when ranking up.",
+      "synergy": "Mirror Ward buys recovery time and a wider pickup route.",
+      "visualCue": "Red heart-shell badge.",
+      "sfx": "select",
+      "icon": "heart-husk"
+    },
+    {
+      "id": "comet-thread",
+      "name": "Comet Thread",
+      "type": "evolution",
+      "family": "projectile",
+      "maxRank": 1,
+      "ranks": [
+        {
+          "damage": 32,
+          "intervalSec": 0.52,
+          "count": 3,
+          "pierce": 2,
+          "range": 520,
+          "splashDamage": 12,
+          "splashRadius": 55
+        }
+      ],
+      "behavior": "Wick Dart behavior with +/-10 degree spread plus center bolt. Final impact of each projectile emits one splash, excludes its direct impact target. Direct hits apply Sparked. No recursive splash.",
+      "synergy": "Persistent marking feeds Prism Ring and Starfall.",
+      "visualCue": "Amber braided triple trail and ivory spark.",
+      "sfx": "meteor",
+      "icon": "comet-thread",
+      "recipe": {
+        "active": "wick-dart",
+        "activeRank": 5,
+        "passive": "thread-lens",
+        "passiveRank": 2,
+        "catalysts": 1
+      }
+    },
+    {
+      "id": "crown-of-glass",
+      "name": "Crown of Glass",
+      "type": "evolution",
+      "family": "orbit",
+      "maxRank": 1,
+      "ranks": [
+        {
+          "damage": 30,
+          "count": 5,
+          "radius": 85,
+          "periodSec": 1.7,
+          "rehitSec": 0.55,
+          "pulseDamage": 27,
+          "pulseRadius": 145
+        }
+      ],
+      "behavior": "Prism Ring behavior. Every full orbit triggers one pulse from Wick that consumes Sparked for +9 base damage.",
+      "synergy": "Pairs with Dart marks and Hex Bell close-range damage.",
+      "visualCue": "Orchid pentagon of blades and clear pulse.",
+      "sfx": "bell",
+      "icon": "crown-of-glass",
+      "recipe": {
+        "active": "prism-ring",
+        "activeRank": 5,
+        "passive": "lantern-oil",
+        "passiveRank": 2,
+        "catalysts": 1
+      }
+    },
+    {
+      "id": "green-midnight",
+      "name": "Green Midnight",
+      "type": "evolution",
+      "family": "dot",
+      "maxRank": 1,
+      "ranks": [
+        {
+          "tickDamage": 18,
+          "intervalSec": 3.1,
+          "radius": 92,
+          "durationSec": 4.5,
+          "range": 355,
+          "moveSlow": 0.25,
+          "chillSec": 1.4,
+          "spreadRadius": 65
+        }
+      ],
+      "behavior": "Bog Bloom behavior plus chill on entry. First dying poisoned enemy per patch per cast spreads remaining poison to up to 3 unpoisoned nearby enemies, no recursive spreading.",
+      "synergy": "Reliable poison coverage for Hex Bell. Control helps keep foes inside Starfall.",
+      "visualCue": "Mint briars with low-opacity gradient and curled spores.",
+      "sfx": "bloom",
+      "icon": "green-midnight",
+      "recipe": {
+        "active": "bog-bloom",
+        "activeRank": 5,
+        "passive": "root-charm",
+        "passiveRank": 2,
+        "catalysts": 1
+      }
+    },
+    {
+      "id": "lantern-pack",
+      "name": "Lantern Pack",
+      "type": "evolution",
+      "family": "summon",
+      "maxRank": 1,
+      "ranks": [
+        {
+          "damage": 19,
+          "count": 3,
+          "intervalSec": 0.63,
+          "range": 390,
+          "boltSpeed": 515,
+          "dashBurstDamage": 48,
+          "dashBurstRadius": 96
+        }
+      ],
+      "behavior": "Foxfire behavior. Emit one burst from dash endpoint including a dash truncated by a solid blocker. Burst triggers once per paid dash.",
+      "synergy": "Gale Laces and Wind encourage mobile burst lines.",
+      "visualCue": "Three fox wisps and cyan arc at dash end.",
+      "sfx": "dash",
+      "icon": "lantern-pack",
+      "recipe": {
+        "active": "foxfire",
+        "activeRank": 5,
+        "passive": "gale-laces",
+        "passiveRank": 2,
+        "catalysts": 1
+      }
+    }
+  ]
+}
