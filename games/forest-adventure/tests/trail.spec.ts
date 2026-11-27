@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page, type Request } from '@playwright/test';
 import { STEP_MS } from '../src/session.ts';
 import registry from '../../../registry/games.json' with { type: 'json' };
 import { EXPANSION_SAVE_KEY } from '../src/save.ts';
@@ -69,6 +69,17 @@ test('clears the whole campaign by keyboard from the Studio catalog and returns 
   // The portal can replace its cover element on navigation. Check the decoded
   // image and the HTTP response separately from canceled image requests.
   const errors = watchErrors(page, coverPath);
+  const isAudioRequest = (request: Request) => /\.(?:ogg|m4a)$/.test(new URL(request.url()).pathname);
+  const pendingAudio = new Set<Request>();
+  page.on('request', (request) => {
+    if (isAudioRequest(request)) pendingAudio.add(request);
+  });
+  page.on('requestfinished', (request) => pendingAudio.delete(request));
+  page.on('requestfailed', (request) => pendingAudio.delete(request));
+  const waitForAudioRequests = () => expect.poll(
+    () => Array.from(pendingAudio, (request) => request.url()),
+    { message: 'Audio requests should settle before leaving the game document' },
+  ).toEqual([]);
   const media: string[] = [];
   page.on('response', (response) => {
     if (/\.(png|webp|json)$/.test(response.url())) media.push(new URL(response.url()).pathname);
@@ -265,21 +276,29 @@ test('clears the whole campaign by keyboard from the Studio catalog and returns 
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   expect(await progress()).toEqual(completed);
   await page.clock.resume();
+  await waitForAudioRequests();
   await page.reload();
   await page.getByRole('button', { name: 'Choose a trail' }).click();
   const choices = page.getByRole('dialog').getByRole('button');
   await expect(choices).toHaveText([...levels.map(({ name }) => name), 'Title screen']);
-  await page.getByRole('button', { name: 'Fernlight Trail', exact: true }).click();
+  await Promise.all([
+    page.waitForRequest(isAudioRequest),
+    page.getByRole('button', { name: 'Fernlight Trail', exact: true }).click(),
+  ]);
   await expect(page.getByRole('region', { name: 'Fernlight Trail playfield' })).toBeFocused();
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   expect(await progress()).toEqual(completed);
+  await waitForAudioRequests();
   await page.reload();
-  await page.getByRole('button', { name: 'Continue' }).click();
+  await Promise.all([
+    page.waitForRequest(isAudioRequest),
+    page.getByRole('button', { name: 'Continue' }).click(),
+  ]);
   await expect(page.locator('#chapter-name')).toHaveText(expansionLevels.at(-1)!.name);
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'Paused' })).toBeVisible();
-  await page.waitForLoadState('networkidle');
+  await waitForAudioRequests();
 
   await page.getByRole('link', { name: 'Back to Studio' }).click();
   await expect(page).toHaveURL(`${prefix}#/`);
