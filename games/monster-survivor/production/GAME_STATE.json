@@ -1,95 +1,212 @@
 {
   "schemaVersion": 1,
   "gameId": "monster-survivor",
-  "baselineCommit": "f46ee26e4c0402dcd3d9c84504380af27c48e644",
-  "packId": "monster-survivor-production-v1",
-  "features": [
-    {
-      "id": "MS-CORE",
-      "intendedBehavior": "Movement, auto-spells, dash, XP and upgrades",
-      "implementationStatus": "designed",
-      "acceptanceStatus": "NOT_RUN",
-      "evidence": "design/GDD.md"
-    },
-    {
-      "id": "MS-RITES",
-      "intendedBehavior": "Three ward positions, activate two on Normal",
-      "implementationStatus": "designed",
-      "acceptanceStatus": "NOT_RUN",
-      "evidence": "design/WAVES_AND_MAP.md"
-    },
-    {
-      "id": "MS-BUILDS",
-      "intendedBehavior": "16 entries and four skill evolutions",
-      "implementationStatus": "designed",
-      "acceptanceStatus": "NOT_RUN",
-      "evidence": "design/SKILL_CATALOG.md"
-    },
-    {
-      "id": "MS-WARDEN",
-      "intendedBehavior": "Three boss phases with victory/defeat",
-      "implementationStatus": "designed",
-      "acceptanceStatus": "NOT_RUN",
-      "evidence": "design/BOSS_DESIGN.md"
-    },
-    {
-      "id": "MS-PLAYBACK",
-      "intendedBehavior": "Audio, accessibility, recap and local records",
-      "implementationStatus": "designed",
-      "acceptanceStatus": "NOT_RUN",
-      "evidence": "design/UI_UX.md"
-    }
-  ],
-  "levels": [
+  "baselineCommit": "c790f520f96f6702fc2014f1c1524d2b01f341fa",
+  "records": [
     {
       "id": "bellgrave-garden",
-      "designed": true,
-      "implemented": false,
-      "publiclyPlayable": false
+      "kind": "level",
+      "intendedBehavior": "Survive four minutes, light the Orchard Ward and defeat the Hollow Warden before the final toll.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-core",
+      "kind": "feature",
+      "intendedBehavior": "Move, dash, auto-cast, gather embers and draft spells or passives.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/sim.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-orchard-rite",
+      "kind": "feature",
+      "intendedBehavior": "Light the Orchard Ward and select a boon while the run is paused.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-comet-thread",
+      "kind": "feature",
+      "intendedBehavior": "Defeat Thornback, collect its catalyst and evolve Wick Dart V with Thread Lens II.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-warden-slice",
+      "kind": "feature",
+      "intendedBehavior": "Dodge Cleave and Toll across Sentinel and Briar phases and see the reason for either ending.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/slice.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-playback",
+      "kind": "feature",
+      "intendedBehavior": "Play with keyboard or touch, adjust audio and accessibility settings, retry and keep local results.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "src/main.ts",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "ms-normal-campaign",
+      "kind": "feature",
+      "intendedBehavior": "Play the full Normal schedule with three wards and all authored skills, evolutions and Warden phases.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "stages/S04/STAGE.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
+    },
+    {
+      "id": "ms-records-expansion",
+      "kind": "feature",
+      "intendedBehavior": "Review expanded records and use cosmetic rewards.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "stages/S04/STAGE.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": null,
+        "result": "NOT_RUN",
+        "evidence": []
+      }
     }
   ],
+  "knownGaps": [
+    "G2 Producer playtest pending. The next task is MS-410 after approval.",
+    "S04–S06, Normal and later game systems are pending.",
+    "Physical touch device, additional browsers and the producer audio listening pass are unverified.",
+    "Studio registry registration and Pages publication require separate approval.",
+    "Direct observation of the live Pages marker was blocked by the workspace network."
+  ],
   "save": {
-    "schemaVersion": 1,
-    "status": "designed",
-    "key": "ai-game-studio:monster-survivor:v1"
-  },
-  "publication": {
-    "repositoryMedia": "pending-producer-prompt",
-    "pages": "pending",
-    "registry": "absent-at-baseline"
-  },
-  "gates": {
-    "G0": "PENDING_PRODUCER",
-    "G1": "NOT_RUN",
-    "G2": "NOT_RUN",
-    "G3": "NOT_RUN",
-    "G4": "NOT_RUN"
-  },
-  "deployment": {
-    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
-    "deployedCommit": "f46ee26e4c0402dcd3d9c84504380af27c48e644",
-    "observedAt": "2026-11-27",
-    "gameEntry": null,
-    "checks": [
-      {
-        "id": "studio-commit-marker",
-        "result": "PASS"
-      },
-      {
-        "id": "studio-manifest-monster-survivor",
-        "result": "ABSENT_EXPECTED"
-      },
-      {
-        "id": "monster-survivor-live-play",
-        "result": "NOT_RUN"
-      }
+    "schema": "ai-game-studio:monster-survivor:v1",
+    "version": 1,
+    "evidence": [
+      "src/save.ts",
+      "tests/sim.test.ts",
+      "reports/QA_REPORT.md"
     ]
   },
-  "knownGaps": [
-    "Game code and integrated gameplay pending.",
-    "Studio registration requires separate scope review.",
-    "Browser and target-device evidence pending.",
-    "Producer approvals and live Pages checks pending."
-  ],
-  "firstTask": "MS-000"
+  "publication": {
+    "rights": "cleared",
+    "preview": "pending",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md",
+      "production/RIGHTS.md",
+      "production/ASSET_MANIFEST.csv"
+    ]
+  },
+  "deployment": {
+    "deployedCommit": null,
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/",
+    "observedAt": null,
+    "checks": {
+      "revision": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      },
+      "http": {
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": [
+          "reports/QA_REPORT.md"
+        ]
+      }
+    }
+  }
 }

@@ -24,3 +24,11 @@ Pack `monster-survivor-production-v1` · design and assets staged for handoff. S
 - T06–T10/T12 slice subset PASS. Eleven gameplay/data/storage tests passed. Chromium 156, 1366×768, played the authored timeline through normal input with a deterministic test clock and seed. Orchard charge, Hearth, Thornback chest and Comet Thread were reached. Warden victory at 04:03.78 with 434 kills and 110 HP. An idle retry took HP defeat. Retry reset HUD and simulation. Two runs and one win were saved. Zero page or HTTP faults on the passing run.
 - An initial retry exposed stale renderer effects when the fixture reissued a seed. Renderer now clears effects based on run identity. Same-seed retry passed.
 - S02 Producer review deferred by MS-AP01. Next MS-310.
+
+## S03 · MS-310 / MS-320 · candidate_ready at G2
+
+- Implemented the 04:00–05:30 slice with the supplied atlases, key artwork and original WAV exports, responsive HUD and draft cards, settings, Web Audio, touch movement and dash, portrait pause, results and local storage.
+- Latest inspected main `c790f520f96f6702fc2014f1c1524d2b01f341fa` adopted Studio V5.2 during QA. Revalidated the original ZIP against the same digest and external scope on a clean checkout of that revision. The registry and target were still absent. Candidate runtime rebuilt byte-for-byte after rebasing. The updated state conforms to Studio V5.2.
+- Tested runtime source `19d642819558d9c150b2eb40f77ba8e23e3f7b38`, rebased source `49f0bbca7f4b1d8e566280dd3218284d7b45501d`. Exact checks and nine Chromium captures are in the [QA report](../reports/QA_REPORT.md). Authored-paced clear 04:03.78 with 434 kills and Comet Thread. HP defeat and same-session retry passed. Touch passed in Chromium emulation.
+- The canonical Pages build and Forest Adventure regression passed, including the full public campaign and save migration. The candidate has its own local project-subpath preview and independent static build. Shared desktop preview access was blocked by the environment.
+- Producer playtest and acceptance pending at G2. Next authorized work after approval is MS-410. S04–S06 remain pending. Registry and Pages approval are separate. Keep merge manual.
