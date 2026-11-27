@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "gameId": "midnight-greenhouse",
+  "baselineCommit": "2fef3a8e97ae219767bad273bd67ea6724408306",
+  "records": [
+    {
+      "id": "raincourt",
+      "kind": "level",
+      "intendedBehavior": "Defend four lanes for six waves while using one supply for wet collector income or Orchid chains.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": ["tests/simulation.test.mjs", "tests/pages.spec.ts", "reports/QA_REPORT.md"],
+      "acceptanceEvidence": [],
+      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+    },
+    {
+      "id": "pump-gallery",
+      "kind": "level",
+      "intendedBehavior": "Handle pump faults and mixed raincoat and healer waves with Rêu Thành.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": ["design/GDD.md"],
+      "acceptanceEvidence": [],
+      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+    },
+    {
+      "id": "lightning-dome",
+      "kind": "level",
+      "intendedBehavior": "Defend the Heart Seed through both keeper phases and respond to lane locks.",
+      "implementation": "planned",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": ["design/GDD.md"],
+      "acceptanceEvidence": [],
+      "artifactCheck": { "target": null, "result": "NOT_RUN", "evidence": [] }
+    }
+  ],
+  "knownGaps": ["S04 and S05 await Producer G2", "Real phone, Firefox, Safari and subjective mix await review", "reports/QA_REPORT.md"],
+  "save": { "schema": "midnight-greenhouse.progress", "version": 1, "evidence": ["src/save.ts"] },
+  "publication": { "rights": "cleared", "preview": "pending", "release": "blocked", "evidence": ["production/DECISIONS.md"] },
+  "deployment": {
+    "deployedCommit": null,
+    "url": null,
+    "observedAt": null,
+    "checks": {
+      "revision": { "result": "NOT_RUN", "evidence": [] },
+      "http": { "result": "NOT_RUN", "evidence": [] },
+      "gameplay": { "result": "NOT_RUN", "evidence": [] }
+    }
+  }
+}

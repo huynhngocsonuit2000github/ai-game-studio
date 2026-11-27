@@ -1,0 +1,217 @@
+{
+  "schemaVersion": 1,
+  "arenas": {
+    "raincourt": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "boards/raincourt.webp",
+      "xPlantSpan": [
+        0.126,
+        0.868
+      ],
+      "visualRowEdges": [
+        0.3,
+        0.463,
+        0.624,
+        0.785,
+        0.949
+      ],
+      "feetY": [
+        0.4337,
+        0.595,
+        0.756,
+        0.9195
+      ],
+      "valveX": 0.074,
+      "entranceX": 0.917
+    },
+    "pump-gallery": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "boards/pump-gallery.webp",
+      "xPlantSpan": [
+        0.143,
+        0.865
+      ],
+      "visualRowEdges": [
+        0.266,
+        0.429,
+        0.591,
+        0.753,
+        0.92
+      ],
+      "feetY": [
+        0.3997,
+        0.5618,
+        0.7238,
+        0.8899
+      ],
+      "valveX": 0.091,
+      "entranceX": 0.914
+    },
+    "lightning-dome": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "boards/lightning-dome.webp",
+      "xPlantSpan": [
+        0.137,
+        0.861
+      ],
+      "visualRowEdges": [
+        0.282,
+        0.442,
+        0.599,
+        0.761,
+        0.915
+      ],
+      "feetY": [
+        0.4132,
+        0.5707,
+        0.7318,
+        0.8873
+      ],
+      "valveX": 0.085,
+      "entranceX": 0.91
+    }
+  },
+  "sprites": {
+    "pitcher": {
+      "asset": "plants/pitcher.webp",
+      "size": [
+        193,
+        220
+      ],
+      "anchorPx": [
+        96,
+        215
+      ]
+    },
+    "fern": {
+      "asset": "plants/fern.webp",
+      "size": [
+        236,
+        220
+      ],
+      "anchorPx": [
+        118,
+        215
+      ]
+    },
+    "bramble": {
+      "asset": "plants/bramble.webp",
+      "size": [
+        271,
+        220
+      ],
+      "anchorPx": [
+        136,
+        214
+      ]
+    },
+    "orchid": {
+      "asset": "plants/orchid.webp",
+      "size": [
+        216,
+        220
+      ],
+      "anchorPx": [
+        108,
+        215
+      ]
+    },
+    "moss": {
+      "asset": "plants/moss.webp",
+      "size": [
+        192,
+        220
+      ],
+      "anchorPx": [
+        96,
+        215
+      ]
+    },
+    "pod": {
+      "asset": "plants/pod.webp",
+      "size": [
+        217,
+        220
+      ],
+      "anchorPx": [
+        108,
+        215
+      ]
+    },
+    "walker": {
+      "asset": "enemies/walker.webp",
+      "size": [
+        174,
+        220
+      ],
+      "anchorPx": [
+        86,
+        214
+      ]
+    },
+    "courier": {
+      "asset": "enemies/courier.webp",
+      "size": [
+        225,
+        220
+      ],
+      "anchorPx": [
+        112,
+        214
+      ]
+    },
+    "porter": {
+      "asset": "enemies/porter.webp",
+      "size": [
+        191,
+        220
+      ],
+      "anchorPx": [
+        95,
+        214
+      ]
+    },
+    "raincoat": {
+      "asset": "enemies/raincoat.webp",
+      "size": [
+        135,
+        220
+      ],
+      "anchorPx": [
+        66,
+        215
+      ]
+    },
+    "mender": {
+      "asset": "enemies/mender.webp",
+      "size": [
+        187,
+        220
+      ],
+      "anchorPx": [
+        93,
+        215
+      ]
+    },
+    "keeper": {
+      "asset": "enemies/keeper.webp",
+      "size": [
+        303,
+        310
+      ],
+      "anchorPx": [
+        152,
+        303
+      ]
+    }
+  }
+}
