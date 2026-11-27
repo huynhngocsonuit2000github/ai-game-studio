@@ -33,6 +33,22 @@
         "Roguelite"
       ],
       "milestone": "S03 · Polished vertical slice"
+    },
+    {
+      "id": "mo-vang-nao-loan",
+      "title": "Mỏ Vàng Náo Loạn",
+      "description": "Căn góc thả móc, kéo vàng lên trước khi hết giờ và ghé quầy tiếp tế sau ca đào.",
+      "engine": "other",
+      "status": "development",
+      "visibility": "public",
+      "entry": "games/mo-vang-nao-loan/index.html",
+      "cover": "games/mo-vang-nao-loan/cover.webp",
+      "version": "0.1.0",
+      "dimension": "2D",
+      "categories": [
+        "Arcade"
+      ],
+      "milestone": "S02 · Bãi Vàng Đầu Ca"
     }
   ]
 }
