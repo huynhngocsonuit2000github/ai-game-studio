@@ -1,14 +1,20 @@
 import { expect, test, type Page } from '@playwright/test';
 import { STEP_MS } from '../src/session.ts';
 import registry from '../../../registry/games.json' with { type: 'json' };
-import { SAVE_KEY } from '../src/save.ts';
+import { EXPANSION_SAVE_KEY } from '../src/save.ts';
+import { expansionLevels, levels } from '../src/level.ts';
+import replays from '../features/exp-10-trails/layouts/TRAIL_REPLAYS.json' with { type: 'json' };
 import { oak, willow } from './campaign-routes.ts';
 
 const released = registry.games.some(game => game.id === 'forest-adventure' && game.status === 'released');
 
+// Capture the upper fork, the still-locked portal, and the canopy route.
+const routeEvidenceTicks: Record<string, number> = { 'trail-02': 96, 'trail-06': 616, 'trail-08': 456 };
+
 const prefix = '/ai-game-studio/';
 const detail = `${prefix}#/games/forest-adventure`;
 const game = `${prefix}games/forest-adventure/index.html`;
+const coverPath = `${prefix}games/forest-adventure/cover.webp`;
 
 // Use an exact 60 Hz frame source for the campaign routes. This controls
 // elapsed time only. The browser still receives real keyboard events and
@@ -40,7 +46,7 @@ async function fixedFrameSource(page: Page) {
   }, { count, interval: STEP_MS });
 }
 
-function watchErrors(page: Page) {
+function watchErrors(page: Page, canceledCatalogCover?: string) {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
@@ -48,7 +54,8 @@ function watchErrors(page: Page) {
   });
   page.on('requestfailed', (request) => {
     const failure = request.failure()?.errorText;
-    if (failure === 'net::ERR_ABORTED' && request.url().endsWith('/favicon.png')) return;
+    const pathname = new URL(request.url()).pathname;
+    if (failure === 'net::ERR_ABORTED' && (pathname.endsWith('/favicon.png') || pathname === canceledCatalogCover)) return;
     errors.push(`${failure} ${request.url()}`);
   });
   page.on('response', (response) => {
@@ -57,8 +64,11 @@ function watchErrors(page: Page) {
   return errors;
 }
 
-test('clears all three trails by keyboard from the Studio catalog and returns to Studio', async ({ page }, testInfo) => {
-  const errors = watchErrors(page);
+test('clears the whole campaign by keyboard from the Studio catalog and returns to Studio', async ({ page }, testInfo) => {
+  test.setTimeout(180_000);
+  // The portal can replace its cover element on navigation. Check the decoded
+  // image and the HTTP response separately from canceled image requests.
+  const errors = watchErrors(page, coverPath);
   const media: string[] = [];
   page.on('response', (response) => {
     if (/\.(png|webp|json)$/.test(response.url())) media.push(new URL(response.url()).pathname);
@@ -68,10 +78,11 @@ test('clears all three trails by keyboard from the Studio catalog and returns to
   await expect(page.getByRole('heading', { name: 'Forest Adventure 2D' })).toBeVisible();
   await expect(page.getByText(released ? 'Released' : 'In Development', { exact: true })).toBeVisible();
   await expect(page.locator('img[src$="/cover.webp"]')).toBeVisible();
+  await page.locator('img[src$="/cover.webp"]').evaluate((node: HTMLImageElement) => node.decode());
   await page.getByRole('link', { name: released ? 'Play Now' : 'Play preview' }).click();
   await expect(page).toHaveURL(game);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeFocused();
-  const cover = await page.request.get(`${prefix}games/forest-adventure/cover.webp`);
+  const cover = await page.request.get(coverPath);
   expect(cover.ok()).toBe(true);
   expect(cover.headers()['content-type']).toBe('image/webp');
   const runtimeMedia = media.filter((path) => path.includes('/games/forest-adventure/assets/'));
@@ -167,7 +178,7 @@ test('clears all three trails by keyboard from the Studio catalog and returns to
   activeDirection = null;
 
   advance = await fixedFrameSource(page);
-  const progress = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), SAVE_KEY);
+  const progress = () => page.evaluate((key) => JSON.parse(localStorage.getItem(key) ?? '{}'), EXPANSION_SAVE_KEY);
   expect((await progress()).unlockedLevelIds).toEqual(['fernlight-trail', 'willow-run']);
   await page.getByRole('button', { name: 'Next Trail' }).click();
   await expect(page.locator('#chapter-name')).toHaveText('Willow Run');
@@ -196,12 +207,60 @@ test('clears all three trails by keyboard from the Studio catalog and returns to
   }
   await travel(32);
   await expect(page.getByRole('heading', { name: 'The Lantern Oak wakes' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next Trail' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Next Trail' })).toBeFocused();
   await page.screenshot({ path: testInfo.outputPath('oak-finale.png') });
-  const completed = await progress();
-  expect(Object.keys(completed.bestByLevel)).toEqual(['fernlight-trail', 'willow-run', 'lantern-oak']);
-  expect(completed.bestByLevel['lantern-oak'].fireflies).toBe(8);
+  expect((await progress()).bestByLevel['lantern-oak'].fireflies).toBe(8);
   await page.keyboard.up('ArrowRight');
+  activeDirection = null;
+
+  for (const level of expansionLevels) {
+    const replay = replays.runs.find(({ levelId }) => levelId === level.id);
+    if (!replay) throw new Error(`Missing replay for ${level.id}`);
+    await test.step(`Clear ${level.name} by keyboard`, async () => {
+      await page.getByRole('button', { name: 'Next Trail' }).click();
+      await expect(page.getByRole('region', { name: `${level.name} playfield` })).toBeFocused();
+      const ids = levels.slice(0, levels.indexOf(level) + 1).map(({ id }) => id);
+      expect((await progress()).unlockedLevelIds).toEqual(ids);
+      let elapsed = 0;
+      const captureAt = routeEvidenceTicks[level.id];
+      for (const [action, repeats] of replay.runsOfActions) {
+        if (typeof action !== 'string' || typeof repeats !== 'number') throw new Error('Invalid replay action');
+        const direction = action.startsWith('L') ? -1 : action.startsWith('R') ? 1 : 0;
+        const edge = action.endsWith('J') || action.endsWith('P');
+        const jump = action.endsWith('J') || action.endsWith('H');
+        for (let repeat = 0; repeat < repeats; repeat++) {
+          if (edge && jumpHeld) {
+            await page.keyboard.up('Space');
+            jumpHeld = false;
+          }
+          if (action.endsWith('P')) {
+            await page.keyboard.down('Space');
+            await page.keyboard.up('Space');
+          }
+          await travel(replays.ticksPerAction, direction, jump);
+          elapsed += replays.ticksPerAction;
+          if (elapsed === captureAt) {
+            if (level.id === 'trail-06') await expect(page.locator('#hint')).toHaveText('Heartseeds needed: 1');
+            await page.screenshot({ path: testInfo.outputPath(`${level.id}-route.jpg`), quality: 85 });
+          }
+        }
+      }
+      if (activeDirection) await page.keyboard.up(activeDirection);
+      if (jumpHeld) await page.keyboard.up('Space');
+      activeDirection = null;
+      jumpHeld = false;
+      const last = level === expansionLevels.at(-1);
+      await expect(page.getByRole('heading', { name: last ? 'Forest Adventure complete' : 'Trail cleared' })).toBeVisible();
+      await expect(page.locator('#seeds')).toHaveText('Heartseeds 3/3');
+      await expect(page.getByText(/8\/8 fireflies · 0 falls or defeats/)).toBeVisible();
+      expect((await progress()).bestByLevel[level.id]).toEqual({ ticks: replay.tickCount, fireflies: 8 });
+      await expect(page.getByRole('button', { name: 'Next Trail' })).toHaveCount(Number(!last));
+      await page.screenshot({ path: testInfo.outputPath(`${level.id}-cleared.png`) });
+    });
+  }
+  const completed = await progress();
+  expect(levels).toHaveLength(13);
+  expect(Object.keys(completed.bestByLevel)).toEqual(levels.map(({ id }) => id));
   await page.getByRole('button', { name: 'Replay' }).click();
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   expect(await progress()).toEqual(completed);
@@ -209,14 +268,14 @@ test('clears all three trails by keyboard from the Studio catalog and returns to
   await page.reload();
   await page.getByRole('button', { name: 'Choose a trail' }).click();
   const choices = page.getByRole('dialog').getByRole('button');
-  await expect(choices).toHaveText(['Fernlight Trail', 'Willow Run', 'Lantern Oak', 'Title screen']);
+  await expect(choices).toHaveText([...levels.map(({ name }) => name), 'Title screen']);
   await page.getByRole('button', { name: 'Fernlight Trail', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Fernlight Trail playfield' })).toBeFocused();
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   expect(await progress()).toEqual(completed);
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
-  await expect(page.locator('#chapter-name')).toHaveText('Lantern Oak');
+  await expect(page.locator('#chapter-name')).toHaveText(expansionLevels.at(-1)!.name);
   await expect(page.locator('#seeds')).toHaveText('Heartseeds 0/3');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('heading', { name: 'Paused' })).toBeVisible();
@@ -225,6 +284,10 @@ test('clears all three trails by keyboard from the Studio catalog and returns to
   await page.getByRole('link', { name: 'Back to Studio' }).click();
   await expect(page).toHaveURL(`${prefix}#/`);
   await expect(page.getByRole('heading', { name: 'Game Library' })).toBeVisible();
+  const libraryCover = page.getByRole('list', { name: 'Game results' }).locator('img[src$="/cover.webp"]');
+  await expect(libraryCover).toBeVisible();
+  await libraryCover.evaluate((node: HTMLImageElement) => node.decode());
+  await page.waitForLoadState('networkidle');
   expect(errors).toEqual([]);
 });
 
