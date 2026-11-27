@@ -16,6 +16,23 @@
         "Platformer"
       ],
       "milestone": "S01 · Playable prototype"
+    },
+    {
+      "id": "monster-survivor",
+      "title": "Monster Survivor",
+      "description": "Rekindle the Bellgrave Garden and turn Wick's lantern into a storm of spells.",
+      "engine": "other",
+      "status": "development",
+      "visibility": "public",
+      "entry": "games/monster-survivor/index.html",
+      "cover": "games/monster-survivor/cover.webp",
+      "version": "0.1.0",
+      "dimension": "2D",
+      "categories": [
+        "Survival",
+        "Roguelite"
+      ],
+      "milestone": "S03 · Polished vertical slice"
     }
   ]
 }
