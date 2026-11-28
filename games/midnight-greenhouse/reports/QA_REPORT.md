@@ -150,3 +150,23 @@ A 30-second animation-frame sample on the assembled game began at the same late 
 The 45-second reel opens with a matched Sân Mưa lane shown before and after. Both openings used pointer placement and the normal game clock. The Hầm Bơm and Đài Chớp clips replay the existing command history to prepare their starting positions and then run at the normal game clock. The clips cover Mũ Tím's run, Lan Sét's arc and Nấm Vá's heal after 0:10, Gai Cuộn's lash and the monsters' bites after 0:23, Keeper's phase change after 0:30 and Pod detonation after 0:37. The Canvas observer and combat event log confirm the matching pose rows and effects. Console and network checks passed in each capture. [Combat animation comparison](motion/combat-animation-comparison.mp4) · [Replay commands](../tests/retro-routes.json)
 
 Lint, game and portal TypeScript, 35 Vitest tests, 15 Studio Node tests, 12 pack-validator tests, assembled Pages verification and 16 Midnight Greenhouse simulation checks passed locally. The assembled game browser suite covers the catalog route, saves, Sổ tay, audio, touch, fullscreen and high-DPR input, plus live Canvas windup, release and fixed reduced-motion poses. The candidate's live verification follows manual merge.
+
+## GH-STAGE-MOTION-03
+
+The deployed baseline was `a2cd2603653d45dd6933f43ec49781da6be13533` from PR #39. The Producer requested more character poses, particularly visible footfalls and reactions like the Chậu Giáp and Áo Mưa reference. [Baseline Pages verification](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46138300772/job/140960706623)
+
+| Measure across the 12 characters | Baseline | Candidate |
+| --- | ---: | ---: |
+| Character-action sequences | 65 | 138 |
+| Assigned atlas cells | 390 | 2,190 |
+| Distinct visible frames | 375 | 2,149 |
+
+Visible frame counts use the decoded WebP pixels. A frame must contain alpha, and identical pixels count once per character. The 5.73× increase applies to visible frames. The 73 added sequences include separate bite windup and recovery, strong impact, stun, limping, plant entrance and wilting, and the Keeper's phase-two gait.
+
+The gait tracks each boot through contact, push-off, lift and the opposite step. Chậu Giáp brings a painted toe out from beneath the shield and tilts the shield at a block. Áo Mưa's boots take turns swinging forward. Plants bend at the fronds, petals or attack tip while their pots stay registered. Impact strength, armor blocks, electric insulation, roots, stun and defeats have state-driven poses. Reduced motion shows an authored key pose from each relevant sequence. Sổ tay lists each action in Vietnamese. [Offline atlas baker](../assets/source/motion/bake.py)
+
+Four existing deterministic routes matched the deployed build on every simulation tick for positions, HP, attacks, projectiles, stock, drops, cooldowns and final result. The 48-second clip uses matched screenshots from running Đài Chớp at normal speed for the two comparisons. Later waves start from the existing replay command history and then run at normal speed. The reel shows Sân Mưa planting and attack, Đài Chớp bites and blocks, Keeper phase change and Pod detonation. [Animation reel](motion/expanded-character-animations.mp4)
+
+The encoded cold title through Sân Mưa combat second 7 transferred 4,128,903 bytes, including eight atlases. The whole assembled game occupied 7,528,625 bytes. The 30-second late Đài Chớp rendering sample measured 16.7/16.8 ms median/p95 at 1280×720 and 16.7/33.3 ms at 1920×1080 in isolated Debian headless Chromium. The documented 1280×720 p95 target is at most 25 ms. Full-HD frame drops and physical-device coverage remain limitations.
+
+Lint, portal and game TypeScript builds, repository tests, the 17 game simulation tests and 11 assembled Chromium browser tests passed locally. The live Canvas test counted changing Fern idle, windup and release frames and Walker gait and impact frames. The same actions displayed their fixed key frames under reduced motion. Candidate verification on the live Pages route follows manual merge.

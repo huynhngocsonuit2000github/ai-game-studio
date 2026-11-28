@@ -16,9 +16,10 @@ try {
 
   const tuning = await readJson('design/TUNING.json');
   const layout = await readJson('assets/runtime/art/retro/layout.json');
-  const atlas = await readJson('assets/runtime/art/retro/motion/atlas.json');
+  const atlasPath = 'retro/motion-library/atlas.json';
+  const atlas = await readJson(`assets/runtime/art/${atlasPath}`);
   const guide = await readJson('design/retro/FIELD_GUIDE_VI.json');
-  const media = new Set(['retro/campaign-card.webp', 'retro/motion/atlas.json',
+  const media = new Set(['retro/campaign-card.webp', atlasPath,
     ...['bell', 'flag', 'heart', 'hoe', 'seed', 'valve'].map((id) => `retro/icons/${id}.webp`)]);
   const ids = (entries) => entries.map(({ id }) => id);
   assert.deepEqual(ids(tuning.levels), ['raincourt', 'pump-gallery', 'lightning-dome']);
@@ -28,7 +29,7 @@ try {
   assert.equal(tuning.schemaVersion, 1);
   assert.equal(guide.schemaVersion, 1);
   assert.equal(guide.locale, 'vi');
-  assert.equal(atlas.schemaVersion, 1);
+  assert.equal(atlas.schemaVersion, 2);
   assert.equal(atlas.tickRate, 30);
   equalIds(ids(guide.plants), ids(tuning.plants));
   equalIds(ids(guide.enemies), ids(tuning.enemies));
@@ -44,13 +45,21 @@ try {
     const [width, height] = unit.atlasSize;
     assert.ok(w > 0 && h > 0 && width % w === 0 && height % h === 0 && x >= 0 && x < w && y >= 0 && y < h);
     assert.equal(unit.source, layout.sprites[id].asset);
-    const rows = new Set();
+    assert.equal(unit.columns, width / w);
+    if (tuning.enemies.some((enemy) => enemy.id === id)) {
+      assert.ok(unit.feet?.length === 2 && unit.feet.every((foot) => foot >= -x && foot < w - x));
+    }
+    const occupied = new Set();
     for (const clip of Object.values(unit.clips)) {
-      assert.ok(!rows.has(clip.row) && Number.isInteger(clip.row) && clip.row >= 0 && (clip.row + 1) * h <= height);
-      assert.ok(Number.isInteger(clip.frameCount) && clip.frameCount > 0 && clip.frameCount * w <= width);
+      assert.ok(Number.isInteger(clip.firstFrame) && clip.firstFrame >= 0);
+      assert.ok(Number.isInteger(clip.frameCount) && clip.frameCount > 0
+        && clip.firstFrame + clip.frameCount <= unit.columns * height / h);
       assert.ok(Number.isInteger(clip.durationTicks) && clip.durationTicks > 0 && typeof clip.loop === 'boolean');
       assert.ok(Number.isInteger(clip.reducedFrame) && clip.reducedFrame >= 0 && clip.reducedFrame < clip.frameCount);
-      rows.add(clip.row);
+      for (let frame = clip.firstFrame; frame < clip.firstFrame + clip.frameCount; frame++) {
+        assert.ok(!occupied.has(frame), `${id} has overlapping atlas frames`);
+        occupied.add(frame);
+      }
     }
     media.add(unit.asset);
     media.add(unit.source);

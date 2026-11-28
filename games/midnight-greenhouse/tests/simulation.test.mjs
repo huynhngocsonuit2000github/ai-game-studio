@@ -12,7 +12,7 @@ function durable(stage) {
   return { ...stage, level: { ...stage.level, coreHealth: 100 } };
 }
 
-const atlas = JSON.parse(readFileSync(new URL('../dist/art/retro/motion/atlas.json', import.meta.url)));
+const atlas = JSON.parse(readFileSync(new URL('../dist/art/retro/motion-library/atlas.json', import.meta.url)));
 const step = (garden, n = 1) => { for (let i = 0; i < n; i++) garden.step(); };
 const finish = (garden, at) => step(garden, at - garden.now);
 const put = (garden, card, lane, col) => {
@@ -176,7 +176,7 @@ test('bell resolves tied breaches in spawn order, stuns peers and never intercep
   const x = peer.x;
   step(garden, ticks(1));
   assert.equal(peer.x, x);
-  assert.equal(enemyPose(peer, garden).clip, 'restrained');
+  assert.equal(enemyPose(peer, garden).clip, 'stunned');
   const newGarden = new Garden(campaign['lightning-dome']);
   finish(newGarden, 181);
   enemy(newGarden, 'keeper', 0, -0.36);
@@ -188,6 +188,8 @@ test('bell resolves tied breaches in spawn order, stuns peers and never intercep
 test('a Pod arms, commits a burst on real contact and leaves exactly one visual record', () => {
   const garden = new Garden(campaign['lightning-dome']);
   const pod = put(garden, 'pod', 0, 4);
+  assert.equal(plantPose(pod, garden).clip, 'enter');
+  step(garden, 12);
   assert.equal(plantPose(pod, garden).clip, 'arm');
   finish(garden, 182);
   assert.equal(plantPose(pod, garden).clip, 'armed');
@@ -229,7 +231,7 @@ test('ally heal, armored frontal recoil and Keeper phase use game state and main
 test('higher pose ages use different atlas columns while reduced motion uses the declared key frame', () => {
   for (const { clips } of Object.values(atlas.units)) for (const clip of Object.values(clips)) {
     assert.equal(frameOf(clip, 0, false), 0);
-    assert.equal(frameOf(clip, clip.durationTicks - 1, false), clip.frameCount - 1);
+    assert.equal(frameOf(clip, clip.durationTicks - .001, false), clip.frameCount - 1);
     assert.equal(frameOf(clip, clip.durationTicks * 4, true), clip.reducedFrame);
     assert.equal(frameOf(clip, clip.durationTicks, false), clip.loop ? 0 : clip.frameCount - 1);
   }
@@ -244,13 +246,31 @@ test('a bite loads away from the plant and snaps forward on the same tick as dam
   assert.ok(walker.biteWindup);
   const beforeHit = walker.biteWindup.fires - 1;
   finish(garden, beforeHit);
+  assert.equal(enemyPose(walker, garden).clip, 'biteWindup');
   assert.ok(bodyMotion('walker', enemyPose(walker, garden)).lean > .20);
   assert.equal(plant.hp, plant.card.hp);
   assert.ok(!garden.effects.some(({ kind }) => kind === 'bite'));
   step(garden);
+  assert.equal(enemyPose(walker, garden).clip, 'bite');
   assert.ok(bodyMotion('walker', enemyPose(walker, garden)).lean < -.50);
   assert.equal(plant.hp, plant.card.hp - walker.spec.biteDamage);
   assert.deepEqual(garden.effects.find(({ kind }) => kind === 'bite')?.targets, [plant.x]);
+  step(garden, 9);
+  assert.equal(enemyPose(walker, garden).clip, 'biteRecovery');
+});
+
+test('expanded atlas exposes all registered foot and combat sequences', () => {
+  const original = JSON.parse(readFileSync(new URL('../assets/runtime/art/retro/motion/atlas.json', import.meta.url)));
+  const count = (manifest) => Object.values(manifest.units).flatMap(({ clips }) => Object.values(clips))
+    .reduce((sum, clip) => sum + clip.frameCount, 0);
+  assert.ok(count(atlas) >= 5 * count(original));
+  for (const { id } of campaign['lightning-dome'].hostiles) {
+    const unit = atlas.units[id];
+    assert.ok(unit.feet[0] < unit.feet[1]);
+    for (const clip of ['walk', 'limp', 'biteWindup', 'bite', 'biteRecovery', 'hurt', 'hitHeavy', 'stunned', 'fall']) {
+      assert.ok(unit.clips[clip], id + ' ' + clip);
+    }
+  }
 });
 
 test('legacy bytes, settings and v1 values survive retro records and a rollback', () => {

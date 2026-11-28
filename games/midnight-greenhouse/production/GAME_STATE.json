@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameId": "midnight-greenhouse",
-  "baselineCommit": "e8bab8048ca21ed2a322bd5ace41b1711aec7d21",
+  "baselineCommit": "a2cd2603653d45dd6933f43ec49781da6be13533",
   "records": [
     {
       "id": "raincourt",
@@ -102,7 +102,7 @@
   ],
   "knownGaps": [
     "Physical phone, Firefox, Safari, assistive technology, human audio mix and Producer playtest pending",
-    "Combat animation revision awaits manual merge. GitHub Actions confirmed the baseline marker and route. A direct Cloud request was blocked",
+    "Character animation library awaits manual merge. GitHub Actions confirmed the baseline marker and route. A direct Cloud request was blocked",
     "reports/RETRO_QA.md"
   ],
   "save": {
@@ -124,20 +124,20 @@
     ]
   },
   "deployment": {
-    "deployedCommit": "e8bab8048ca21ed2a322bd5ace41b1711aec7d21",
+    "deployedCommit": "a2cd2603653d45dd6933f43ec49781da6be13533",
     "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/midnight-greenhouse/index.html",
-    "observedAt": "2026-11-28T10:01:22.365Z",
+    "observedAt": "2026-11-28T11:16:07.445Z",
     "checks": {
       "revision": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46132403220/job/140942540031"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46138300772/job/140960706623"
         ]
       },
       "http": {
         "result": "PASS",
         "evidence": [
-          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46132403220/job/140942540031"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46138300772/job/140960706623"
         ]
       },
       "gameplay": {

@@ -2,9 +2,9 @@ import type { CardId, EnemyId } from './content.js';
 import type { Enemy, Garden, Plant } from './simulation.js';
 
 type UnitId = CardId | EnemyId;
-type Clip = { row: number; frameCount: number; durationTicks: number; loop: boolean; reducedFrame: number };
+type Clip = { firstFrame: number; frameCount: number; durationTicks: number; loop: boolean; reducedFrame: number };
 type Unit = { asset: string; source: string; cell: [number, number]; anchorPx: [number, number];
-  atlasSize: [number, number]; clips: Record<string, Clip> };
+  atlasSize: [number, number]; columns: number; feet?: [number, number]; clips: Record<string, Clip> };
 type Atlas = { units: Record<UnitId, Unit> };
 export type Pose = { clip: string; age: number };
 
@@ -22,9 +22,9 @@ const stride = {
   keeper: { cycle: 36, lift: .06, lean: .17 },
 };
 const windup = {
-  fern: { duration: 18, lean: .30, squash: .18 },
-  bramble: { duration: 12, lean: .40, squash: .10 },
-  orchid: { duration: 22.5, lean: .18, squash: .21 },
+  fern: { duration: 12, lean: .30, squash: .18 },
+  bramble: { duration: 8, lean: .40, squash: .10 },
+  orchid: { duration: 15, lean: .18, squash: .21 },
 };
 const lunge = { fern: .46, bramble: .68, orchid: .29 };
 const idleSway = { fern: .16, pitcher: .14, bramble: .12, orchid: .19, moss: .06, pod: .10 };
@@ -42,7 +42,9 @@ export function bodyMotion(id: UnitId, { clip, age }: Pose) {
       stretch = Math.sin(age * .24 + 1) * (.035 + sway * .42);
       break;
     }
-    case 'walk': {
+    case 'walk':
+    case 'limp':
+    case 'phaseWalk': {
       const gait = stride[id as EnemyId];
       if (!gait) break;
       const step = Math.sin(age * 2 * Math.PI / gait.cycle);
@@ -64,16 +66,16 @@ export function bodyMotion(id: UnitId, { clip, age }: Pose) {
     case 'fire':
     case 'lash':
     case 'spark': {
-      // Atlas release starts partway into its row so it meets the end of the windup.
-      const released = age - 5;
+      const released = age;
       const snap = settle(released, 14);
       lean = (lunge[id as keyof typeof lunge] ?? .29) * snap - .16 * wave(released - 5, 14);
       stretch = .25 * snap - .11 * wave(released - 6, 12);
       break;
     }
+    case 'biteWindup':
     case 'bite': {
-      const prep = age < 6 ? ease(clamp(age / 6)) : 0;
-      const snap = age >= 6 ? settle(age - 6, 14) : 0;
+      const prep = clip === 'biteWindup' ? ease(clamp(age / 6)) : 0;
+      const snap = clip === 'bite' ? settle(age, 9) : 0;
       x = -.13 * snap;
       lean = .27 * prep - (id === 'keeper' ? .65 : .55) * snap;
       stretch = -.17 * prep + .22 * snap;
@@ -110,6 +112,7 @@ export function bodyMotion(id: UnitId, { clip, age }: Pose) {
       y = -.09 * rise;
       break;
     }
+    case 'hitHeavy':
     case 'hurt': {
       const knock = settle(age, 11);
       lean = (id in stride ? 1 : -1) * (.43 * knock - .12 * wave(age - 4, 10));
@@ -138,46 +141,69 @@ export function plantPose(plant: Plant, game: Garden): Pose {
   const now = game.now;
   const acted = now - plant.acted;
   const hurt = now - plant.hurt;
+  const planted = now - plant.placed;
+  const heavy = (plant.lastDamage ?? 0) >= 26;
+  const hitDuration = heavy ? 15 : 12;
+  if (hurt < hitDuration && acted !== 0 && (hurt < 5 || !plant.windup)) {
+    return animation(heavy ? 'hitHeavy' : 'hurt', hurt);
+  }
+  if (planted < 12 && !plant.windup) return animation('enter', planted);
   switch (plant.card.id) {
     case 'pitcher':
-      if (acted < 18) return animation('release', acted);
+      if (acted < 12) return animation('release', acted);
       if (plant.ready - now <= 24) return animation('gather', 24 - plant.ready + now);
       break;
     case 'fern':
     case 'bramble':
     case 'orchid':
-      if (plant.windup) return animation(windupClips[plant.card.id], (now - plant.windup.at) * 1.5);
-      if (acted < 18) return animation(impactClips[plant.card.id], acted + 5);
+      if (plant.windup) return animation(windupClips[plant.card.id], now - plant.windup.at);
+      if (acted < 12) return animation(impactClips[plant.card.id], acted);
       break;
     case 'moss':
-      if (now - plant.placed < 18) return animation('brace', now - plant.placed);
+      if (planted < 30) return animation('brace', planted - 12);
       if (plant.mossHealing) return animation('mend', now % 36);
       break;
     case 'pod':
       if (plant.windup) return animation('arm', 21 + (now - plant.windup.at) * 2);
+      if (hurt >= hitDuration && hurt < hitDuration + 12) return animation('recover', hurt - hitDuration);
+      if (plant.hp < plant.card.hp * .30) return animation('wilt', planted + plant.col * 4);
       if (plant.ready > now) return animation('arm', now - plant.placed);
       return animation('armed', now - plant.ready);
   }
-  if (hurt < 12) return animation('hurt', hurt);
-  return animation('idle', now - plant.placed + plant.col * 4 + plant.lane * 7);
+  const latest = Math.min(hurt - hitDuration, acted - 12);
+  if (latest >= 0 && latest < 12) return animation('recover', latest);
+  return animation(plant.hp < plant.card.hp * .30 ? 'wilt' : 'idle', planted + plant.col * 4 + plant.lane * 7);
 }
 
 export function enemyPose(enemy: Enemy, game: Garden): Pose {
   const now = game.now;
   const id = enemy.spec.id;
+  const acted = now - enemy.acted;
+  const hurt = now - enemy.hurt;
+  const heavy = (enemy.lastDamage ?? 0) >= 35;
   if (id === 'keeper') {
     const age = now - game.phaseAt;
     if (age < 36) return animation('phase', age);
     if (game.keeperSignal) return animation('signal', now - game.keeperSignal.at);
   }
-  if (id === 'mender' && now - enemy.healed < 24) return animation('heal', now - enemy.healed);
-  if (enemy.biteWindup) return animation('bite', now - enemy.biteWindup.at);
-  if (now - enemy.acted < 15) return animation('bite', now - enemy.acted + 6);
   if (id === 'raincoat' && now - enemy.insulated < 18) return animation('insulated', now - enemy.insulated);
   if (id === 'porter' && now - enemy.braced < 18) return animation('brace', now - enemy.braced);
-  if (now - enemy.hurt < 12) return animation('hurt', now - enemy.hurt);
-  if (enemy.stunnedUntil > now || enemy.rootedUntil > now || !enemy.moving) return animation('restrained', now + enemy.id * 7);
-  return animation('walk', enemy.gait);
+  if (acted === 0) return animation('bite', 0);
+  if (hurt < 5) return animation(heavy ? 'hitHeavy' : 'hurt', hurt);
+  if (id === 'mender' && now - enemy.healed < 24) return animation('heal', now - enemy.healed);
+  const hitDuration = heavy ? 15 : 12;
+  if (hurt < hitDuration) return animation(heavy ? 'hitHeavy' : 'hurt', hurt);
+  if (enemy.stunnedUntil > now) return animation('stunned', now + enemy.id * 7);
+  if (enemy.biteWindup) return animation('biteWindup', now - enemy.biteWindup.at);
+  if (acted < 9) return animation('bite', acted);
+  if (acted < 19) return animation('biteRecovery', acted - 9);
+  if (enemy.rootedUntil > now) return animation('restrained', now + enemy.id * 7);
+  if (hurt < hitDuration + 9 && !enemy.moving) return animation('recover', hurt - hitDuration);
+  const entrantAge = now - (enemy.spawnedAt ?? -Infinity);
+  if (entrantAge < 12) return animation('enter', entrantAge);
+  if (!enemy.moving) return animation('blocked', now + enemy.id * 7);
+  if (id === 'keeper' && game.keeperPhase === 2) return animation('phaseWalk', enemy.gait);
+  return animation(enemy.hp < enemy.spec.hp * .30 ? 'limp' : 'walk', enemy.gait);
 }
 
 export function loadImage(src: string) {
@@ -189,7 +215,7 @@ export function loadImage(src: string) {
 let manifest: Promise<Atlas | null> | undefined;
 const sheets = new Map<string, Promise<HTMLImageElement | null>>();
 export function loadAtlas() {
-  return manifest ??= fetch('./art/retro/motion/atlas.json').then((response) => {
+  return manifest ??= fetch('./art/retro/motion-library/atlas.json').then((response) => {
     if (!response.ok) throw new Error('Motion manifest unavailable');
     return response.json() as Promise<Atlas>;
   }).catch(() => {
@@ -226,7 +252,8 @@ export function drawPose(ctx: CanvasRenderingContext2D, { unit, image }: Motion,
   if (!clip) return false;
   const [w, h] = unit.cell;
   const scale = height / h;
-  ctx.drawImage(image, frameOf(clip, pose.age, reduced) * w, clip.row * h, w, h,
+  const index = clip.firstFrame + frameOf(clip, pose.age, reduced);
+  ctx.drawImage(image, index % unit.columns * w, Math.floor(index / unit.columns) * h, w, h,
     -unit.anchorPx[0] * scale, -unit.anchorPx[1] * scale, w * scale, height);
   return true;
 }
