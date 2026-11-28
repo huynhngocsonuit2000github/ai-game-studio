@@ -10,4 +10,4 @@
 | GH-42 | S04 | Unlock, continue, retry or replay, preserve records, and reach the ending. | implemented | GH-41. Q12, Q13. |
 | GH-50 | S05 | All three stages accessible from a real candidate Pages assembly and within recorded budgets. | verification | GH-42. Q01–Q16. No open P0/P1. |
 | GH-60 | S06 | Launch via authorized live catalog and share exact verified link. | blocked | GH-50, explicit G4/publicity decision and trusted Studio catalog approval. Q17. |
-| GH-RETRO-01 | S05 refresh | Play the same three-stage campaign with the original retro art, new economy and pacing, field guide and event-driven animation. | verification | GH-D06, GH-R01–GH-R07 and GH-R09–GH-R11 in the canonical Pages artifact. GH-R08 after merge. |
+| GH-RETRO-01 | S05 refresh | Play the same three-stage campaign with the original retro art, new economy and pacing, field guide and event-driven animation. | candidate_ready | GH-D06, GH-R01–GH-R07 and GH-R09–GH-R11 in the canonical Pages artifact. GH-R08 after merge. |

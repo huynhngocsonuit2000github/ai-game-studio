@@ -125,6 +125,19 @@ test('Orchid unlocks on the third warning and dry chain only hits eligible neigh
   assert.equal(targets[3].hp, targets[3].spec.hp);
 });
 
+test('an Orchid cues isolated Raincoat immunity without firing or harming the enemy', () => {
+  const garden = new Garden(campaign['pump-gallery']);
+  const orchid = put(garden, 'orchid', 2, 1);
+  finish(garden, 181);
+  const raincoat = enemy(garden, 'raincoat', 2, 4.2);
+  step(garden);
+  assert.equal(raincoat.hp, raincoat.spec.hp);
+  assert.equal(enemyPose(raincoat, garden).clip, 'insulated');
+  assert.equal(plantPose(orchid, garden).clip, 'idle');
+  assert.ok(garden.effects.some(({ kind }) => kind === 'insulated'));
+  assert.ok(!garden.effects.some(({ kind }) => kind === 'shock'));
+});
+
 test('wet regeneration and wet chain work alongside independent pump lock and reroute', () => {
   const garden = new Garden(durable(campaign['pump-gallery']));
   const moss = put(garden, 'moss', 3, 2);

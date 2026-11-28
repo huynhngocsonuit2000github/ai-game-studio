@@ -7,7 +7,7 @@ export type Command = { kind: 'plant'; card: CardId; lane: number; col: number }
   | { kind: 'collect'; id?: number };
 export type Cue = 'plant' | 'fern' | 'root' | 'shock' | 'water' | 'warning' | 'breach' | 'victory' | 'defeat' | 'pod' | 'valve-lock' | 'collect' | 'shield-chip' | 'bell' | 'unlock';
 export type Effect = {
-  kind: Cue | 'income' | 'impact' | 'heal' | 'phase' | 'keeper-down';
+  kind: Cue | 'income' | 'impact' | 'heal' | 'phase' | 'keeper-down' | 'insulated';
   at: number;
   lane: number;
   x: number;
@@ -375,7 +375,18 @@ export class Garden {
     const target = card.id === 'fern' ? targets.find((unit) =>
       unit.hp > this.shots.reduce((reserved, shot) => reserved + (shot.target === unit ? shot.damage : 0), 0))
       : targets[0];
-    if (!target || target.x - x > card.rangeTiles) { plant.windup = undefined; return; }
+    if (!target || target.x - x > card.rangeTiles) {
+      plant.windup = undefined;
+      if (card.id === 'orchid') {
+        const coat = this.enemies.find((enemy) => enemy.spec.id === 'raincoat' && enemy.hp > 0
+          && enemy.lane === lane && enemy.x >= x && enemy.x - x <= card.rangeTiles);
+        if (coat && this.now - coat.insulated >= ticks(card.cooldownSeconds)) {
+          coat.insulated = this.now;
+          this.effect('insulated', lane, coat.x);
+        }
+      }
+      return;
+    }
     if (!plant.windup) {
       plant.windup = { at: this.now, fires: this.now + windupTicks[card.id] };
       return;

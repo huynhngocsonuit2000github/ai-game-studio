@@ -135,6 +135,21 @@ export class Painter {
       ctx.ellipse(x, y - 32, this.tile * 1.35 * spread, 31 * spread, 0, 0, Math.PI * 2);
       ctx.stroke();
     }
+    if (effect.kind === 'insulated' && age < 0.55) {
+      ctx.save();
+      ctx.fillStyle = '#fff3cb';
+      ctx.strokeStyle = '#3c3651';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x + 19, y - 101, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 18px system-ui';
+      ctx.fillStyle = '#3c3651';
+      ctx.fillText('ϟ̸', x + 19, y - 95);
+      ctx.restore();
+    }
     if (age > 0.17) return;
     if (effect.kind === 'shock' && effect.targets) {
       const points: [number, number][] = [[x, y - 73]];

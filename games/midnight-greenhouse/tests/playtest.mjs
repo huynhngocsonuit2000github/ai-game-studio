@@ -6,8 +6,10 @@ import { URL } from 'node:url';
 import { chromium } from '@playwright/test';
 import { observeMotion } from './motion-observer.mjs';
 
-const project = new URL(process.env.GREENHOUSE_PLAYTEST_URL ?? 'http://127.0.0.1:4189/ai-game-studio/');
-const direct = new URL('./games/midnight-greenhouse/index.html', project);
+const previousDirect = process.env.GREENHOUSE_PLAYTEST_URL;
+const project = new URL(process.env.GREENHOUSE_PAGES_URL
+  ?? (previousDirect ? new URL('../../', previousDirect).href : 'http://127.0.0.1:4189/ai-game-studio/'));
+const direct = new URL(previousDirect ?? './games/midnight-greenhouse/index.html', project);
 const output = new URL('../test-results/retro-normal-speed/', import.meta.url);
 const routes = JSON.parse(await readFile(new URL('./retro-routes.json', import.meta.url), 'utf8'));
 const mode = process.argv[2] ?? 'campaign';
@@ -58,10 +60,17 @@ async function apply(card, lane, col) {
   await button.and(page.locator('[aria-disabled=false]')).waitFor({ timeout: 3500 });
   if (await button.getAttribute('aria-pressed') !== 'true') await button[use]();
   const tile = page.locator('.tile').nth(lane * 8 + col);
-  const box = await tile.boundingBox();
-  assert.ok(box);
-  // The bottom third stays clear of collectible tokens.
-  await tile[use]({ position: { x: box.width * .5, y: box.height * .78 }, timeout: 2000 });
+  // Find a point that belongs to the tile if a floating token covers its center.
+  const position = await tile.evaluate((node) => {
+    const { x, y, width, height } = node.getBoundingClientRect();
+    for (const across of [.5, .17, .83]) for (const down of [.8, .64, .28]) {
+      const left = width * across;
+      const top = height * down;
+      if (document.elementFromPoint(x + left, y + top) === node) return { x: left, y: top };
+    }
+    return undefined;
+  });
+  await tile[use]({ position, timeout: 3500 });
   const label = await button.locator('strong').innerText();
   await page.waitForFunction(({ index, label }) =>
     document.querySelectorAll('.tile')[index]?.getAttribute('aria-label')?.includes(label),

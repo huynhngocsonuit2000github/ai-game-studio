@@ -6,9 +6,9 @@
     {
       "id": "raincourt",
       "kind": "level",
-      "intendedBehavior": "Defend four lanes for six waves while using one supply for wet collector income or Orchid chains.",
+      "intendedBehavior": "Learn placement, Ánh Hạt credit and the dry Orchid chain across six waves.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "tests/simulation.test.mjs",
@@ -18,20 +18,21 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": "private-fixture",
+        "target": "assembled-pages",
         "result": "PASS",
         "evidence": [
-          "reports/QA_REPORT.md",
-          "tests/pages.spec.ts"
+          "reports/RETRO_QA.md",
+          "reports/screenshots/retro-raincourt-desktop.webp",
+          "tests/playtest.mjs"
         ]
       }
     },
     {
       "id": "pump-gallery",
       "kind": "level",
-      "intendedBehavior": "Handle pump faults and mixed raincoat and healer waves with Rêu Thành.",
+      "intendedBehavior": "Reroute the water supply around pump closures and hold a mixed armored, insulated and healer wave.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "tests/simulation.test.mjs",
@@ -42,20 +43,21 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": "private-fixture",
+        "target": "assembled-pages",
         "result": "PASS",
         "evidence": [
-          "tests/pages.spec.ts",
-          "reports/QA_REPORT.md"
+          "reports/RETRO_QA.md",
+          "reports/screenshots/retro-pump-desktop.webp",
+          "tests/playtest.mjs"
         ]
       }
     },
     {
       "id": "lightning-dome",
       "kind": "level",
-      "intendedBehavior": "Defend the Heart Seed through both keeper phases and respond to lane locks.",
+      "intendedBehavior": "Protect the core through both Keeper phases, respond to lane locks and finish the remaining enemies.",
       "implementation": "implemented",
-      "publicAvailability": "private",
+      "publicAvailability": "public",
       "acceptance": "pending",
       "evidence": [
         "tests/simulation.test.mjs",
@@ -66,11 +68,34 @@
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
-        "target": "private-fixture",
+        "target": "assembled-pages",
         "result": "PASS",
         "evidence": [
-          "tests/pages.spec.ts",
-          "reports/QA_REPORT.md"
+          "reports/RETRO_QA.md",
+          "reports/screenshots/retro-dome-desktop.webp",
+          "tests/playtest.mjs"
+        ]
+      }
+    },
+    {
+      "id": "retro-refresh",
+      "kind": "feature",
+      "implementation": "implemented",
+      "publicAvailability": "public",
+      "acceptance": "pending",
+      "intendedBehavior": "Play the original retro garden refresh with a standalone Vietnamese field guide and state-driven unit motion.",
+      "evidence": [
+        "design/retro/FEATURE.md",
+        "production/DECISIONS.md",
+        "reports/RETRO_QA.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "assembled-pages",
+        "result": "PASS",
+        "evidence": [
+          "reports/RETRO_QA.md",
+          "tests/pages.spec.ts"
         ]
       }
     }
@@ -100,16 +125,20 @@
   },
   "deployment": {
     "deployedCommit": null,
-    "url": null,
+    "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/midnight-greenhouse/index.html",
     "observedAt": null,
     "checks": {
       "revision": {
-        "result": "NOT_RUN",
-        "evidence": []
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/RETRO_QA.md"
+        ]
       },
       "http": {
-        "result": "NOT_RUN",
-        "evidence": []
+        "result": "BLOCKED",
+        "evidence": [
+          "reports/RETRO_QA.md"
+        ]
       },
       "gameplay": {
         "result": "NOT_RUN",
