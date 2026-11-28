@@ -18,8 +18,8 @@ export function plantPose(plant: Plant, game: Garden): Pose {
   const hurt = now - plant.hurt;
   switch (plant.card.id) {
     case 'pitcher':
-      if (plant.ready - now <= 24) return animation('gather', 24 - plant.ready + now);
       if (acted < 18) return animation('release', acted);
+      if (plant.ready - now <= 24) return animation('gather', 24 - plant.ready + now);
       break;
     case 'fern':
     case 'bramble':
@@ -32,7 +32,7 @@ export function plantPose(plant: Plant, game: Garden): Pose {
       if (plant.mossHealing) return animation('mend', now % 36);
       break;
     case 'pod':
-      if (plant.windup) return animation('burst', now - plant.windup.at);
+      if (plant.windup) return animation('arm', 21 + (now - plant.windup.at) * 2);
       if (plant.ready > now) return animation('arm', (now - plant.placed) % 36);
       return animation('armed', (now - plant.ready) % 18);
   }
@@ -54,7 +54,7 @@ export function enemyPose(enemy: Enemy, game: Garden): Pose {
   if (id === 'raincoat' && now - enemy.insulated < 18) return animation('insulated', now - enemy.insulated);
   if (id === 'porter' && now - enemy.braced < 18) return animation('brace', now - enemy.braced);
   if (now - enemy.hurt < 12) return animation('hurt', now - enemy.hurt);
-  if (enemy.stunnedUntil > now || enemy.rootedUntil > now) return animation('restrained', 8);
+  if (enemy.stunnedUntil > now || enemy.rootedUntil > now || !enemy.moving) return animation('restrained', 8);
   return animation('walk', enemy.gait);
 }
 
@@ -70,7 +70,10 @@ export function loadAtlas() {
   return manifest ??= fetch('./art/retro/motion/atlas.json').then((response) => {
     if (!response.ok) throw new Error('Motion manifest unavailable');
     return response.json() as Promise<Atlas>;
-  }).catch(() => null);
+  }).catch(() => {
+    manifest = undefined;
+    return null;
+  });
 }
 
 export async function loadMotion(id: UnitId) {
@@ -85,6 +88,7 @@ export async function loadMotion(id: UnitId) {
   }
   const image = await sheet;
   if (image) return { unit, image };
+  if (sheets.get(unit.asset) === sheet) sheets.delete(unit.asset);
 }
 
 export type Motion = NonNullable<Awaited<ReturnType<typeof loadMotion>>>;

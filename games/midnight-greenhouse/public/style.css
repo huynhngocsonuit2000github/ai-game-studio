@@ -214,3 +214,65 @@ dialog input { accent-color: var(--jade); }
   .threat { font-size: .69rem; }
 }
 @media (prefers-reduced-motion: reduce) { .bloom { animation-duration: .01ms; } }
+
+/* The battle fills the available viewport. The menu and field guide retain their own reading layouts. */
+#app:has(> .game:not([hidden])) {
+  width: 100%;
+  max-width: none;
+  padding-inline: clamp(6px, 1.15vw, 22px);
+}
+.game { max-width: none; }
+#fullscreen { white-space: nowrap; }
+.game-header { position: relative; }
+#fullscreen-status:not(:empty) {
+  position: absolute;
+  z-index: 6;
+  inset: calc(100% + 4px) 0 auto auto;
+  padding: 4px 7px;
+  max-inline-size: 18rem;
+  color: var(--ink);
+  background: var(--paper);
+  border-radius: 5px;
+  font-size: .78rem;
+}
+#fullscreen-status:empty { display: none; }
+@media (min-width: 951px) and (min-height: 580px) and (orientation: landscape) {
+  body:has(#app > .game:not([hidden])) {
+    height: 100dvh;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  #app:has(> .game:not([hidden])) {
+    min-height: 0;
+    padding-block: 7px max(8px, env(safe-area-inset-bottom));
+    overflow: auto;
+  }
+  .game {
+    min-height: 100%;
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+  .playfield {
+    min-height: 0;
+    grid-template-columns: clamp(188px, 13.2vw, 272px) minmax(0, 1fr);
+    gap: clamp(8px, 1vw, 16px);
+    align-items: stretch;
+  }
+  .board-column {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .board { flex: 1 1 auto; min-height: 0; aspect-ratio: auto; }
+  .deck { min-height: 0; align-content: start; overflow: auto; }
+  .seed-card, .seed-empty { min-height: clamp(87px, 11.6dvh, 137px); }
+  .seed-card { grid-template-rows: clamp(37px, 6.2dvh, 69px) auto auto auto; font-size: clamp(.76rem, .9vw, .93rem); }
+  .seed-card img { height: 100%; width: min(76%, 84px); }
+}
+@media (max-width: 950px) and (orientation: landscape) {
+  #fullscreen { font-size: .72rem; padding-inline: 5px; }
+}
+@media (orientation: portrait) {
+  .game-header, .game-header .badges { flex-wrap: wrap; }
+}
