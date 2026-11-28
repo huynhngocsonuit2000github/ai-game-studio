@@ -7,7 +7,7 @@ export type Command = { kind: 'plant'; card: CardId; lane: number; col: number }
   | { kind: 'collect'; id?: number };
 export type Cue = 'plant' | 'fern' | 'root' | 'shock' | 'water' | 'warning' | 'breach' | 'victory' | 'defeat' | 'pod' | 'valve-lock' | 'collect' | 'shield-chip' | 'bell' | 'unlock';
 export type Effect = {
-  kind: Cue | 'income' | 'impact' | 'heal' | 'phase' | 'keeper-down' | 'insulated';
+  kind: Cue | 'income' | 'impact' | 'bite' | 'heal' | 'phase' | 'keeper-down' | 'insulated';
   at: number;
   lane: number;
   x: number;
@@ -21,6 +21,7 @@ export type Plant = {
 };
 export type Enemy = {
   id: number; spec: Hostile; lane: number; x: number; hp: number;
+  previousX?: number;
   rootedUntil: number; biteAt: number; acted: number; hurt: number;
   healAt?: number; healed: number; slowedUntil?: number; stunnedUntil: number;
   gait: number; moving: boolean; braced: number; insulated: number;
@@ -284,6 +285,7 @@ export class Garden {
   }
 
   private move(enemy: Enemy) {
+    enemy.previousX = enemy.x;
     enemy.moving = false;
     if (enemy.stunnedUntil > this.now) { enemy.biteWindup = undefined; return; }
     const phaseTwo = enemy.spec.id === 'keeper' && this.keeperPhase === 2;
@@ -314,6 +316,7 @@ export class Garden {
     enemy.acted = this.now;
     blocker.hurt = this.now;
     blocker.hp -= enemy.spec.biteDamage * (phaseTwo ? 1.25 : 1);
+    this.effect('bite', enemy.lane, enemy.x, [blocker.x]);
   }
 
   private heal(enemy: Enemy) {
