@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "gameId": "midnight-greenhouse",
+  "baselineCommit": "2fef3a8e97ae219767bad273bd67ea6724408306",
+  "records": [
+    {
+      "id": "raincourt",
+      "kind": "level",
+      "intendedBehavior": "Defend four lanes for six waves while using one supply for wet collector income or Orchid chains.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": ["tests/simulation.test.mjs", "tests/pages.spec.ts", "reports/QA_REPORT.md"],
+      "acceptanceEvidence": [],
+      "artifactCheck": { "target": "private-fixture", "result": "PASS", "evidence": ["reports/QA_REPORT.md", "tests/pages.spec.ts"] }
+    },
+    {
+      "id": "pump-gallery",
+      "kind": "level",
+      "intendedBehavior": "Handle pump faults and mixed raincoat and healer waves with Rêu Thành.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "tests/simulation.test.mjs",
+        "tests/pages.spec.ts",
+        "tests/playtest.mjs",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "tests/pages.spec.ts",
+          "reports/QA_REPORT.md"
+        ]
+      }
+    },
+    {
+      "id": "lightning-dome",
+      "kind": "level",
+      "intendedBehavior": "Defend the Heart Seed through both keeper phases and respond to lane locks.",
+      "implementation": "implemented",
+      "publicAvailability": "private",
+      "acceptance": "pending",
+      "evidence": [
+        "tests/simulation.test.mjs",
+        "tests/pages.spec.ts",
+        "tests/playtest.mjs",
+        "reports/QA_REPORT.md"
+      ],
+      "acceptanceEvidence": [],
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "tests/pages.spec.ts",
+          "reports/QA_REPORT.md"
+        ]
+      }
+    }
+  ],
+  "knownGaps": ["Physical phones, Firefox, Safari, assistive technology and human mix review pending", "reports/QA_REPORT.md"],
+  "save": { "schema": "midnight-greenhouse.progress", "version": 1, "evidence": ["src/save.ts"] },
+  "publication": { "rights": "cleared", "preview": "pending", "release": "blocked", "evidence": ["production/DECISIONS.md"] },
+  "deployment": {
+    "deployedCommit": null,
+    "url": null,
+    "observedAt": null,
+    "checks": {
+      "revision": { "result": "NOT_RUN", "evidence": [] },
+      "http": { "result": "NOT_RUN", "evidence": [] },
+      "gameplay": { "result": "NOT_RUN", "evidence": [] }
+    }
+  }
+}
