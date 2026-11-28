@@ -25,14 +25,14 @@ try {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nhà Kính Sau Nửa Đêm · Chiến dịch</title>
-<body style="color:#e6f1df;background:#102023;font:1rem system-ui;padding:1.5rem">
+<body style="color:#352a22;background:#fff1c9;font:1rem system-ui;padding:1.5rem">
 <h1>Nhà Kính Sau Nửa Đêm</h1>
-<p><a style="color:#f6cf85" href="./games/midnight-greenhouse/index.html">Chơi chiến dịch</a></p>
+<p><a style="color:#963d2a" href="./games/midnight-greenhouse/index.html">Chơi chiến dịch</a></p>
 <p>Ứng viên <code>${head}</code></p>
 </body>
 </html>
 `);
-  await writeFile(join(staging, 'PLAYTEST.txt'), `NHÀ KÍNH SAU NỬA ĐÊM · BA MÀN
+  await writeFile(join(staging, 'PLAYTEST.txt'), `NHÀ KÍNH SAU NỬA ĐÊM · GH-RETRO-01 V2
 PR head: ${head}
 Built from: ${revision}
 

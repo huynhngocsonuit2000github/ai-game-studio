@@ -73,7 +73,6 @@ export class Garden {
   firstBreach: number | null = null;
   lastBreach: number | null = null;
   bestChain = 0;
-  damageDealt = 0;
   result: 'victory' | 'defeat' | null = null;
   feedback = '';
 
@@ -332,10 +331,10 @@ export class Garden {
 
   private damage(target: Enemy, amount: number, frontal = false) {
     if (target.hp <= 0) return;
-    this.damageDealt += Math.min(target.hp, amount);
+    const applied = Math.min(target.hp, amount);
     target.hp -= amount;
     target.hurt = this.now;
-    this.effect('impact', target.lane, target.x);
+    this.effect('impact', target.lane, target.x, undefined, applied);
     if (frontal && target.spec.id === 'porter') {
       target.braced = this.now;
       this.effect('shield-chip', target.lane, target.x);

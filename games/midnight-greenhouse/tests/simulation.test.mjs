@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import test from 'node:test';
+import { URL } from "node:url";
 import { ticks } from '../dist/content.js';
 import { enemyPose, frameOf, plantPose } from '../dist/motion.js';
 import { Save } from '../dist/save.js';
