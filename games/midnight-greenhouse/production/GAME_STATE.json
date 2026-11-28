@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameId": "midnight-greenhouse",
-  "baselineCommit": "e25dbe3c78a4ef45105bb444e9c55fc088f079f6",
+  "baselineCommit": "f854b0055ed66c5a53e9cf100a1cf58d97f7cfce",
   "records": [
     {
       "id": "raincourt",
@@ -102,7 +102,7 @@
   ],
   "knownGaps": [
     "Physical phone, Firefox, Safari, assistive technology, human audio mix and Producer playtest pending",
-    "Candidate live deployment awaits manual merge. Cloud HTTP request for the baseline Pages marker was blocked",
+    "Fullscreen revision awaits manual merge. GitHub Actions confirmed the baseline marker and route. A direct Cloud request was blocked",
     "reports/RETRO_QA.md"
   ],
   "save": {
@@ -124,20 +124,20 @@
     ]
   },
   "deployment": {
-    "deployedCommit": null,
+    "deployedCommit": "f854b0055ed66c5a53e9cf100a1cf58d97f7cfce",
     "url": "https://huynhngocsonuit2000github.github.io/ai-game-studio/games/midnight-greenhouse/index.html",
-    "observedAt": null,
+    "observedAt": "2026-11-28T07:26:42.763Z",
     "checks": {
       "revision": {
-        "result": "BLOCKED",
+        "result": "PASS",
         "evidence": [
-          "reports/RETRO_QA.md"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46120538522/job/140905950219"
         ]
       },
       "http": {
-        "result": "BLOCKED",
+        "result": "PASS",
         "evidence": [
-          "reports/RETRO_QA.md"
+          "https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46120538522/job/140905950219"
         ]
       },
       "gameplay": {

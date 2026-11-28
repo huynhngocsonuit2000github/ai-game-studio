@@ -92,3 +92,47 @@ The main run verifies end-to-end campaign progression. The separate touch replay
 [Active Sân Mưa](screenshots/s05-san-mua.webp) · [Hầm Bơm valve warning](screenshots/s05-ham-bom.webp) · [Đài Chớp phase one warning](screenshots/s05-dai-chop-pha-mot.webp) · [Đài Chớp phase two lock](screenshots/s05-dai-chop-pha-hai.webp).
 
 The 844×390 emulated touch sample had 1,350 frames with median 16.7 ms and p95 49.9 ms while other checks shared the Cloud instance. This exceeds the 45 ms comparison target. A physical Android measurement is still pending.
+
+## GH-STAGE-MOTION-01
+
+Runtime `f5dc55b36f7c2ea1e31a4fdf26873f92790d34d8` was exercised from the canonical Pages assembly at `/ai-game-studio/` using Debian Chromium 156.0.8078.79. The approved baseline was `f854b0055ed66c5a53e9cf100a1cf58d97f7cfce`. The baseline and candidate captures use the same 1920×1080 viewport, Sân Mưa placement and displayed combat time. The visible board grew from 979×526 to 1607×948 CSS pixels. [Before](screenshots/stage-motion-before.webp) · [After](screenshots/stage-motion-after.webp)
+
+| Case | Result | Observed evidence |
+| --- | --- | --- |
+| Window layout and input | PASS | Chromium at 1280×720, 1920×1080 and 2560×1440. The board cleared the 1480×850 threshold at 1920×1080. All four rows' first and last tile hit points resolved to their DOM controls. A planting click landed after resize at DPR 3, with the backing canvas capped at six million pixels. The live attempt retained both plants on return to the original viewport. |
+| Native fullscreen | PASS | Chrome's Fullscreen API entered and exited via the on-screen control. A separate headed Chromium run used an X11 Escape keypress and observed the button state reset, the timer remain in combat and the same planted Fern. The virtual window kept its geometry during that Escape check. An unsupported API test displayed the Vietnamese windowed status and still accepted planting. |
+| Touch and portrait | PASS | Chromium touch emulation at 844×390 hit the outer tile and removed the plant at the same point. All eight outer hit areas were at least 44×44 CSS pixels. Rotating to 390×844 showed the rotate hint and settings with zero horizontal overflow. |
+| Atlas readiness and recovery | PASS | Holding the Fern sheet response delayed battle entry. The manifest and stage sheets loaded under the assembled game subpath. An aborted Fern sheet request left still art and working planting, then retried successfully on stage re-entry. |
+| Motion and pause | PASS | Canvas instrumentation observed several Fern idle and fire frames and a windup. Under reduced motion the live Fern displayed the declared key frame for all three states. Sổ tay held the combat timer while the page stayed fullscreen. Guide return restored the pause controls and the same planted Fern was present after fullscreen exit. |
+| Deployed baseline | PASS via Actions | The deploy job read the exact baseline commit marker and observed HTTP 200 for the catalog and game at 14:26 ICT. Independent Pages access returned a proxy 403. Candidate deployment and its live gameplay check await manual merge. [Deploy job](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46120538522/job/140905950219) |
+
+### Normal-speed campaign and capture
+
+A fresh browser profile launched through the production catalog and played all three stages with ordinary tile, card and valve inputs at the normal 30 Hz simulation rate. Both Continue controls advanced the campaign, and the ending opened. All three earned records were byte-for-byte identical after reload. The library return worked. The campaign recorded zero console, network or page errors.
+
+| Stage | Combat time | Stars | Ending stock |
+| --- | --- | --- | --- |
+| Sân Mưa | 4:26.07 | 3 | 40 |
+| Hầm Bơm | 4:39.77 | 3 | 163 |
+| Đài Chớp | 5:21.43 | 2 | 176 |
+
+The 41.5-second silent recording uses cuts from actual canvas play at normal speed. Its opening shows idle, windup and fire for Dương Xỉ Nảy and Walker gait, impact and fall. The next cuts show the Walker bite at 0:11, Mũ Tím running at 0:16 and Nấm Vá healing at 0:22. The Thợ Vườn Gốm warning starts around 0:27, followed by the phase-two change around 0:33 and the Pod arming and actual blast around 0:37–0:41. The canvas draw log corroborated the Keeper warning and phase, plus distinct Pod arm and burst rows in the same run. [Combat clip](motion/stage-motion-combat.mp4)
+
+The standalone ZIP from the canonical game build was unpacked, served over local HTTP and verified by entering Sân Mưa and planting a Fern. The PR workflow packages its tested candidate as `midnight-greenhouse-campaign.zip` inside the `browser-evidence` artifact.
+
+### Repository verification
+
+The locked install, portal and game TypeScript checks, lint, 35 Vitest checks, 15 Studio Node checks, 12 pack validator checks, 15 game simulation checks and trusted scope check passed. The Pages build, project-subpath artifact verification, game-state schema and 47 Chromium browser checks passed across the portal and all four public games. The public catalog already includes this game, so the preflight found no changed private game to assemble.
+
+Browser coverage for this task is Debian Chromium and Chromium touch emulation. Physical phones, Firefox and Safari still need device coverage. The candidate's live marker and gameplay check follow Producer merge.
+
+### Late-wave rendering
+
+A test harness prepared the same late Đài Chớp wave with 28 plants and three enemies. It then measured native animation-frame intervals for 30 seconds of the running game with a single headless Chromium session at DPR 1. The Keeper entered phase two during each sample.
+
+| Viewport | Intervals | Median | p95 | Interpretation |
+| --- | --- | --- | --- | --- |
+| 1280×720 | 1,769 | 16.7 ms | 16.8 ms | PASS against the documented 25 ms p95 budget |
+| 1920×1080 | 1,284 | 16.7 ms | 33.4 ms | More frame drops at full HD on this Cloud host |
+
+An earlier 1920×1080 sample taken while other browser workloads and recording were active measured 33.4 ms median and 83.3 ms p95. The isolated repeat reduced that load. The 1920×1080 campaign still completed all three stages at normal simulation speed. A physical-device frame-time result remains open.
