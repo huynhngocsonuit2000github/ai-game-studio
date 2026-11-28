@@ -2,7 +2,7 @@ import { COLUMNS, HZ, LANES } from './content.js';
 import type { CardId, Content, EnemyId } from './content.js';
 import type { Garden, Effect } from './simulation.js';
 
-import { drawPose, enemyPose, loadImage, loadMotion, plantPose } from './motion.js';
+import { bodyMotion, drawPose, enemyPose, loadImage, loadMotion, plantPose } from './motion.js';
 import type { Motion, Pose } from './motion.js';
 
 export async function loadArena(content: Content) {
@@ -107,35 +107,17 @@ export class Painter {
     context.save();
     context.translate(this.x(x), this.feet[lane]);
     context.scale(this.visualAspect, 1);
-    context.fillStyle = '#2c25194b';
+    const movement = reduced ? undefined : bodyMotion(id, pose);
+    const lift = -(movement?.y ?? 0);
+    context.fillStyle = lift > .08 ? '#2c251932' : '#2c25194b';
     context.beginPath();
-    context.ellipse(0, 0, sprite.size[0] * scale * 0.36, 7, 0, 0, Math.PI * 2);
+    context.ellipse(0, 0, sprite.size[0] * scale * (.36 - lift * .5), 7 - lift * 12, 0, 0, Math.PI * 2);
     context.fill();
     if (pose.clip === 'fall') context.globalAlpha = Math.min(1, (45 - pose.age) / 13);
-    const peak = Math.sin(Math.PI * Math.min(1, pose.age / 18));
-    if (!reduced) {
-      if (pose.clip === 'walk') {
-        const step = Math.sin(pose.age * Math.PI / (id === 'courier' ? 7.5 : id === 'keeper' ? 18 : 12));
-        const lift = id === 'courier' ? 0.085 : id === 'porter' ? 0.027 : 0.048;
-        context.translate(0, -row * lift * Math.abs(step));
-        context.rotate(step * (id === 'courier' ? 0.085 : 0.04));
-      } else if (pose.clip === 'bite') {
-        context.translate(-row * 0.12 * peak, 0);
-        context.rotate(-0.12 * peak);
-      } else if (pose.clip === 'fire' || pose.clip === 'lash' || pose.clip === 'spark') {
-        context.rotate(0.095 * peak);
-        context.scale(1 + 0.075 * peak, 1 - 0.058 * peak);
-      } else if (pose.clip === 'hurt') {
-        context.translate((hostile ? 1 : -1) * row * 0.075 * peak, 0);
-        context.rotate((hostile ? 1 : -1) * 0.10 * peak);
-      } else if (pose.clip === 'fall') {
-        const progress = Math.min(1, pose.age / 33);
-        context.rotate((hostile ? -1 : 1) * progress * 0.28);
-      } else if (pose.clip === 'idle') {
-        const breath = Math.sin(pose.age * (id === 'orchid' ? 0.19 : 0.13));
-        context.rotate(breath * (id === 'moss' ? 0.019 : 0.037));
-        context.scale(1 - 0.032 * breath, 1 + 0.045 * breath);
-      }
+    if (movement) {
+      const { x, y, lean, stretch } = movement;
+      // The shear bends the upper body while keeping the atlas foot registration in place.
+      context.transform(1 - stretch * .38, 0, -lean, 1 + stretch, x * visibleHeight, y * visibleHeight);
     }
     if ((!frames || !drawPose(context, frames, pose, height, reduced)) && image) {
       context.drawImage(image, -sprite.anchorPx[0] * scale, -sprite.anchorPx[1] * scale,
@@ -168,6 +150,45 @@ export class Painter {
     ctx.stroke();
   }
 
+  private sparks(x: number, y: number, progress: number, radius: number, color: string, count = 6) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.globalAlpha = .94 * (1 - progress);
+    ctx.beginPath();
+    for (let i = 0; i < count; i++) {
+      const angle = i * Math.PI * 2 / count + .24;
+      const spread = radius * (.31 + progress * .86) * (i % 2 ? .65 : 1);
+      const length = radius * .28 * (1 - progress) + 3;
+      const dx = Math.cos(angle), dy = Math.sin(angle);
+      ctx.moveTo(x + dx * spread, y + dy * spread * .72);
+      ctx.lineTo(x + dx * (spread + length), y + dy * (spread + length) * .72);
+    }
+    ctx.lineCap = 'round';
+    ctx.lineWidth = 5;
+    ctx.strokeStyle = color;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  private lash(x: number, tx: number, y: number, progress: number) {
+    const ctx = this.ctx;
+    const span = tx - x;
+    const bend = Math.sin(Math.PI * progress) * 34;
+    ctx.save();
+    ctx.globalAlpha = 1 - progress;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(x + span * .18, y - 66);
+    ctx.bezierCurveTo(x + span * .46, y - 125 - bend, tx - span * .21, y - 96 + bend, tx, y - 48);
+    ctx.lineWidth = 13;
+    ctx.strokeStyle = '#234f32';
+    ctx.stroke();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#d6ed91';
+    ctx.stroke();
+    ctx.restore();
+  }
+
   private effect(effect: Effect, now: number, motion: boolean) {
     if (effect.lane < 0) return;
     const ctx = this.ctx;
@@ -196,6 +217,7 @@ export class Painter {
       if (effect.kind === 'heal' && effect.targets && age < 0.45) {
         this.line([[x, y - 65], [(x + target) / 2, y - 96], [target, y - 60]], '#4c8448', 7);
         this.line([[x, y - 65], [(x + target) / 2, y - 96], [target, y - 60]], '#d4f1a0', 3);
+        if (motion) this.sparks(target, y - 66, age / .45, 46, '#e7faa6');
       }
       const label = effect.value === undefined ? '+' : '+' + Math.round(effect.value);
       ctx.strokeText(label, target, height);
@@ -214,6 +236,7 @@ export class Painter {
       ctx.beginPath();
       ctx.ellipse(x, y - 32, this.tile * 1.35 * spread, 31 * spread, 0, 0, Math.PI * 2);
       ctx.stroke();
+      if (motion) this.sparks(x, y - 69, age / .42, 97, '#fff1a0', 9);
     }
     if (effect.kind === 'insulated' && age < 0.55) {
       ctx.save();
@@ -230,13 +253,25 @@ export class Painter {
       ctx.fillText('ϟ̸', x + 19, y - 95);
       ctx.restore();
     }
+    if (motion && effect.kind === 'fern' && age < .22) this.sparks(x + 48, y - 90, age / .22, 29, '#f7ffbf', 5);
+    if (motion && effect.kind === 'impact' && age < .20) this.sparks(x, y - 78, age / .20, 39, '#ffe09e', 5);
+    if (effect.kind === 'bite' && age < .23 && effect.targets) {
+      const target = this.x(effect.targets[0]);
+      // The contact marks only appear after the simulation lands a bite.
+      this.line([[target + 31, y - 94], [target + 8, y - 65]], '#fff1ce', 7);
+      this.line([[target + 47, y - 80], [target + 25, y - 56]], '#ffcf9d', 5);
+      if (motion) this.sparks(target + 20, y - 71, age / .23, 34, '#ffe1af');
+    }
+    if (motion && effect.kind === 'root' && age < .29 && effect.targets) this.lash(x, this.x(effect.targets[0]), y, age / .29);
+    if (motion && effect.kind === 'phase' && age < .54) this.sparks(x, y - 89, age / .54, 99, '#f7cbff', 10);
     if (age > 0.17) return;
     if (effect.kind === 'shock' && effect.targets) {
       const points: [number, number][] = [[x, y - 73]];
       for (const hit of effect.targets) {
         const tx = this.x(hit);
         const [previous] = points[points.length - 1];
-        points.push([previous + (tx - previous) * 0.36, y - 100], [previous + (tx - previous) * 0.72, y - 56], [tx, y - 82]);
+        const bend = motion ? Math.sin(age * 38 + hit) * 24 : 0;
+        points.push([previous + (tx - previous) * 0.36, y - 100 + bend], [previous + (tx - previous) * 0.72, y - 56 - bend], [tx, y - 82]);
       }
       this.line(points, '#81ebea99', 17);
       this.line(points, '#fff4b2', 5);
@@ -250,7 +285,8 @@ export class Painter {
       ctx.strokeStyle = effect.kind === 'plant' ? '#c9f3a4' : '#ffdbb2';
       ctx.lineWidth = 4;
       ctx.beginPath();
-      ctx.ellipse(x, y - (effect.kind === 'plant' ? 6 : 70), 17 + age * 80, 6 + age * 21, 0, 0, Math.PI * 2);
+      ctx.ellipse(x, y - (effect.kind === 'plant' ? 6 : 70), 17 + (motion ? age * 80 : 6),
+        6 + (motion ? age * 21 : 2), 0, 0, Math.PI * 2);
       ctx.stroke();
     }
   }
@@ -315,13 +351,16 @@ export class Painter {
           held: false, arming: unit.card.id === 'pod',
         })),
         ...game.enemies.filter((unit) => unit.lane === lane).map((unit) => ({
-          id: unit.spec.id, x: unit.x + (unit.id % 3 - 1) * 0.075, pose: enemyPose(unit, game),
+          id: unit.spec.id,
+          x: unit.x + (motion && unit.moving && unit.previousX !== undefined ? (unit.previousX - unit.x) * (1 - fraction) : 0)
+            + (unit.id % 3 - 1) * 0.075,
+          pose: enemyPose(unit, game),
           ratio: unit.hp / unit.spec.hp, hostile: true, arming: false,
           held: unit.rootedUntil > game.now || unit.stunnedUntil > game.now,
         })),
       ].sort((a, b) => a.x - b.x);
       for (const fallen of game.fallen) {
-        const age = game.now - fallen.at + aftermath;
+        const age = game.now - fallen.at + aftermath + fraction;
         if (fallen.lane !== lane || age >= (fallen.clip === 'burst' ? 18 : 45)) continue;
         this.sprite(fallen.id, fallen.x, lane, { clip: fallen.clip, age }, reduced,
           !game.cards.has(fallen.id as CardId));
@@ -333,7 +372,7 @@ export class Painter {
         ctx.restore();
       }
       for (const unit of units) {
-        const pose = unit.pose.clip === 'restrained' ? unit.pose : { ...unit.pose, age: unit.pose.age + fraction };
+        const pose = { ...unit.pose, age: unit.pose.age + fraction };
         this.sprite(unit.id, unit.x, lane, pose, reduced, unit.hostile);
         const x = this.x(unit.x), y = this.feet[lane];
         if (unit.held) this.line([[x - 22, y], [x + 22, y]], '#efe9a2', 5);
@@ -351,14 +390,19 @@ export class Painter {
       }
     }
     for (const shot of game.shots) {
-      const t = (game.now - shot.fired) / (shot.at - shot.fired);
-      const x = this.x(shot.from + (shot.target.x - shot.from) * t);
-      const y = this.feet[shot.target.lane] - 66 - Math.sin(t * Math.PI) * 61;
-      ctx.fillStyle = '#e4efad';
-      ctx.beginPath();
-      ctx.ellipse(x, y, 9, 6, -t, 0, Math.PI * 2);
-      ctx.fill();
+      const elapsed = game.now - shot.fired + (motion ? fraction : 0);
+      const lifetime = shot.at - shot.fired;
+      const trail = motion ? Math.min(3, Math.floor(elapsed / 1.6)) : 0;
+      for (let step = trail; step >= 0; step--) {
+        const t = Math.min(1, (elapsed - step * 1.6) / lifetime);
+        const x = this.x(shot.from + (shot.target.x - shot.from) * t);
+        const y = this.feet[shot.target.lane] - 66 - Math.sin(t * Math.PI) * 61;
+        ctx.fillStyle = step === 0 ? '#e9ffb8' : '#e7ff8c85';
+        ctx.beginPath();
+        ctx.ellipse(x, y, 12 - step * 2.2, 7 - step * 1.5, t - .5, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
-    for (const effect of game.effects) this.effect(effect, game.now, motion);
+    for (const effect of game.effects) this.effect(effect, game.now + (motion ? fraction + aftermath : 0), motion);
   }
 }

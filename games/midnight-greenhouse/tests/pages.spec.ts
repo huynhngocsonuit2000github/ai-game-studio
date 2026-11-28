@@ -349,12 +349,21 @@ test('a planted Fern uses changing live atlas poses, and reduced motion still sh
       const errors = clientErrors(page);
       await page.addInitScript(() => {
         const frames = new Set<string>();
-        Object.defineProperty(window, '__fernProbe', { get: () => [...frames] });
+        const bodyAngles = { idle: [0, 0], windup: 0, fire: 0 };
+        Object.defineProperty(window, '__fernProbe', { get: () => ({ frames: [...frames], bodyAngles }) });
         const draw = CanvasRenderingContext2D.prototype.drawImage;
         CanvasRenderingContext2D.prototype.drawImage = function (this: CanvasRenderingContext2D, image: CanvasImageSource, ...args: number[]) {
           if (this.canvas.closest('#board') && image instanceof HTMLImageElement
             && image.src.endsWith('/fern-motion.webp') && args.length === 8 && this.globalAlpha > 0.99) {
-            frames.add(`${args[1] / args[3]}:${args[0] / args[2]}`);
+            const row = args[1] / args[3];
+            frames.add(`${row}:${args[0] / args[2]}`);
+            const matrix = this.getTransform();
+            const lean = matrix.c === 0 ? 0 : -matrix.c / matrix.a;
+            if (row === 0) {
+              bodyAngles.idle[0] = Math.min(bodyAngles.idle[0], lean);
+              bodyAngles.idle[1] = Math.max(bodyAngles.idle[1], lean);
+            } else if (row === 1) bodyAngles.windup = Math.min(bodyAngles.windup, lean);
+            else if (row === 2) bodyAngles.fire = Math.max(bodyAngles.fire, lean);
           }
           Reflect.apply(draw, this, [image, ...args]);
         };
@@ -364,14 +373,22 @@ test('a planted Fern uses changing live atlas poses, and reduced motion still sh
       await page.locator('[data-card=fern]').click();
       await tile(page, 2, 4).click();
       await expect(tile(page, 2, 4)).toHaveAccessibleName(/Dương Xỉ Nảy/);
-      const frames = () => page.evaluate(() => (window as Window & { __fernProbe: string[] }).__fernProbe);
+      const probe = () => page.evaluate(() => (window as Window & {
+        __fernProbe: { frames: string[]; bodyAngles: { idle: number[]; windup: number; fire: number } };
+      }).__fernProbe);
+      const frames = async () => (await probe()).frames;
       if (reducedMotion === 'no-preference') {
         await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('0:')).length).toBeGreaterThan(2);
         await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('2:')).length,
           { timeout: 15_000 }).toBeGreaterThan(1);
         expect((await frames()).some((cell) => cell.startsWith('1:'))).toBe(true);
+        const { bodyAngles } = await probe();
+        expect(bodyAngles.idle[1] - bodyAngles.idle[0]).toBeGreaterThan(.25);
+        expect(bodyAngles.windup).toBeLessThan(-.2);
+        expect(bodyAngles.fire).toBeGreaterThan(.35);
       } else {
         await expect.poll(frames, { timeout: 15_000 }).toEqual(['0:2', '1:2', '2:2']);
+        expect((await probe()).bodyAngles).toEqual({ idle: [0, 0], windup: 0, fire: 0 });
       }
       expect(errors).toEqual([]);
     } finally { await context.close(); }

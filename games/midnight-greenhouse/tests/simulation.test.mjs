@@ -3,7 +3,7 @@ import { readFileSync } from 'node:fs';
 import test from 'node:test';
 import { URL } from "node:url";
 import { ticks } from '../dist/content.js';
-import { enemyPose, frameOf, plantPose } from '../dist/motion.js';
+import { bodyMotion, enemyPose, frameOf, plantPose } from '../dist/motion.js';
 import { Save } from '../dist/save.js';
 import { Garden } from '../dist/simulation.js';
 
@@ -233,6 +233,24 @@ test('higher pose ages use different atlas columns while reduced motion uses the
     assert.equal(frameOf(clip, clip.durationTicks * 4, true), clip.reducedFrame);
     assert.equal(frameOf(clip, clip.durationTicks, false), clip.loop ? 0 : clip.frameCount - 1);
   }
+});
+
+test('a bite loads away from the plant and snaps forward on the same tick as damage', () => {
+  const garden = new Garden(campaign['lightning-dome']);
+  const plant = put(garden, 'moss', 0, 4);
+  const walker = enemy(garden, 'walker', 0, plant.x + .46);
+  finish(garden, garden.prep);
+  while (!walker.biteWindup && garden.now < garden.prep + 30) step(garden);
+  assert.ok(walker.biteWindup);
+  const beforeHit = walker.biteWindup.fires - 1;
+  finish(garden, beforeHit);
+  assert.ok(bodyMotion('walker', enemyPose(walker, garden)).lean > .20);
+  assert.equal(plant.hp, plant.card.hp);
+  assert.ok(!garden.effects.some(({ kind }) => kind === 'bite'));
+  step(garden);
+  assert.ok(bodyMotion('walker', enemyPose(walker, garden)).lean < -.50);
+  assert.equal(plant.hp, plant.card.hp - walker.spec.biteDamage);
+  assert.deepEqual(garden.effects.find(({ kind }) => kind === 'bite')?.targets, [plant.x]);
 });
 
 test('legacy bytes, settings and v1 values survive retro records and a rollback', () => {

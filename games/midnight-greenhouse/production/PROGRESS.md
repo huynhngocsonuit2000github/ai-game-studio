@@ -57,3 +57,11 @@ The runtime candidate is `f5dc55b36f7c2ea1e31a4fdf26873f92790d34d8`. Integration
 The baseline Pages workflow recorded the pinned SHA and HTTP 200 for the catalog and game on 28 November 2026 at 14:26 ICT. The direct Pages request from this environment was blocked. Producer playtest, manual merge and live candidate verification remain pending. After merge, compare the served marker to the actual merged SHA and independently check catalog or direct entry, planting, character motion and fullscreen. [Baseline deploy job](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46120538522/job/140905950219)
 
 **Candidate ready.** The canonical Pages assembly passed all 47 browser checks. A fresh normal-speed run cleared Sân Mưa and Hầm Bơm with three stars each and Đài Chớp with two stars. The ending, records after reload, fullscreen, Sổ tay, and standalone ZIP passed. Late Keeper play measured 16.8 ms p95 at 1280×720 and 33.4 ms at 1920×1080 on the Cloud Chromium host. See the [QA evidence and limitations](../reports/QA_REPORT.md#gh-stage-motion-01).
+
+## GH-STAGE-MOTION-02
+
+Producer feedback from the deployed Đài Chớp battle asked for noticeably more movement and attack animation for plants and enemies. Trusted main was `e8bab8048ca21ed2a322bd5ace41b1711aec7d21`, the merge of PR #38. GitHub Actions observed that exact Pages marker and HTTP 200 for the game on 28 November 2026 at 17:01 ICT. Direct Pages access from Cloud returned a proxy 403. [Baseline deployment](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46132403220/job/140942540031)
+
+The candidate uses the original pose sheets with stronger upright-body deformation, attack anticipation and follow-through, distinct enemy strides and event-driven contact effects. Four deterministic clears matched the deployed baseline on every tick for HP, positions, stock, cooldowns, projectiles, and the final result. [QA and combat comparison](../reports/QA_REPORT.md#gh-stage-motion-02)
+
+**Candidate ready.** The assembled-stage combat clips, 16 simulation checks and all 11 game browser cases passed locally. The 1280×720 late-wave frame-time run stayed within the desktop budget. The clip and recorded bench include the full-HD scene. Manual merge and candidate Pages verification remain pending.

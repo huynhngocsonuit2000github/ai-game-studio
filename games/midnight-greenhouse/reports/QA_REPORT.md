@@ -136,3 +136,17 @@ A test harness prepared the same late Đài Chớp wave with 28 plants and three
 | 1920×1080 | 1,284 | 16.7 ms | 33.4 ms | More frame drops at full HD on this Cloud host |
 
 An earlier 1920×1080 sample taken while other browser workloads and recording were active measured 33.4 ms median and 83.3 ms p95. The isolated repeat reduced that load. The 1920×1080 campaign still completed all three stages at normal simulation speed. A physical-device frame-time result remains open.
+
+## GH-STAGE-MOTION-02
+
+The Producer's Pages screenshot showed the Đài Chớp battlefield from PR #38 and asked for more noticeable character motion and attacks. The candidate starts from deployed commit `e8bab8048ca21ed2a322bd5ace41b1711aec7d21`. [Baseline Pages verification](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46132403220/job/140942540031)
+
+The renderer bends the torso of each sprite around its registered feet. Dương Xỉ Nảy pulls back and snaps forward as the seed leaves, Gai Cuộn whips a vine toward the hit target, and Lan Sét charges before its arc. Bình Hứng Mưa dips and rises for payout, Rêu Thành braces and recovers, and Lựu Cầu Chì pulses before detonation. Mũ Tím uses a faster, higher stride than the heavy shield carrier. Enemies lunge when a bite lands, recoil from hits and collapse. Nấm Vá and Thợ Vườn Gốm have distinct heal and phase poses. The new shapes and trails use actual event timestamps and targets. Reduced motion retains atlas key poses and static contact marks.
+
+Four existing deterministic routes produced identical gameplay state at each tick against the deployed baseline, including enemy and plant HP, positions, economy, cooldowns, drops and projectiles. The 16 simulation checks include the contact-tick regression that ties the bite lunge and effect to actual damage.
+
+A 30-second animation-frame sample on the assembled game began at the same late Đài Chớp setup with 28 plants and three enemies. Isolated Debian headless Chromium at DPR 1 measured median/p95 of 16.7/16.8 ms from 1,787 intervals at 1280×720 and 16.7/33.3 ms from 1,659 intervals at 1920×1080. The 1280×720 sample passed the 25 ms p95 desktop budget. Full-HD frame drops and physical device coverage remain limitations.
+
+The 45-second reel opens with a matched Sân Mưa lane shown before and after. Both openings used pointer placement and the normal game clock. The Hầm Bơm and Đài Chớp clips replay the existing command history to prepare their starting positions and then run at the normal game clock. The clips cover Mũ Tím's run, Lan Sét's arc and Nấm Vá's heal after 0:10, Gai Cuộn's lash and the monsters' bites after 0:23, Keeper's phase change after 0:30 and Pod detonation after 0:37. The Canvas observer and combat event log confirm the matching pose rows and effects. Console and network checks passed in each capture. [Combat animation comparison](motion/combat-animation-comparison.mp4) · [Replay commands](../tests/retro-routes.json)
+
+Lint, game and portal TypeScript, 35 Vitest tests, 15 Studio Node tests, 12 pack-validator tests, assembled Pages verification and 16 Midnight Greenhouse simulation checks passed locally. The assembled game browser suite covers the catalog route, saves, Sổ tay, audio, touch, fullscreen and high-DPR input, plus live Canvas windup, release and fixed reduced-motion poses. The candidate's live verification follows manual merge.
