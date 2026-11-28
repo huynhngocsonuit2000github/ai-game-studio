@@ -1,5 +1,7 @@
 # Nhà Kính Sau Nửa Đêm
 
+GH-RETRO-01 v2 updates the three playable stages. Chơi begins the next uncompleted stage. Chọn màn offers replay and legacy records. Sổ tay is available on the title, map and paused board. Press S to collect visible Ánh Hạt or wait for automatic credit. [Current design](design/retro/FEATURE.md) · [Technical QA](reports/RETRO_QA.md)
+
 Trò chơi phòng thủ bốn luống của AI Game Studio. Dùng một dòng nước để nuôi Bình Hứng Mưa hoặc nối tia Lan Sét, giữ Hạt Tim qua ba ca trực.
 
 ## Chơi bản thử

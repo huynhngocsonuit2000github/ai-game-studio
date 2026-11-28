@@ -2,17 +2,19 @@ import { COLUMNS, HZ, LANES } from './content.js';
 import type { CardId, Content, EnemyId } from './content.js';
 import type { Garden, Effect } from './simulation.js';
 
-export function loadImage(src: string) {
-  const image = new Image();
-  image.src = src;
-  return image.decode().then(() => image);
-}
+import { drawPose, enemyPose, loadImage, loadMotion, plantPose } from './motion.js';
+import type { Motion, Pose } from './motion.js';
 
 export async function loadArena(content: Content) {
   const board = await loadImage('./art/' + content.arena.boardAsset);
-  const images = new Map(await Promise.all(Object.entries(content.sprites).map(async ([id, sprite]) =>
-    [id, await loadImage('./art/' + sprite.asset)] as const)));
-  return { board, images };
+  const images = new Map<string, HTMLImageElement>();
+  // Decode the board first and let character media load while the player plans their opening.
+  const motion = new Map<string, Motion>();
+  for (const [id, sprite] of Object.entries(content.sprites)) {
+    void loadImage('./art/' + sprite.asset).then((image) => images.set(id, image)).catch(() => {});
+    void loadMotion(id as CardId | EnemyId).then((asset) => { if (asset) motion.set(id, asset); });
+  }
+  return { board, images, motion };
 }
 
 export class Painter {
@@ -40,30 +42,25 @@ export class Painter {
 
   private x(tile: number) { return this.left + tile * this.tile; }
 
-  private sprite(id: CardId | EnemyId, x: number, lane: number, stamp: number, motion: boolean,
-    acted: number, hurt: number, hostile: boolean, rooted = false) {
+  private sprite(id: CardId | EnemyId, x: number, lane: number, pose: Pose, reduced: boolean, hostile: boolean) {
     const context = this.ctx;
     const sprite = this.content.sprites[id];
     const image = this.art.images.get(id);
-    if (!image) return;
-    const foot = this.feet[lane];
-    const scale = (this.edges[lane + 1] - this.edges[lane]) * (id === 'keeper' ? 1.18 : hostile ? 0.83 : 0.74) / sprite.size[1];
-    const phase = stamp * (id === 'courier' ? 0.42 : 0.19) + x;
-    const stride = motion && !rooted ? Math.sin(phase) * (hostile ? 3 : 1.7) : 0;
-    const impulse = motion ? Math.max(0, 1 - (stamp - acted) / 9) : 0;
-    const impact = stamp - hurt < 5;
+    const frames = this.art.motion.get(id);
+    if (!sprite || (!image && !frames)) return;
+    const height = (this.edges[lane + 1] - this.edges[lane]) * (id === 'keeper' ? 1.55 : hostile ? 1.14 : 1.09);
+    const scale = height * 0.78 / sprite.size[1];
     context.save();
-    context.translate(this.x(x), foot);
-    context.fillStyle = '#070f12a0';
+    context.translate(this.x(x), this.feet[lane]);
+    context.fillStyle = '#2c25194b';
     context.beginPath();
-    context.ellipse(0, -1, sprite.size[0] * scale * 0.39, 8, 0, 0, Math.PI * 2);
+    context.ellipse(0, 0, sprite.size[0] * scale * 0.36, 7, 0, 0, Math.PI * 2);
     context.fill();
-    context.translate((hostile ? -9 : 6) * impulse, stride);
-    if (motion) context.rotate(stride * 0.009 + impulse * (hostile ? -0.095 : 0.07));
-    if (impact) context.shadowColor = '#ffc37c';
-    context.shadowBlur = impact ? 13 : 0;
-    context.drawImage(image, -sprite.anchorPx[0] * scale, -sprite.anchorPx[1] * scale,
-      sprite.size[0] * scale, sprite.size[1] * scale);
+    if (pose.clip === 'fall') context.globalAlpha = Math.min(1, (45 - pose.age) / 13);
+    if ((reduced || !frames || !drawPose(context, frames, pose, height)) && image) {
+      context.drawImage(image, -sprite.anchorPx[0] * scale, -sprite.anchorPx[1] * scale,
+        sprite.size[0] * scale, sprite.size[1] * scale);
+    }
     context.restore();
   }
 
@@ -98,6 +95,13 @@ export class Painter {
     const y = this.feet[effect.lane];
     const x = this.x(effect.x);
     if (effect.kind === 'warning') return;
+    if (effect.kind === 'bell' && age < 1.05) {
+      const right = this.x(COLUMNS);
+      const pos = x + (right - x) * Math.min(1, 0.14 + age * 1.35);
+      ctx.fillStyle = '#f6ca695b';
+      ctx.fillRect(this.left, this.edges[effect.lane], right - this.left, this.edges[effect.lane + 1] - this.edges[effect.lane]);
+      if (motion) this.line([[pos - 32, y - 104], [pos, y - 56], [pos - 36, y + 11]], '#925234', 8);
+    }
     if (effect.kind === 'income' || effect.kind === 'heal') {
       if (age > 0.95) return;
       ctx.save();
@@ -109,6 +113,10 @@ export class Painter {
       ctx.fillStyle = effect.kind === 'heal' ? '#bdf3ac' : '#ffe8ab';
       const height = y - 107 - (motion ? age * 34 : 0);
       const target = this.x(effect.targets?.[0] ?? effect.x);
+      if (effect.kind === 'heal' && effect.targets && age < 0.45) {
+        this.line([[x, y - 65], [(x + target) / 2, y - 96], [target, y - 60]], '#4c8448', 7);
+        this.line([[x, y - 65], [(x + target) / 2, y - 96], [target, y - 60]], '#d4f1a0', 3);
+      }
       const label = effect.value === undefined ? '+' : '+' + Math.round(effect.value);
       ctx.strokeText(label, target, height);
       ctx.fillText(label, target, height);
@@ -127,6 +135,21 @@ export class Painter {
       ctx.ellipse(x, y - 32, this.tile * 1.35 * spread, 31 * spread, 0, 0, Math.PI * 2);
       ctx.stroke();
     }
+    if (effect.kind === 'insulated' && age < 0.55) {
+      ctx.save();
+      ctx.fillStyle = '#fff3cb';
+      ctx.strokeStyle = '#3c3651';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.arc(x + 19, y - 101, 16, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.textAlign = 'center';
+      ctx.font = 'bold 18px system-ui';
+      ctx.fillStyle = '#3c3651';
+      ctx.fillText('ϟ̸', x + 19, y - 95);
+      ctx.restore();
+    }
     if (age > 0.17) return;
     if (effect.kind === 'shock' && effect.targets) {
       const points: [number, number][] = [[x, y - 73]];
@@ -140,6 +163,9 @@ export class Painter {
     } else if (effect.kind === 'root') {
       const tx = this.x(effect.targets?.[0] ?? effect.x);
       this.line([[x, y - 23], [tx - 22, y - 10], [tx, y - 34], [tx + 16, y - 14]], '#c5ee98', 5);
+    } else if (effect.kind === 'shield-chip') {
+      this.line([[x - 34, y - 72], [x - 50, y - 88], [x - 61, y - 81]], '#ffb82c', 7);
+      this.line([[x - 34, y - 72], [x - 53, y - 58]], '#fff0ad', 5);
     } else if (effect.kind === 'plant' || effect.kind === 'impact') {
       ctx.strokeStyle = effect.kind === 'plant' ? '#c9f3a4' : '#ffdbb2';
       ctx.lineWidth = 4;
@@ -149,16 +175,18 @@ export class Painter {
     }
   }
 
-  draw(game: Garden, reduced: boolean) {
+  draw(game: Garden, reduced: boolean, aftermath = 0, ghost?: { id: CardId; lane: number; col: number }) {
     const ctx = this.ctx;
     const motion = !reduced;
-    ctx.drawImage(this.art.board, 0, 0);
+    ctx.drawImage(this.art.board, 0, 0, this.width, this.height);
     const upcoming = game.nextThreat;
+    const first = game.threats[0];
+    const kickoff = game.now < first.at && game.wave === 0 && game.plants.length === 0;
     for (let lane = 0; lane < LANES; lane++) {
       const top = this.edges[lane], height = this.edges[lane + 1] - top;
       const wet = game.wet === lane;
-      const warning = upcoming?.lane === lane && upcoming.at - game.now <= 6 * HZ;
-      ctx.fillStyle = wet ? '#166a7570' : '#101b2538';
+      const warning = (kickoff && first.lane === lane) || (upcoming?.lane === lane && upcoming.at - game.now <= 6 * HZ);
+      ctx.fillStyle = wet ? '#4a98ad48' : kickoff && first.lane === lane ? '#fef0a342' : '#fae6ad0a';
       ctx.fillRect(this.left, top, this.tile * COLUMNS, height);
       ctx.strokeStyle = wet ? '#a5fbf17c' : '#fce7b145';
       ctx.lineWidth = 2;
@@ -201,22 +229,40 @@ export class Painter {
       }
       const units = [
         ...game.plants.filter((unit) => unit.lane === lane).map((unit) => ({
-          arming: unit.card.id === 'pod' && unit.ready > game.now,
-          id: unit.card.id, x: unit.x, acted: unit.acted, hurt: unit.hurt, ratio: unit.hp / unit.card.hp, hostile: false, rooted: false,
+          id: unit.card.id, x: unit.x, pose: plantPose(unit, game), ratio: unit.hp / unit.card.hp, hostile: false,
+          held: false, arming: unit.card.id === 'pod',
         })),
         ...game.enemies.filter((unit) => unit.lane === lane).map((unit) => ({
-          arming: false, id: unit.spec.id, x: unit.x + (unit.id % 3 - 1) * 0.075, acted: unit.acted,
-          hurt: unit.hurt, ratio: unit.hp / unit.spec.hp, hostile: true, rooted: unit.rootedUntil > game.now,
+          id: unit.spec.id, x: unit.x + (unit.id % 3 - 1) * 0.075, pose: enemyPose(unit, game),
+          ratio: unit.hp / unit.spec.hp, hostile: true, arming: false,
+          held: unit.rootedUntil > game.now || unit.stunnedUntil > game.now,
         })),
       ].sort((a, b) => a.x - b.x);
+      for (const fallen of game.fallen) {
+        const age = game.now - fallen.at + aftermath;
+        if (fallen.lane !== lane || age >= (fallen.clip === 'burst' ? 18 : 45)) continue;
+        this.sprite(fallen.id, fallen.x, lane, { clip: fallen.clip, age }, reduced,
+          !game.cards.has(fallen.id as CardId));
+      }
+      if (ghost?.lane === lane) {
+        ctx.save();
+        ctx.globalAlpha = 0.48;
+        this.sprite(ghost.id, ghost.col + 0.5, lane, { clip: 'idle', age: 0 }, true, false);
+        ctx.restore();
+      }
       for (const unit of units) {
-        this.sprite(unit.id, unit.x, lane, game.now, motion, unit.acted, unit.hurt, unit.hostile, unit.rooted);
-        if (unit.rooted) this.line([[this.x(unit.x) - 22, this.feet[lane]], [this.x(unit.x) + 22, this.feet[lane]]], '#d5f5a3', 5);
+        this.sprite(unit.id, unit.x, lane, unit.pose, reduced, unit.hostile);
+        const x = this.x(unit.x), y = this.feet[lane];
+        if (unit.held) this.line([[x - 22, y], [x + 22, y]], '#efe9a2', 5);
         if (unit.id !== 'keeper') this.health(unit.x, lane, unit.ratio, unit.hostile, unit.id === 'raincoat');
+        if (unit.id === 'moss' && unit.ratio <= 0.65) {
+          this.line([[x - 23, y - 35], [x - 9, y - 42], [x - 4, y - 28], [x + 10, y - 38]],
+            unit.ratio <= 0.30 ? '#a43d2c' : '#785732', 5);
+        }
         if (unit.arming) {
-          ctx.fillStyle = '#ffce86';
+          ctx.fillStyle = unit.pose.clip === 'arm' ? '#f5b84f' : '#b5482d';
           ctx.beginPath();
-          ctx.arc(this.x(unit.x), this.feet[lane] - 104, motion ? 4 + 2 * Math.sin(game.now / 5) : 5, 0, Math.PI * 2);
+          ctx.arc(x, y - 106, 6, 0, Math.PI * 2);
           ctx.fill();
         }
       }

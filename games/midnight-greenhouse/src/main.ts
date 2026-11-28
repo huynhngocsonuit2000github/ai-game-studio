@@ -1,10 +1,12 @@
-import { COLUMNS, descriptions, HZ, LANES, levels } from './content.js';
+import { cardDescription, COLUMNS, HZ, LANES, levels, roles } from './content.js';
 import type { Campaign, CardId, Content, LevelId } from './content.js';
 import { Garden } from './simulation.js';
 import type { Command, Cue } from './simulation.js';
 import { loadArena, Painter } from './renderer.js';
 import { Save } from './save.js';
 import { Sound } from './audio.js';
+import { FieldGuide } from './guide.js';
+import { drawPose, loadMotion } from './motion.js';
 
 const app = document.querySelector<HTMLElement>('#app')!;
 const dialog = document.querySelector<HTMLDialogElement>('#dialog')!;
@@ -18,8 +20,8 @@ const save = new Save();
 const sound = new Sound(save.settings);
 const stages = {
   raincourt: {
-    beat: 'Giữ đèn lên', description: 'Tập chuyển nước giữa Bình Hứng và Lan Sét.',
-    tip: 'Tưới Bình Hứng khi cần Ánh Hạt, rồi chuyển nước sang Lan Sét lúc địch tụ lại.',
+    beat: 'Giữ đèn lên', description: 'Trồng Dương Xỉ, nhặt Ánh Hạt rồi mở Lan Sét ở đợt 3.',
+    tip: 'Đặt Dương Xỉ ở luống có cờ để đón nhóm đầu.',
   },
   'pump-gallery': {
     beat: 'Bơm chạy lại', description: 'Giữ thế trận khi van bơm gặp sự cố.',
@@ -31,11 +33,16 @@ const stages = {
   },
 } satisfies Record<LevelId, { beat: string; description: string; tip: string }>;
 
-let view: 'title' | 'map' | 'brief' | 'play' | 'ending' = 'title';
+let view: 'title' | 'map' | 'play' | 'ending' = 'title';
 let campaign: Campaign;
 let content: Content;
 const arenaPromises = new Map<LevelId, ReturnType<typeof loadArena>>();
 let activeTip = '';
+let guide: FieldGuide | undefined;
+let guideOrigin: HTMLElement | null = null;
+let guideFocus: HTMLElement | null = null;
+let guideFromPause = false;
+let endingFrame = 0;
 const introduced = new Set<LevelId>();
 let garden: Garden | undefined;
 let painter: Painter | undefined;
@@ -52,15 +59,75 @@ let lastFeedback = '';
 let cardNodes: HTMLButtonElement[] = [];
 let valveNodes: HTMLButtonElement[] = [];
 let tileNodes: HTMLButtonElement[] = [];
+const tokenNodes = new Map<number, HTMLButtonElement>();
+let tutorialStep: 'plant' | 'drop' | 'done' = 'done';
+let lastResultFrame = 0;
+let resultMotion = 0;
+let collectedAt = -Infinity;
+let collectedAmount = 0;
+let lastCreditAnnouncement = -Infinity;
+
+const icon = (name: string) => `<img class="icon" src="./art/retro/icons/${name}.webp" alt="">`;
+const guidePath = '#so-tay';
+const inGuide = () => location.hash === guidePath || location.hash.startsWith(guidePath + '/');
+
+function showGuide(id?: CardId) {
+  if (guide) return;
+  guideFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  guideFromPause = dialog.open && guideFocus?.id === 'pause-guide';
+  history.pushState({}, '', guidePath + '/plants' + (id ? '/' + id : ''));
+  mountGuide();
+}
+
+function mountGuide() {
+  if (guide) { guide.route(); return; }
+  guideOrigin = app.firstElementChild as HTMLElement | null;
+  if (garden && !garden.result) {
+    closeDialog();
+    pause();
+  }
+  if (guideOrigin) guideOrigin.hidden = true;
+  guide = new FieldGuide(() => {
+    history.pushState({}, '', location.pathname + location.search);
+    dismissGuide();
+  }, () => save.settings.reduced);
+  app.append(guide.node);
+  document.title = 'Sổ tay Nhà Kính';
+  void guide.open();
+}
+
+function dismissGuide() {
+  if (!guide) return;
+  guide.close();
+  guide = undefined;
+  if (guideOrigin) guideOrigin.hidden = false;
+  document.title = 'Nhà Kính Sau Nửa Đêm';
+  if (garden && !garden.result) {
+    pauseMenu();
+    if (guideFromPause) byId('pause-guide').focus();
+  } else if (guideFocus?.isConnected) guideFocus.focus();
+  else head();
+  guideOrigin = null;
+  guideFocus = null;
+  guideFromPause = false;
+}
+
+window.addEventListener('hashchange', () => {
+  if (!campaign) return;
+  if (inGuide()) mountGuide();
+  else dismissGuide();
+});
 
 function head() { app.querySelector<HTMLElement>('h1')?.focus(); }
 function storageMessage() { return save.unavailable ? 'Trình duyệt đang chặn lưu. Tiến độ chỉ giữ trong phiên này.' : ''; }
 
 function leaveBoard() {
   cancelAnimationFrame(animation);
+  cancelAnimationFrame(endingFrame);
   garden = undefined;
   painter = undefined;
   paused = false;
+  tokenNodes.clear();
   sound.clearVoices();
   sound.setScene('off');
   sound.setPaused(false);
@@ -69,72 +136,57 @@ function leaveBoard() {
 function title() {
   leaveBoard();
   view = 'title';
-  app.innerHTML = `<section class="hero"><div>
-    <p class="kicker">Phòng thủ bốn luống</p>
-    <h1 tabindex="-1">Nhà Kính Sau Nửa Đêm</h1>
-    <p>Đêm mưa, lũ nấm kéo lên mái. Trồng cây, chuyển nước và giữ Hạt Tim đến rạng sáng.</p>
-    <button id="enter" class="primary">Vào nhà kính</button>
-  </div></section>`;
+  app.innerHTML = `<section class="hero">
+    <img class="hero-art" src="./cover.webp" alt="">
+    <div class="hero-page">
+      <h1 tabindex="-1">Nhà Kính<br>Sau Nửa Đêm</h1>
+      <p>Chăm cây và giữ Hạt Tim qua ba ca trực.</p>
+      <button id="enter" class="primary">Chơi</button>
+      <div class="actions"><button id="choose-stage" class="secondary">Chọn màn</button>
+        <button id="title-guide" class="secondary">Sổ tay</button></div>
+    </div></section>`;
   byId('enter').onclick = () => {
-    try { sessionStorage.setItem('midnight-greenhouse.entered', '1'); } catch { /* storage is optional */ }
-    map();
+    const next = levels.find((id) => save.unlocked(id) && !save.record(id) && !save.legacy(id));
+    if (next) enterStage(next);
+    else map();
   };
+  byId('choose-stage').onclick = map;
+  byId('title-guide').onclick = () => showGuide();
   head();
 }
 
 function map() {
   leaveBoard();
   view = 'map';
-  app.innerHTML = `<section class="map"><p class="kicker">Ca trực đêm</p><h1 tabindex="-1">Chiến dịch</h1>
-    <div class="stage-list">${levels.map((id, index) => {
+  app.innerHTML = `<section class="map"><header class="map-header">
+    <div><h1 tabindex="-1">Bản đồ nhà kính</h1><button id="map-guide" class="secondary">Sổ tay</button></div>
+  </header><div class="stage-list">${levels.map((id, index) => {
       const { level, arena } = campaign[id];
       const record = save.record(id);
+      const old = save.legacy(id);
       const available = save.unlocked(id);
       return `<article class="stage ${available ? 'playable' : 'locked'}">
         <img src="./art/${arena.boardAsset}" alt="">
-        <p class="kicker">Màn 0${index + 1} · ${record ? 'Đã qua' : available ? 'Có thể chơi' : 'Chưa mở'}</p>
+        <p class="kicker">Màn ${index + 1} · ${record || old ? 'Đã qua' : available ? 'Có thể chơi' : 'Chưa mở'}</p>
         <h2>${level.title}</h2><p>${stages[id].description}</p>
-        ${record ? `<p>${'★'.repeat(record.stars)} · Nhanh nhất ${clock(Math.round(record.fastest))}</p>` : ''}
-        ${available ? `<button data-stage="${id}" class="primary">${record ? 'Chơi lại' : 'Chọn'} ${level.title}</button>`
+        ${record ? `<p aria-label="${record.stars} sao"> ${'★'.repeat(record.stars)} · Nhanh nhất ${clock(Math.round(record.fastest))}</p>` : ''}
+        ${old ? `<details><summary>Kỷ lục cũ</summary><p>${old.stars} sao · ${clock(Math.round(old.fastest))}</p></details>` : ''}
+        ${available ? `<button data-stage="${id}" class="primary">${record || old ? 'Chơi lại' : 'Chơi'} ${level.title}</button>`
           : `<p>Hoàn thành ${campaign[levels[index - 1]].level.title} để mở.</p>`}
       </article>`;
     }).join('')}</div>
     <p class="map-note">${storageMessage()}</p></section>`;
-  for (const id of levels) {
-    const button = app.querySelector<HTMLButtonElement>(`[data-stage="${id}"]`);
-    if (button) button.onclick = () => briefing(id);
+  for (const button of app.querySelectorAll<HTMLButtonElement>('[data-stage]')) {
+    button.onclick = () => enterStage(button.dataset.stage as LevelId);
   }
+  byId('map-guide').onclick = () => showGuide();
   head();
 }
 
-const tutorial = `<ol>
-  <li>Chọn hạt giống rồi chọn ô trống. Địch đi từ phải sang trái.</li>
-  <li>Chạm van bên trái để tưới một luống. Đợi 4 giây trước khi chuyển.</li>
-  <li>Bình Hứng có nước thu thêm Ánh Hạt. Lan Sét có nước nối tia qua nhiều địch.</li>
-  <li>Dùng Dương Xỉ khi gặp Chậu Giáp hoặc Áo Mưa.</li>
-</ol>`;
-
-function briefing(id: LevelId) {
-  if (!save.unlocked(id)) return;
-  closeDialog();
-  leaveBoard();
+function enterStage(id: LevelId) {
+  if (busy || !save.unlocked(id)) return;
   content = campaign[id];
-  const { level, arena } = content;
-  const stage = stages[id];
-  const chapter = levels.indexOf(id) + 1;
-  view = 'brief';
-  sound.setScene('brief');
-  app.innerHTML = `<section class="brief"><img src="./art/${arena.boardAsset}" alt="Các luống và bộ van ở ${level.title}">
-    <div><p class="kicker">Màn 0${chapter} · ${stage.beat}</p><h1 tabindex="-1">${level.title}</h1>
-    <p>Giữ Hạt Tim qua ${level.waves.length} đợt nấm. Bạn có ${content.preparationSeconds} giây chuẩn bị.</p>
-    <p class="brief-tip">${stage.tip}</p>
-    <details><summary>Ôn cách chơi</summary>${tutorial}</details>
-    <div class="actions"><button id="start" class="primary">Bắt đầu ca trực</button>
-    <button id="back" class="secondary">Bản đồ</button></div></div></section>`;
-  byId('start').onclick = () => { void start(); };
-  byId('back').onclick = map;
-  head();
-  void getArena(content).catch(() => {});
+  void start();
 }
 
 function getArena(stage: Content) {
@@ -185,9 +237,10 @@ function resume() {
 function pauseMenu() {
   if (!garden || garden.result || dialog.open) return;
   openDialog('Ca trực tạm dừng', `<div class="actions">
-    <button id="resume" class="primary">Tiếp tục</button><button id="return-map" class="secondary">Về bản đồ</button>
+    <button id="resume" class="primary">Tiếp tục</button><button id="pause-guide" class="secondary">Sổ tay</button><button id="return-map" class="secondary">Về bản đồ</button>
   </div>`, () => {
     byId('resume').onclick = resume;
+    byId('pause-guide').onclick = () => showGuide();
     byId('return-map').onclick = confirmExit;
   });
 }
@@ -222,13 +275,8 @@ function settings() {
       const input = byId<HTMLInputElement>('mix-' + key);
       input.onchange = () => { save.settings[key] = input.checked; changed(); };
     }
-    byId('settings-done').onclick = resume;
+    byId('settings-done').onclick = () => { if (guide) closeDialog(); else resume(); };
   });
-}
-
-function showHelp() {
-  openDialog('Cách giữ nhà kính', `${tutorial}<p>${stages[content.level.id].tip}</p><p>Phím 1–6 chọn cây đang có. Phím mũi tên di chuyển trong luống, Enter hoặc Space đặt cây, Esc bỏ chọn hoặc tạm dừng.</p>
-    <button id="help-done" class="primary">Tiếp tục</button>`, () => { byId('help-done').onclick = resume; });
 }
 
 function boardMarkup() {
@@ -238,16 +286,19 @@ function boardMarkup() {
     ${Array.from({ length: LANES }, (_, lane) => {
       const top = arena.visualRowEdges[lane];
       const bottom = arena.visualRowEdges[lane + 1];
-      return `<button class="valve" aria-pressed="false" style="top:${percent((top + bottom) / 2)};left:${percent(arena.valveX)}">${lane + 1}<span>◇</span></button>
+      return `${content.level.waterEnabled ? `<button class="valve" aria-pressed="false" style="top:${percent((top + bottom) / 2)};left:${percent(arena.valveX)}">${icon('valve')}${lane + 1}<span>◇</span></button>` : ''}
         <div class="tiles" role="group" aria-label="Luống ${lane + 1}"
           style="top:${percent(top)};height:${percent(bottom - top)};left:${percent(arena.xPlantSpan[0])};width:${percent(arena.xPlantSpan[1] - arena.xPlantSpan[0])}">
           ${Array.from({ length: COLUMNS }, (_, col) => `<button class="tile" tabindex="${lane === 0 && col === 0 ? 0 : -1}" aria-label="Luống ${lane + 1}, ô ${col + 1}"></button>`).join('')}
         </div>`;
-    }).join('')}</div>`;
+    }).join('')}<div id="tokens" class="tokens"></div></div>`;
 }
 
 function select(value: typeof selection) {
   if (paused || !garden || garden.result) return;
+  if (value && value !== 'remove' && garden.cardStatus(value)) {
+    renderText(byId('readout'), garden.cardStatus(value));
+  }
   selection = selection === value ? null : value;
   lastFeedback = '';
   updateSelection();
@@ -257,7 +308,7 @@ function updateSelection() {
   for (const button of cardNodes) button.setAttribute('aria-pressed', String(button.dataset.card === selection));
   byId('remove').setAttribute('aria-pressed', String(selection === 'remove'));
   const message = selection === 'remove' ? 'Chọn cây để tháo và lấy lại 25% giá.'
-    : selection ? descriptions[selection] : 'Chọn cây để trồng. Chọn van số 1–4 để chuyển nước.';
+    : selection ? cardDescription(garden!.cards.get(selection)!, content) : 'Chọn cây rồi chọn một ô trống.';
   renderText(byId('card-help'), message);
   paintPreview();
 }
@@ -297,10 +348,11 @@ async function start() {
   const chosen = content;
   try {
     const media = await getArena(chosen);
-    if (view !== source || content !== chosen) return;
+    if (view !== source || content !== chosen || guide) return;
     closeDialog();
     leaveBoard();
     view = 'play';
+    window.scrollTo(0, 0);
     selection = null;
     focusTile = 0;
     selectedTile = null;
@@ -308,27 +360,43 @@ async function start() {
     garden = new Garden(content);
     const { id, title } = content.level;
     activeTip = save.record(id) || introduced.has(id) ? '' : stages[id].tip;
+    tutorialStep = id === 'raincourt' && activeTip ? 'plant' : 'done';
     introduced.add(id);
+    collectedAt = -Infinity;
+    lastCreditAnnouncement = -Infinity;
+    resultMotion = 0;
+    lastResultFrame = 0;
     app.innerHTML = `<section class="game" data-arena="${id}" aria-label="${title}">
-      <header class="game-header"><div><p class="kicker">Màn 0${levels.indexOf(id) + 1} · ${stages[id].beat}</p><h1 tabindex="-1">${title}</h1></div>
-      <div class="badges"><div id="stock" class="badge">Ánh Hạt <strong></strong></div>
-      <div id="core" class="badge">Hạt Tim <strong></strong></div><div id="time" class="badge"></div><button id="help" class="plain">Cách chơi</button></div></header>
-      <p class="rotate">Xoay ngang màn hình để có ô trồng và chữ lớn hơn.</p>
-      <div class="playfield"><div class="board-column">
-        <div id="board" class="board">${boardMarkup()}</div><div id="threat" class="threat">
+      <header class="game-header"><h1 tabindex="-1">${title}</h1>
+      <div class="badges"><button id="compact-help" class="plain">Sổ tay</button><div id="core" class="badge">${icon('heart')} Hạt Tim <strong></strong></div>
+      <div id="time" class="badge"></div></div></header>
+      <p class="rotate">Xoay ngang màn hình để dễ chạm các ô trồng.</p>
+      <div class="playfield"><aside class="deck" aria-label="Hạt giống và công cụ">
+        <div class="notebook-head"><div id="stock" class="badge">${icon('seed')} <span>Ánh Hạt</span> <strong></strong><small id="stock-credit"></small></div>
+        <div id="bell-state" class="badge">${icon('bell')} <span>Chuông</span> <strong></strong></div></div>
+        <button id="collect" class="secondary" aria-keyshortcuts="S">Thu Ánh Hạt <kbd>S</kbd></button>
+        <div class="seed-grid">${(['fern', 'pitcher', 'bramble', 'orchid', 'moss', 'pod'] as const).map((id, index) => {
+          const card = garden!.cards.get(id);
+          return card ? `<button class="seed-card" data-card="${id}" aria-pressed="false" aria-describedby="card-help" aria-keyshortcuts="${index + 1}">
+            <img src="./art/${content.sprites[id].asset}" alt=""><strong>${card.label}</strong>
+            <span class="cost">${card.cost}</span><small class="card-role">${roles[id]}</small>
+            <small class="card-state"></small><span class="cooldown" aria-hidden="true"></span></button>`
+            : `<div class="seed-empty" aria-hidden="true">${icon('seed')}</div>`;
+        }).join('')}</div>
+        <div class="toolbelt"><button id="remove" class="secondary" aria-pressed="false">${icon('hoe')} Tháo cây</button>
+          <button id="pause" class="secondary">Tạm dừng</button></div>
+        <p id="card-help" class="help"></p>
+        <button id="help" class="plain">Xem trong Sổ tay</button>
+      </aside><div class="board-column">
+        <div id="board" class="board">${boardMarkup()}</div>
+        <div id="threat" class="threat">${icon('flag')}
           <div><strong id="wave"></strong><span id="next-threat"></span></div><progress id="wave-progress" aria-label="Tiến độ đợt"></progress>
         </div>
         <div id="keeper-hud" class="keeper-hud" hidden>
           <span id="keeper-status"></span><meter id="keeper-health" min="0" aria-label="Sức bền Thợ Vườn Gốm"></meter>
         </div>
         <p id="readout" class="readout" role="status"></p>
-      </div><aside class="deck" aria-label="Hạt giống và công cụ">
-      ${content.cards.map((card, index) => `<button class="seed-card" data-card="${card.id}" aria-pressed="false" aria-describedby="card-help">
-        <img src="./art/${content.sprites[card.id].asset}" alt=""><span><strong><span class="shortcut">${index + 1} · </span>${card.label}</strong><span class="cost">${card.cost}<span class="cost-unit"> Ánh Hạt</span></span></span></button>`).join('')}
-        <div class="toolbelt"><button id="remove" class="secondary" aria-pressed="false">Tháo cây</button>
-          <button id="pause" class="secondary">Tạm dừng</button></div>
-        <p id="card-help" class="help"></p>
-      </aside></div>
+      </div></div>
     </section>`;
     painter = new Painter(app.querySelector('canvas')!, content, media);
     cardNodes = [...app.querySelectorAll<HTMLButtonElement>('.seed-card')];
@@ -336,7 +404,7 @@ async function start() {
     tileNodes = [...app.querySelectorAll<HTMLButtonElement>('.tile')];
     for (const button of cardNodes) {
       button.onclick = () => select(button.dataset.card as CardId);
-      button.title = descriptions[button.dataset.card as CardId];
+      button.title = cardDescription(garden.cards.get(button.dataset.card as CardId)!, content);
     }
     valveNodes.forEach((button, lane) => { button.onclick = () => garden?.queue({ kind: 'water', lane }); });
     tileNodes.forEach((button, index) => {
@@ -367,7 +435,10 @@ async function start() {
     byId('board').oncontextmenu = (event) => { event.preventDefault(); selection = null; updateSelection(); };
     byId('remove').onclick = () => select('remove');
     byId('pause').onclick = pauseMenu;
-    byId('help').onclick = showHelp;
+    byId('collect').onclick = () => garden?.queue({ kind: 'collect' });
+    const cardGuide = () => showGuide(selection && selection !== 'remove' ? selection : undefined);
+    byId('help').onclick = cardGuide;
+    byId('compact-help').onclick = cardGuide;
     updateSelection();
     updateHud(garden);
     painter.draw(garden, save.settings.reduced);
@@ -386,10 +457,47 @@ async function start() {
   } finally { busy = false; }
 }
 
+function updateTokens(game: Garden) {
+  for (const [id, node] of tokenNodes) if (!game.drops.some((drop) => drop.id === id)) {
+    node.remove();
+    tokenNodes.delete(id);
+  }
+  const layer = byId('tokens');
+  const { xPlantSpan, feetY, visualRowEdges } = content.arena;
+  for (const drop of game.drops) {
+    let node = tokenNodes.get(drop.id);
+    if (!node) {
+      node = document.createElement('button');
+      node.className = 'token';
+      node.tabIndex = -1; // The persistent S button collects the same drops from the keyboard.
+      node.setAttribute('aria-label', `Thu ${drop.value} Ánh Hạt`);
+      node.innerHTML = `${icon('seed')}<b>${drop.value}</b>`;
+      node.style.left = (xPlantSpan[0] + drop.x / COLUMNS * (xPlantSpan[1] - xPlantSpan[0])) * 100 + '%';
+      node.style.top = (feetY[drop.lane] * 0.55 + visualRowEdges[drop.lane] * 0.45) * 100 + '%';
+      node.onclick = () => game.queue({ kind: 'collect', id: drop.id });
+      tokenNodes.set(drop.id, node);
+      layer.append(node);
+    }
+    node.style.setProperty('--life', String((drop.expires - game.now) / (drop.expires - drop.created)));
+  }
+}
+
+function ghost(game: Garden) {
+  if (selectedTile !== null) {
+    const command = tileCommand(selectedTile);
+    if (command?.kind === 'plant' && !game.check(command)) return { id: command.card, lane: command.lane, col: command.col };
+  }
+  if (tutorialStep === 'plant' && !selection && !save.settings.reduced) return { id: 'fern' as const, lane: game.threats[0].lane, col: 3 };
+}
+
 let lastHudTick = -1;
 function updateHud(game: Garden) {
   const preparing = game.now < game.prep;
   renderText(byId('stock').querySelector('strong')!, String(game.stock));
+  renderText(byId('bell-state').querySelector('strong')!, game.bell ? 'Sẵn' : 'Đã dùng');
+  renderText(byId('stock-credit'), game.now - collectedAt <= HZ ? '+' + collectedAmount : '');
+  byId('bell-state').dataset.spent = String(!game.bell);
+  updateTokens(game);
   renderText(byId('core').querySelector('strong')!, game.core + '/' + content.level.coreHealth);
   renderText(byId('time'), preparing ? 'Chuẩn bị · ' + seconds(game.prep - game.now) + ' giây'
     : 'Ca trực · ' + clock(Math.floor((game.now - game.prep) / HZ)));
@@ -439,7 +547,15 @@ function updateHud(game: Garden) {
   });
   cardNodes.forEach((button) => {
     const id = button.dataset.card as CardId;
-    button.dataset.affordable = String(game.stock >= game.cards.get(id)!.cost);
+    const status = game.cardStatus(id);
+    const card = game.cards.get(id)!;
+    const remaining = Math.max(0, (game.placementReady.get(id) ?? 0) - game.now);
+    button.dataset.available = String(!status);
+    button.dataset.locked = String(status.startsWith('Mở'));
+    button.setAttribute('aria-disabled', String(Boolean(status)));
+    button.setAttribute('aria-label', `${card.label}, ${card.cost} Ánh Hạt. ${roles[id]}. ${status || 'Sẵn sàng.'}`);
+    button.style.setProperty('--cooldown', String(remaining / (card.placementCooldownSeconds * HZ)));
+    renderText(button.querySelector('.card-state')!, remaining ? `${seconds(remaining)}s` : status.replaceAll('.', ''));
   });
   tileNodes.forEach((button, index) => {
     const lane = Math.floor(index / COLUMNS), col = index % COLUMNS;
@@ -454,9 +570,11 @@ function updateHud(game: Garden) {
     renderText(byId('readout'), game.feedback);
   } else if (!game.feedback) {
     lastFeedback = '';
-    const water = game.wet === null ? 'Mọi luống đang khô.' : `Đang tưới luống ${game.wet + 1}.`;
-    const status = game.now < game.prep && activeTip ? activeTip
-      : water + (lock ? ' Van hồi sau ' + lock + ' giây.' : ' Có thể chuyển nước.');
+    const water = game.wet === null ? 'Các luống đang khô.' : `Đang tưới luống ${game.wet + 1}.`;
+    const status = tutorialStep === 'plant' ? stages.raincourt.tip
+      : tutorialStep === 'drop' && game.drops.length ? 'Chạm hạt hoặc nhấn S để thu Ánh Hạt.'
+      : game.now < game.prep && activeTip && content.level.waterEnabled ? activeTip
+      : content.level.waterEnabled ? water : '';
     renderText(byId('readout'), status);
   }
 }
@@ -465,7 +583,7 @@ function results(game: Garden) {
   sound.setScene('off');
   const win = game.result === 'victory';
   const duration = (game.now - game.prep) / HZ;
-  const stars = 1 + Number(game.core >= 2) + Number(game.bestChain >= 3);
+  const stars = 1 + Number(game.core >= 2) + Number(game.bestChain >= (content.level.waterEnabled ? 3 : 2));
   const { id, title, coreHealth } = content.level;
   const next = levels[levels.indexOf(id) + 1];
   if (win) save.win(id, stars, duration);
@@ -475,9 +593,9 @@ function results(game: Garden) {
   const advance = (next ? 'Tiếp tục · ' + campaign[next].level.title : 'Xem kết thúc');
   openDialog(win ? stages[id].beat + '!' : 'Hạt Tim đã tắt', `${summary}<p>${storageMessage()}</p>
     <div class="actions">${win ? `<button id="advance" class="primary">${advance}</button>` : ''}
-    <button id="retry" class="${win ? 'secondary' : 'primary'}">Chơi lại</button>
+    <button id="retry" class="${win ? 'secondary' : 'primary'}">${win ? 'Chơi lại' : 'Thử lại'}</button>
     <button id="result-map" class="secondary">Bản đồ</button></div>`, () => {
-    if (win) byId('advance').onclick = () => { if (next) briefing(next); else ending(); };
+    if (win) byId('advance').onclick = () => { if (next) enterStage(next); else ending(); };
     byId('retry').onclick = () => { void start(); };
     byId('result-map').onclick = () => { closeDialog(); map(); };
   }, true);
@@ -488,7 +606,10 @@ function ending() {
   leaveBoard();
   view = 'ending';
   app.innerHTML = `<section class="ending">
-    <div id="bloom" class="bloom ${save.settings.reduced ? 'still' : ''}" aria-hidden="true">✿</div>
+    <div class="finale-art" aria-hidden="true">
+      <canvas id="retreat" width="170" height="145" hidden></canvas>
+      <img id="bloom" class="bloom ${save.settings.reduced ? 'still' : ''}" src="./art/retro/plants/fern.webp" alt="">
+    </div>
     <h1 tabindex="-1">Hạt Tim nảy mầm</h1>
     <p>Ba ca trực đã qua. Bình minh rọi qua mái kính, và Hạt Tim đâm chồi.</p>
     <ul class="ending-records">${levels.map((id) => {
@@ -503,6 +624,8 @@ function ending() {
   </section>`;
   const skip = byId<HTMLButtonElement>('skip-bloom');
   skip.onclick = () => {
+    cancelAnimationFrame(endingFrame);
+    byId('retreat').hidden = true;
     byId('bloom').classList.add('still');
     skip.hidden = true;
     byId('ending-map').focus();
@@ -512,23 +635,65 @@ function ending() {
     skip.hidden = true;
   };
   byId('ending-map').onclick = map;
+  if (!save.settings.reduced) {
+    const canvas = byId<HTMLCanvasElement>('retreat');
+    const context = canvas.getContext('2d');
+    if (context) void loadMotion('keeper').then((frames) => {
+      if (!frames || !canvas.isConnected || skip.hidden) return;
+      let start = 0;
+      const draw = (time: number) => {
+        if (!start) start = time;
+        const age = (time - start) * HZ / 1000;
+        if (age >= 45 || save.settings.reduced) { canvas.hidden = true; return; }
+        canvas.hidden = false;
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        context.save();
+        context.translate(85 - age * 0.55, 133);
+        context.globalAlpha = Math.min(1, (45 - age) / 14);
+        drawPose(context, frames, { clip: 'fall', age }, 149);
+        context.restore();
+        endingFrame = requestAnimationFrame(draw);
+      };
+      endingFrame = requestAnimationFrame(draw);
+    });
+  }
   head();
 }
 
-const cues = new Set<string>(['plant', 'fern', 'root', 'shock', 'water', 'warning', 'breach', 'victory', 'defeat', 'pod', 'valve-lock']);
+const cues = new Set<string>(['plant', 'fern', 'root', 'shock', 'water', 'warning', 'breach', 'victory', 'defeat', 'pod', 'valve-lock', 'bell', 'collect', 'shield-chip', 'unlock']);
 
 function frame(timestamp: number) {
   const game = garden;
   if (!game || !painter) return;
+  if (game.result) {
+    if (lastResultFrame && !document.hidden) resultMotion += Math.min(timestamp - lastResultFrame, 80) * HZ / 1000;
+    lastResultFrame = timestamp;
+    painter.draw(game, false, resultMotion);
+    if (resultMotion < 45) animation = requestAnimationFrame(frame);
+    return;
+  }
   if (!paused) {
     if (lastFrame) accumulated += Math.min(timestamp - lastFrame, 5 * 1000 / HZ);
     const interval = 1000 / HZ;
     while (accumulated >= interval && !game.result) {
       game.step();
       accumulated -= interval;
-      for (const effect of game.effects) {
-        if (effect.at !== game.now) continue;
+      const currentEffects = game.effects.filter(({ at }) => at === game.now);
+      const credit = currentEffects.reduce((total, effect) => total + (effect.kind === 'collect' ? effect.value ?? 0 : 0), 0);
+      if (credit) {
+        collectedAt = game.now;
+        collectedAmount = credit;
+        if (tutorialStep === 'drop') tutorialStep = 'done';
+        if (game.now - lastCreditAnnouncement >= HZ) {
+          lastCreditAnnouncement = game.now;
+          announce.textContent = `Đã thu ${collectedAmount} Ánh Hạt.`;
+        }
+      }
+      for (const effect of currentEffects) {
         if (cues.has(effect.kind)) void sound.cue(effect.kind as Cue);
+        if (effect.kind === 'plant' && tutorialStep === 'plant') tutorialStep = 'drop';
+        if (effect.kind === 'unlock') announce.textContent = 'Lan Sét đã mở.';
+        if (effect.kind === 'bell') announce.textContent = `Chuông Gốm đã dùng ở luống ${effect.lane + 1}.`;
         if (effect.kind === 'phase') announce.textContent = 'Thợ Vườn Gốm bước vào pha hai.';
         if (effect.kind === 'keeper-down') announce.textContent = 'Thợ Vườn Gốm đã gục. Hãy dọn địch còn lại.';
         if (effect.kind === 'valve-lock') announce.textContent = `Van luống ${effect.lane + 1} đã đóng.`;
@@ -543,11 +708,13 @@ function frame(timestamp: number) {
     }
     sound.setScene(game.wave >= 5 ? 'storm' : 'watch');
     sound.sync();
-    painter.draw(game, save.settings.reduced);
+    painter.draw(game, save.settings.reduced, 0, ghost(game));
   }
   lastFrame = timestamp;
-  if (game.result) results(game);
-  else animation = requestAnimationFrame(frame);
+  if (game.result) {
+    results(game);
+    if (!save.settings.reduced && game.fallen.length) animation = requestAnimationFrame(frame);
+  } else animation = requestAnimationFrame(frame);
 }
 
 document.addEventListener('pointerdown', () => sound.unlock(), { once: true });
@@ -562,13 +729,14 @@ document.addEventListener('keydown', (event) => {
   }
   const target = event.target;
   if (target instanceof HTMLElement && target.closest('input, textarea, select, [contenteditable]')) return;
+  if (event.key.toLowerCase() === 's') { garden.queue({ kind: 'collect' }); event.preventDefault(); return; }
   if (!/^[1-6]$/.test(event.key)) return;
-  const card = content.cards[Number(event.key) - 1];
-  if (card) { select(card.id); event.preventDefault(); }
+  const card = (['fern', 'pitcher', 'bramble', 'orchid', 'moss', 'pod'] as const)[Number(event.key) - 1];
+  if (garden.cards.has(card)) { select(card); event.preventDefault(); }
 });
 document.addEventListener('visibilitychange', () => {
   if (!document.hidden) return;
-  if (garden && !garden.result) pauseMenu();
+  if (garden && !garden.result && !guide) pauseMenu();
   else sound.setPaused(true);
 });
 document.addEventListener('visibilitychange', () => {
@@ -576,31 +744,25 @@ document.addEventListener('visibilitychange', () => {
 });
 dialog.addEventListener('cancel', (event) => {
   event.preventDefault();
-  if (dialog.dataset.lock !== 'true') resume();
+  if (dialog.dataset.lock !== 'true') { if (guide) closeDialog(); else resume(); }
 });
-byId('brand').onclick = () => { if (view === 'play') confirmExit(); else if (view !== 'title') map(); };
+byId('brand').onclick = () => { if (guide) byId('guide-back').click(); else if (view === 'play') confirmExit(); else if (view !== 'title') title(); };
 byId('settings').onclick = settings;
 document.querySelector<HTMLAnchorElement>('.top-actions a')!.onclick = (event) => {
   if (!garden || garden.result) return;
   event.preventDefault();
   openDialog('Quay về thư viện?', '<p>Lần chơi hiện tại sẽ kết thúc.</p><div class="actions"><button id="stay" class="primary">Tiếp tục ca trực</button><a class="plain" href="../../#/">Về thư viện game</a></div>', () => {
-    byId('stay').onclick = resume;
+    byId('stay').onclick = () => { if (guide) closeDialog(); else resume(); };
   });
 };
 
 async function init() {
-  const settingExists = (() => {
-    try {
-      return localStorage.getItem('midnight-greenhouse.settings.v1') !== null
-        || sessionStorage.getItem('midnight-greenhouse.entered') === '1';
-    } catch { return false; }
-  })();
   try {
     const response = await fetch('./content.json');
     if (!response.ok) throw new Error('Content fetch: ' + response.status);
     campaign = await response.json() as Campaign;
-    if (save.record('raincourt') || settingExists) map();
-    else title();
+    title();
+    if (inGuide()) mountGuide();
   } catch (error) {
     console.error('Greenhouse content failed to load', error);
     app.innerHTML = '<p class="loading">Không tải được dữ liệu nhà kính. <button id="retry-boot" class="secondary">Thử lại</button></p>';

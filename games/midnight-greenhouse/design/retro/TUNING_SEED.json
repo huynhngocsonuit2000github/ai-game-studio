@@ -1,0 +1,1163 @@
+{
+  "schemaVersion": 1,
+  "preparationSeconds": 6,
+  "laneCount": 4,
+  "tileCountPerLane": 8,
+  "rerouteCooldownSeconds": 3,
+  "drops": {
+    "ambientFirstSeconds": 3,
+    "ambientEverySeconds": 10,
+    "ambientValue": 16,
+    "openingAmbientValue": 28,
+    "openingAmbientPayouts": 6,
+    "eliteValue": 6,
+    "eliteIds": [
+      "porter",
+      "raincoat",
+      "mender"
+    ],
+    "maxEliteOnField": 2,
+    "autoCreditSeconds": 3,
+    "maxOnField": 8,
+    "maxPitchers": 3
+  },
+  "bell": {
+    "charges": 1,
+    "ordinaryLaneStunSeconds": 1.2
+  },
+  "plants": [
+    {
+      "id": "pitcher",
+      "label": "Bình Hứng Mưa",
+      "cost": 50,
+      "hp": 120,
+      "placementCooldownSeconds": 6,
+      "payout": 18,
+      "payoutSeconds": 10
+    },
+    {
+      "id": "fern",
+      "label": "Dương Xỉ Nảy",
+      "cost": 70,
+      "hp": 135,
+      "placementCooldownSeconds": 3.5,
+      "damage": 24,
+      "cooldownSeconds": 2.1,
+      "rangeTiles": 7.5,
+      "flightSeconds": 0.35
+    },
+    {
+      "id": "bramble",
+      "label": "Gai Cuộn",
+      "cost": 55,
+      "hp": 245,
+      "placementCooldownSeconds": 5,
+      "damage": 17,
+      "cooldownSeconds": 2.7,
+      "rangeTiles": 1.35,
+      "rootSeconds": 1.45
+    },
+    {
+      "id": "orchid",
+      "label": "Lan Sét",
+      "cost": 95,
+      "hp": 125,
+      "placementCooldownSeconds": 7,
+      "damage": 29,
+      "cooldownSeconds": 3.05,
+      "rangeTiles": 5.8,
+      "armSeconds": 0.75,
+      "dryAdditionalTargets": 1,
+      "wetAdditionalTargets": 3,
+      "jumpRangeTiles": 1.4,
+      "jumpDamage": [
+        20,
+        16,
+        12
+      ]
+    },
+    {
+      "id": "moss",
+      "label": "Rêu Thành",
+      "cost": 60,
+      "hp": 470,
+      "placementCooldownSeconds": 8,
+      "wetHealPerSecond": 8,
+      "regenDelaySeconds": 4
+    },
+    {
+      "id": "pod",
+      "label": "Lựu Cầu Chì",
+      "cost": 80,
+      "hp": 125,
+      "placementCooldownSeconds": 14,
+      "damage": 155,
+      "triggerRadius": 0.8,
+      "blastRadius": 1.4,
+      "armSeconds": 2.75
+    }
+  ],
+  "enemies": [
+    {
+      "id": "walker",
+      "label": "Nấm Gác",
+      "hp": 100,
+      "speedTilesPerSecond": 0.245,
+      "biteDamage": 21,
+      "biteSeconds": 1.35,
+      "coreDamage": 1
+    },
+    {
+      "id": "courier",
+      "label": "Mũ Tím",
+      "hp": 75,
+      "speedTilesPerSecond": 0.38,
+      "biteDamage": 17,
+      "biteSeconds": 1.05,
+      "coreDamage": 1
+    },
+    {
+      "id": "porter",
+      "label": "Chậu Giáp",
+      "hp": 245,
+      "speedTilesPerSecond": 0.19,
+      "biteDamage": 32,
+      "biteSeconds": 1.45,
+      "coreDamage": 1
+    },
+    {
+      "id": "raincoat",
+      "label": "Áo Mưa",
+      "hp": 165,
+      "speedTilesPerSecond": 0.255,
+      "biteDamage": 25,
+      "biteSeconds": 1.26,
+      "coreDamage": 1
+    },
+    {
+      "id": "mender",
+      "label": "Nấm Vá",
+      "hp": 150,
+      "speedTilesPerSecond": 0.235,
+      "biteDamage": 17,
+      "biteSeconds": 1.45,
+      "coreDamage": 1
+    },
+    {
+      "id": "keeper",
+      "label": "Thợ Vườn Gốm",
+      "hp": 1200,
+      "speedTilesPerSecond": 0.105,
+      "biteDamage": 52,
+      "biteSeconds": 1.56,
+      "coreDamage": 3
+    }
+  ],
+  "levels": [
+    {
+      "id": "raincourt",
+      "title": "Sân Mưa",
+      "startingStock": 140,
+      "coreHealth": 3,
+      "waterEnabled": false,
+      "cardIds": [
+        "pitcher",
+        "fern",
+        "bramble",
+        "orchid"
+      ],
+      "cardUnlocks": {
+        "orchid": {
+          "wave": 3,
+          "trigger": "announcement"
+        }
+      },
+      "waves": [
+        {
+          "number": 1,
+          "atSeconds": 4,
+          "announceLeadSeconds": 3,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 20,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 6.0
+            },
+            {
+              "offsetSeconds": 31,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 1,
+              "gapSeconds": 0.0
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "atSeconds": 41,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 2,
+              "gapSeconds": 3.5
+            },
+            {
+              "offsetSeconds": 16,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 26,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 4.0
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "atSeconds": 80,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 5,
+              "gapSeconds": 1.6
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.8
+            },
+            {
+              "offsetSeconds": 16,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.2
+            },
+            {
+              "offsetSeconds": 27,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 3.0
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "atSeconds": 120,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "porter",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 12,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 4,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 22,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 30,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 2.25
+            },
+            {
+              "offsetSeconds": 42,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 3.0
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "atSeconds": 168,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.7
+            },
+            {
+              "offsetSeconds": 8,
+              "lane": 2,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 14,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 4,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 27,
+              "lane": 1,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 38,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.4
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "atSeconds": 215,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 3,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.5
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 5,
+              "gapSeconds": 1.25
+            },
+            {
+              "offsetSeconds": 16,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 3,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 25,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.3
+            },
+            {
+              "offsetSeconds": 33,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 4,
+              "gapSeconds": 2.4
+            },
+            {
+              "offsetSeconds": 44,
+              "lane": 1,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 4.0
+            }
+          ]
+        }
+      ],
+      "faults": []
+    },
+    {
+      "id": "pump-gallery",
+      "title": "Hầm Bơm",
+      "startingStock": 220,
+      "coreHealth": 3,
+      "waterEnabled": true,
+      "cardIds": [
+        "pitcher",
+        "fern",
+        "bramble",
+        "orchid",
+        "moss"
+      ],
+      "cardUnlocks": {},
+      "waves": [
+        {
+          "number": 1,
+          "atSeconds": 5,
+          "announceLeadSeconds": 3,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.5
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 2,
+              "gapSeconds": 2.3
+            },
+            {
+              "offsetSeconds": 22,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 31,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 2.8
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "atSeconds": 43,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 7,
+              "lane": 4,
+              "enemy": "mender",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 13,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 23,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 3.5
+            },
+            {
+              "offsetSeconds": 32,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 4,
+              "gapSeconds": 2.0
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "atSeconds": 86,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 5,
+              "lane": 2,
+              "enemy": "mender",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 13,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.6
+            },
+            {
+              "offsetSeconds": 24,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.5
+            },
+            {
+              "offsetSeconds": 37,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 40,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.0
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "atSeconds": 133,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 3,
+              "lane": 3,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.5
+            },
+            {
+              "offsetSeconds": 19,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 3,
+              "gapSeconds": 3.5
+            },
+            {
+              "offsetSeconds": 31,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.4
+            },
+            {
+              "offsetSeconds": 42,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 2.0
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "atSeconds": 180,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 6,
+              "gapSeconds": 1.55
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 12,
+              "lane": 4,
+              "enemy": "mender",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 21,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 32,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 41,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.45
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "atSeconds": 230,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 3,
+              "lane": 4,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 9,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 6,
+              "gapSeconds": 1.6
+            },
+            {
+              "offsetSeconds": 17,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.33
+            },
+            {
+              "offsetSeconds": 23,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 30,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.2
+            },
+            {
+              "offsetSeconds": 40,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.5
+            },
+            {
+              "offsetSeconds": 46,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 3.0
+            }
+          ]
+        }
+      ],
+      "faults": [
+        {
+          "atSeconds": 55,
+          "lane": 4,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 95,
+          "lane": 2,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 151,
+          "lane": 3,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 213,
+          "lane": 4,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 241,
+          "lane": 3,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        }
+      ]
+    },
+    {
+      "id": "lightning-dome",
+      "title": "Đài Chớp",
+      "startingStock": 265,
+      "coreHealth": 3,
+      "waterEnabled": true,
+      "cardIds": [
+        "pitcher",
+        "fern",
+        "bramble",
+        "orchid",
+        "moss",
+        "pod"
+      ],
+      "cardUnlocks": {},
+      "waves": [
+        {
+          "number": 1,
+          "atSeconds": 5,
+          "announceLeadSeconds": 3,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "porter",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 2,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 16,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 3,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 22,
+              "lane": 1,
+              "enemy": "walker",
+              "count": 3,
+              "gapSeconds": 2.2
+            },
+            {
+              "offsetSeconds": 33,
+              "lane": 4,
+              "enemy": "raincoat",
+              "count": 1,
+              "gapSeconds": 0.0
+            }
+          ]
+        },
+        {
+          "number": 2,
+          "atSeconds": 45,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 3.6
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 2,
+              "enemy": "mender",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 13,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 19,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 4,
+              "gapSeconds": 2.0
+            },
+            {
+              "offsetSeconds": 28,
+              "lane": 3,
+              "enemy": "courier",
+              "count": 4,
+              "gapSeconds": 1.8
+            },
+            {
+              "offsetSeconds": 37,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 1,
+              "gapSeconds": 0.0
+            }
+          ]
+        },
+        {
+          "number": 3,
+          "atSeconds": 88,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 3.7
+            },
+            {
+              "offsetSeconds": 8,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.5
+            },
+            {
+              "offsetSeconds": 14,
+              "lane": 4,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 23,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 6,
+              "gapSeconds": 1.4
+            },
+            {
+              "offsetSeconds": 32,
+              "lane": 1,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.0
+            }
+          ]
+        },
+        {
+          "number": 4,
+          "atSeconds": 130,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 6,
+              "gapSeconds": 1.7
+            },
+            {
+              "offsetSeconds": 15,
+              "lane": 2,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 21,
+              "lane": 2,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 29,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 7,
+              "gapSeconds": 1.45
+            },
+            {
+              "offsetSeconds": 39,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.5
+            }
+          ]
+        },
+        {
+          "number": 5,
+          "atSeconds": 175,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 3,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 2,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 20,
+              "lane": 1,
+              "enemy": "courier",
+              "count": 7,
+              "gapSeconds": 1.35
+            },
+            {
+              "offsetSeconds": 25,
+              "lane": 4,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.3
+            },
+            {
+              "offsetSeconds": 40,
+              "lane": 2,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.4
+            }
+          ]
+        },
+        {
+          "number": 6,
+          "atSeconds": 222,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 4,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 5,
+              "lane": 1,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 11,
+              "lane": 1,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 4.5
+            },
+            {
+              "offsetSeconds": 20,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 7,
+              "gapSeconds": 1.25
+            },
+            {
+              "offsetSeconds": 29,
+              "lane": 3,
+              "enemy": "raincoat",
+              "count": 4,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 34,
+              "lane": 4,
+              "enemy": "walker",
+              "count": 6,
+              "gapSeconds": 1.5
+            }
+          ]
+        },
+        {
+          "number": 7,
+          "atSeconds": 264,
+          "announceLeadSeconds": 6,
+          "groups": [
+            {
+              "offsetSeconds": 0,
+              "lane": 3,
+              "enemy": "keeper",
+              "count": 1,
+              "gapSeconds": 0.0
+            },
+            {
+              "offsetSeconds": 2,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 4,
+              "gapSeconds": 1.75
+            },
+            {
+              "offsetSeconds": 6,
+              "lane": 2,
+              "enemy": "raincoat",
+              "count": 3,
+              "gapSeconds": 4.3
+            },
+            {
+              "offsetSeconds": 10,
+              "lane": 4,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.7
+            },
+            {
+              "offsetSeconds": 19,
+              "lane": 1,
+              "enemy": "porter",
+              "count": 3,
+              "gapSeconds": 3.0
+            },
+            {
+              "offsetSeconds": 24,
+              "lane": 3,
+              "enemy": "porter",
+              "count": 2,
+              "gapSeconds": 5.0
+            },
+            {
+              "offsetSeconds": 29,
+              "lane": 4,
+              "enemy": "mender",
+              "count": 2,
+              "gapSeconds": 6.0
+            },
+            {
+              "offsetSeconds": 34,
+              "lane": 2,
+              "enemy": "courier",
+              "count": 5,
+              "gapSeconds": 1.6
+            },
+            {
+              "offsetSeconds": 43,
+              "lane": 1,
+              "enemy": "raincoat",
+              "count": 2,
+              "gapSeconds": 4.0
+            },
+            {
+              "offsetSeconds": 48,
+              "lane": 3,
+              "enemy": "walker",
+              "count": 5,
+              "gapSeconds": 1.6
+            }
+          ]
+        }
+      ],
+      "faults": [
+        {
+          "atSeconds": 118,
+          "lane": 3,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 243,
+          "lane": 2,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        },
+        {
+          "atSeconds": 280,
+          "lane": 4,
+          "warningSeconds": 3,
+          "closedSeconds": 13
+        }
+      ]
+    }
+  ]
+}

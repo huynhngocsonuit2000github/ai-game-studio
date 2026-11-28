@@ -1,0 +1,677 @@
+{
+  "schemaVersion": 1,
+  "tickRate": 30,
+  "units": {
+    "pitcher": {
+      "asset": "retro/motion/pitcher-motion.webp",
+      "source": "retro/plants/pitcher.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "gather": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "release": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "fern": {
+      "asset": "retro/motion/fern-motion.webp",
+      "source": "retro/plants/fern.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "windup": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fire": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "bramble": {
+      "asset": "retro/motion/bramble-motion.webp",
+      "source": "retro/plants/bramble.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "windup": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "lash": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "orchid": {
+      "asset": "retro/motion/orchid-motion.webp",
+      "source": "retro/plants/orchid.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 42,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "charge": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "spark": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "moss": {
+      "asset": "retro/motion/moss-motion.webp",
+      "source": "retro/plants/moss.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 42,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "brace": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "mend": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 15,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "pod": {
+      "asset": "retro/motion/pod-motion.webp",
+      "source": "retro/plants/pod.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "idle": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "arm": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "armed": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "burst": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 3
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "walker": {
+      "asset": "retro/motion/walker-motion.webp",
+      "source": "retro/enemies/walker.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "courier": {
+      "asset": "retro/motion/courier-motion.webp",
+      "source": "retro/enemies/courier.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        780
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 15,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 15,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 21,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 27,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "porter": {
+      "asset": "retro/motion/porter-motion.webp",
+      "source": "retro/enemies/porter.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        936
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 21,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "brace": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 15,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 5,
+          "frameCount": 6,
+          "durationTicks": 33,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "raincoat": {
+      "asset": "retro/motion/raincoat-motion.webp",
+      "source": "retro/enemies/raincoat.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        936
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "insulated": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 5,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "mender": {
+      "asset": "retro/motion/mender-motion.webp",
+      "source": "retro/enemies/mender.webp",
+      "cell": [
+        156,
+        156
+      ],
+      "anchorPx": [
+        78,
+        133
+      ],
+      "atlasSize": [
+        936,
+        936
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "heal": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 12,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 5,
+          "frameCount": 6,
+          "durationTicks": 30,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    },
+    "keeper": {
+      "asset": "retro/motion/keeper-motion.webp",
+      "source": "retro/enemies/keeper.webp",
+      "cell": [
+        192,
+        192
+      ],
+      "anchorPx": [
+        96,
+        164
+      ],
+      "atlasSize": [
+        1152,
+        1344
+      ],
+      "clips": {
+        "walk": {
+          "row": 0,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "bite": {
+          "row": 1,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "signal": {
+          "row": 2,
+          "frameCount": 6,
+          "durationTicks": 72,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "phase": {
+          "row": 3,
+          "frameCount": 6,
+          "durationTicks": 36,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "hurt": {
+          "row": 4,
+          "frameCount": 6,
+          "durationTicks": 18,
+          "loop": false,
+          "reducedFrame": 2
+        },
+        "restrained": {
+          "row": 5,
+          "frameCount": 6,
+          "durationTicks": 24,
+          "loop": true,
+          "reducedFrame": 2
+        },
+        "fall": {
+          "row": 6,
+          "frameCount": 6,
+          "durationTicks": 45,
+          "loop": false,
+          "reducedFrame": 3
+        }
+      }
+    }
+  }
+}

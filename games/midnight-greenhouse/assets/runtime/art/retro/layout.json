@@ -1,0 +1,285 @@
+{
+  "schemaVersion": 1,
+  "arenas": {
+    "raincourt": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "retro/boards/raincourt.webp",
+      "xPlantSpan": [
+        0.118,
+        0.858
+      ],
+      "visualRowEdges": [
+        0.251,
+        0.407,
+        0.576,
+        0.752,
+        0.939
+      ],
+      "feetY": [
+        0.3789,
+        0.5456,
+        0.7203,
+        0.9053
+      ],
+      "valveX": 0.068,
+      "entranceX": 0.8996
+    },
+    "pump-gallery": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "retro/boards/pump-gallery.webp",
+      "xPlantSpan": [
+        0.122,
+        0.874
+      ],
+      "visualRowEdges": [
+        0.22,
+        0.388,
+        0.572,
+        0.755,
+        0.936
+      ],
+      "feetY": [
+        0.3578,
+        0.5389,
+        0.7221,
+        0.9034
+      ],
+      "valveX": 0.072,
+      "entranceX": 0.9163
+    },
+    "lightning-dome": {
+      "artSize": [
+        1536,
+        1024
+      ],
+      "boardAsset": "retro/boards/lightning-dome.webp",
+      "xPlantSpan": [
+        0.123,
+        0.876
+      ],
+      "visualRowEdges": [
+        0.272,
+        0.428,
+        0.578,
+        0.731,
+        0.896
+      ],
+      "feetY": [
+        0.3999,
+        0.551,
+        0.7035,
+        0.8663
+      ],
+      "valveX": 0.073,
+      "entranceX": 0.9184
+    }
+  },
+  "sprites": {
+    "pitcher": {
+      "asset": "retro/plants/pitcher.webp",
+      "size": [
+        179,
+        220
+      ],
+      "anchorPx": [
+        89,
+        212
+      ]
+    },
+    "fern": {
+      "asset": "retro/plants/fern.webp",
+      "size": [
+        220,
+        220
+      ],
+      "anchorPx": [
+        110,
+        212
+      ]
+    },
+    "bramble": {
+      "asset": "retro/plants/bramble.webp",
+      "size": [
+        203,
+        220
+      ],
+      "anchorPx": [
+        102,
+        212
+      ]
+    },
+    "orchid": {
+      "asset": "retro/plants/orchid.webp",
+      "size": [
+        204,
+        220
+      ],
+      "anchorPx": [
+        102,
+        213
+      ]
+    },
+    "moss": {
+      "asset": "retro/plants/moss.webp",
+      "size": [
+        215,
+        220
+      ],
+      "anchorPx": [
+        108,
+        213
+      ]
+    },
+    "pod": {
+      "asset": "retro/plants/pod.webp",
+      "size": [
+        206,
+        220
+      ],
+      "anchorPx": [
+        102,
+        213
+      ]
+    },
+    "walker": {
+      "asset": "retro/enemies/walker.webp",
+      "size": [
+        207,
+        220
+      ],
+      "anchorPx": [
+        103,
+        211
+      ]
+    },
+    "courier": {
+      "asset": "retro/enemies/courier.webp",
+      "size": [
+        239,
+        220
+      ],
+      "anchorPx": [
+        120,
+        213
+      ]
+    },
+    "porter": {
+      "asset": "retro/enemies/porter.webp",
+      "size": [
+        217,
+        220
+      ],
+      "anchorPx": [
+        108,
+        212
+      ]
+    },
+    "raincoat": {
+      "asset": "retro/enemies/raincoat.webp",
+      "size": [
+        158,
+        220
+      ],
+      "anchorPx": [
+        79,
+        212
+      ]
+    },
+    "mender": {
+      "asset": "retro/enemies/mender.webp",
+      "size": [
+        193,
+        220
+      ],
+      "anchorPx": [
+        96,
+        211
+      ]
+    },
+    "keeper": {
+      "asset": "retro/enemies/keeper.webp",
+      "size": [
+        349,
+        300
+      ],
+      "anchorPx": [
+        176,
+        288
+      ]
+    }
+  },
+  "icons": {
+    "seed": {
+      "asset": "retro/icons/seed.webp",
+      "size": [
+        90,
+        112
+      ],
+      "anchorPx": [
+        45,
+        109
+      ]
+    },
+    "bell": {
+      "asset": "retro/icons/bell.webp",
+      "size": [
+        85,
+        112
+      ],
+      "anchorPx": [
+        42,
+        109
+      ]
+    },
+    "hoe": {
+      "asset": "retro/icons/hoe.webp",
+      "size": [
+        102,
+        112
+      ],
+      "anchorPx": [
+        51,
+        109
+      ]
+    },
+    "valve": {
+      "asset": "retro/icons/valve.webp",
+      "size": [
+        93,
+        112
+      ],
+      "anchorPx": [
+        46,
+        109
+      ]
+    },
+    "flag": {
+      "asset": "retro/icons/flag.webp",
+      "size": [
+        123,
+        112
+      ],
+      "anchorPx": [
+        62,
+        109
+      ]
+    },
+    "heart": {
+      "asset": "retro/icons/heart.webp",
+      "size": [
+        94,
+        112
+      ],
+      "anchorPx": [
+        47,
+        109
+      ]
+    }
+  }
+}

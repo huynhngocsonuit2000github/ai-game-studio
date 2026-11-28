@@ -41,3 +41,9 @@ The 13 game tests cover the new simulation rules and both new authored clear rou
 ## S05 — GH-50
 
 The game remains game-local and private to the temporary catalog. Candidate review requires all three end-to-end clears and green CI. The [PR verification record](https://github.com/huynhngocsonuit2000github/ai-game-studio/pull/35) carries those results, current head and the standalone three-level archive. Physical mobile, Firefox, Safari, assistive technology and subjective audio review are separate checks. Producer retains merge, Pages registration/publication and G4.
+
+## GH-RETRO-01 v2
+
+Trusted GitHub main was refreshed at `e25dbe3c78a4ef45105bb444e9c55fc088f079f6` (PR #35 merged and public development registration in PR #36). The user-supplied ZIP contained 12,069,094 bytes and matched the external SHA-256 `9e526d783071e163a1d386d5840fe54eb60df197c59441e4cba062bf78ab7603`. The validator staged 54 additive destinations, with zero replacements and zero missing assets. All imported files matched the staged hashes, and every asset had cleared rights. The branch originated at the pinned main with no earlier refresh work. The raw attachment, approval and single validator receipt are kept outside Git.
+
+[GH-D06](DECISIONS.md) authorizes the game-local refresh and public development preview after manual merge. The registry entry and release workflow are inherited from main. The attachment documents prior live inspection at the baseline SHA. The Cloud shell's direct Pages marker request returned a proxy 403, so that historical inspection is kept separate from candidate verification. See the [feature brief](../design/retro/FEATURE.md) and [retro QA](../reports/RETRO_QA.md) for the implementation and acceptance evidence.
