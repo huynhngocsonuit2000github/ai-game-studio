@@ -1,5 +1,9 @@
 # Art direction
 
+The refresh uses the supplied original illustrated garden and the left-hand garden notebook. [Current art target](retro/ART_TARGET.md) · [Sổ tay and animation contract](retro/FIELD_GUIDE.md)
+
+The original visual direction below preserves the S00–S05 handoff. Its boards, HUD and single-frame motion treatment describe the pre-refresh candidate.
+
 A premium painted miniature greenhouse after midnight. Use teal slate, weathered copper, warm amber stained glass and ultramarine rain. Sân Mưa is welcoming amber and green, Hầm Bơm contrasts cyan glass and lilac boilers, Đài Chớp uses cobalt with hints of magenta. The playfield should remain dark enough for unit visibility. Water, warnings, immunity and locks each have a separate visual silhouette and text cue.
 
 ## Supplied imagery

@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "locale": "vi",
+  "plants": [
+    {
+      "id": "pitcher",
+      "name": "Bình Hứng Mưa",
+      "role": "Kinh tế",
+      "firstSeen": "Sân Mưa · từ đầu trận",
+      "strength": "Sinh thêm Ánh Hạt mà không cần tưới.",
+      "limitation": "Không tấn công và chiếm chỗ trồng cây phòng thủ.",
+      "howTo": "Đặt phía sau Dương Xỉ. Ưu tiên luống đã có người giữ.",
+      "tip": "Có thể bấm nhận hạt ngay hoặc để chúng tự cộng.",
+      "related": [
+        "fern",
+        "collect"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "fern",
+      "name": "Dương Xỉ Nảy",
+      "role": "Sát thương tầm xa",
+      "firstSeen": "Sân Mưa · từ đầu trận",
+      "strength": "Bắn vòng qua giáp Chậu Giáp, giữ luống tốt từ đầu trận.",
+      "limitation": "Chỉ bắn cùng luống. Địch chạy nhanh vẫn có thể áp sát nếu thiếu cây chặn.",
+      "howTo": "Đặt sau cây chắn. Dùng thêm cây ở luống có nhiều địch thay vì dồn hết vào một luống.",
+      "tip": "Gai Cuộn giữ chân cho Dương Xỉ bắn thêm lượt.",
+      "related": [
+        "bramble",
+        "porter"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "bramble",
+      "name": "Gai Cuộn",
+      "role": "Khống chế",
+      "firstSeen": "Sân Mưa · từ đầu trận",
+      "strength": "Giữ chân quái thường và làm chậm boss.",
+      "limitation": "Tầm ngắn. Gai gõ vào mặt giáp Chậu Giáp yếu hơn đòn vòng qua.",
+      "howTo": "Đặt phía trước Dương Xỉ, nhắm luống Mũ Tím hay tràn qua.",
+      "tip": "Gai chỉ giữ chân, quái đứng sát vẫn có thể cắn.",
+      "related": [
+        "fern",
+        "courier",
+        "keeper"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "orchid",
+      "name": "Lan Sét",
+      "role": "Sát thương dây chuyền",
+      "firstSeen": "Sân Mưa · hiện khi báo đợt 3",
+      "strength": "Đánh lan trong cụm cùng luống. Tưới đúng luống từ Hầm Bơm để đánh lan xa hơn.",
+      "limitation": "Áo Mưa miễn nhiễm. Địch đứng rời nhau làm gián đoạn chuỗi sét.",
+      "howTo": "Đặt sau hàng chắn, chờ quái đứng gần rồi chuyển dòng nếu màn có van.",
+      "tip": "Giữ Dương Xỉ ở luống Áo Mưa. Không đầu tư toàn bộ vào sét.",
+      "related": [
+        "raincoat",
+        "moss",
+        "water"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "moss",
+      "name": "Rêu Thành",
+      "role": "Chặn địch",
+      "firstSeen": "Hầm Bơm · từ đầu trận",
+      "strength": "Chịu đòn lâu, hồi dần khi được tưới và có thời gian nghỉ.",
+      "limitation": "Không đánh trả. Đừng dựa vào hồi máu khi van sắp bị khóa.",
+      "howTo": "Đặt phía trước Lan Sét hoặc Dương Xỉ ở luống đông.",
+      "tip": "Cân nhắc tưới Rêu lúc cần kéo dài thế trận thay vì chuyển nước liên tục.",
+      "related": [
+        "orchid",
+        "water",
+        "keeper"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "pod",
+      "name": "Lựu Cầu Chì",
+      "role": "Sát thương diện rộng",
+      "firstSeen": "Đài Chớp · từ đầu trận",
+      "strength": "Nổ một lần, mạnh khi nhiều quái cùng luống tụ lại.",
+      "limitation": "Phải có thời gian lên ngòi. Nếu bị phá trước khi sẵn sàng thì không nổ.",
+      "howTo": "Đặt đón đầu chỗ đối phương sẽ đi qua, có Gai hoặc Rêu câu giờ.",
+      "tip": "Dùng để dọn nhóm theo boss, vẫn giữ cây đánh lâu dài cho boss.",
+      "related": [
+        "moss",
+        "bramble",
+        "keeper"
+      ],
+      "spoiler": false
+    }
+  ],
+  "enemies": [
+    {
+      "id": "walker",
+      "name": "Nấm Gác",
+      "role": "Áp lực cơ bản",
+      "firstSeen": "Sân Mưa · đợt đầu",
+      "strength": "Đi chậm, cắn cây đầu tiên nó chạm phải.",
+      "limitation": "Không có giáp đặc biệt.",
+      "howTo": "Một Dương Xỉ ở đúng luống đủ đối phó nhóm nhỏ. Tận dụng lúc nó còn xa để tích hạt.",
+      "tip": "Nhìn mũ nấm và bước đi chậm để phân biệt với Mũ Tím.",
+      "related": [
+        "fern"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "courier",
+      "name": "Mũ Tím",
+      "role": "Tấn công nhanh",
+      "firstSeen": "Sân Mưa",
+      "strength": "Chạy nhanh, hay xuất hiện để ép đổi luống.",
+      "limitation": "Máu thấp, dễ bị Gai giữ chân.",
+      "howTo": "Gia cố luống có khăn bay sớm. Kết hợp Gai trước và Dương Xỉ sau.",
+      "tip": "Cờ ở mép sân cho biết luống sắp có địch.",
+      "related": [
+        "bramble",
+        "fern"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "porter",
+      "name": "Chậu Giáp",
+      "role": "Khiên gốm",
+      "firstSeen": "Sân Mưa",
+      "strength": "Khiên làm yếu đòn Gai Cuộn đánh trực diện.",
+      "limitation": "Dương Xỉ bắn vòng qua được. Sét và Lựu vẫn có tác dụng.",
+      "howTo": "Giữ ít nhất một nguồn sát thương hợp vai ở luống nó đi qua.",
+      "tip": "Biểu tượng khiên và tiếng gốm cho biết đòn nào đang chạm giáp.",
+      "related": [
+        "fern",
+        "orchid",
+        "pod"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "raincoat",
+      "name": "Áo Mưa",
+      "role": "Miễn nhiễm sét",
+      "firstSeen": "Sân Mưa",
+      "strength": "Áo chống sét khiến Lan Sét không gây sát thương lên nó.",
+      "limitation": "Vẫn nhận sát thương vật lý và có thể bị Gai giữ chân.",
+      "howTo": "Đặt Dương Xỉ hoặc Lựu, dùng Rêu trì hoãn nếu đã mở.",
+      "tip": "Đừng đổi thêm nước vào luống chỉ để cố đánh Áo Mưa bằng Lan Sét.",
+      "related": [
+        "fern",
+        "bramble",
+        "pod"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "mender",
+      "name": "Nấm Vá",
+      "role": "Hồi máu",
+      "firstSeen": "Hầm Bơm",
+      "strength": "Hồi máu cho đồng đội bị thương trên cùng luống.",
+      "limitation": "Không hồi sinh địch, không tự hồi và không hồi boss.",
+      "howTo": "Đánh lan hoặc dồn sát thương nhanh trước khi nó kịp vá nhóm.",
+      "tip": "Nhìn bình thuốc và vệt sáng tới con được hồi.",
+      "related": [
+        "orchid",
+        "pod"
+      ],
+      "spoiler": false
+    },
+    {
+      "id": "keeper",
+      "name": "Thợ Vườn Gốm",
+      "role": "Boss hai pha",
+      "firstSeen": "Đài Chớp",
+      "strength": "Báo trước rồi khóa một luống nước; hung hơn ở pha hai.",
+      "limitation": "Có thể bị đánh vật lý trong cả hai pha. Gai làm chậm thay vì trói chặt.",
+      "howTo": "Khi thấy cảnh báo, dời nước nếu cần. Giữ Dương Xỉ ở luống boss và bảo vệ các luống phụ.",
+      "tip": "Chuông gốm không cản boss. Khi boss ngã, xử lý nốt địch còn lại.",
+      "related": [
+        "fern",
+        "moss",
+        "water",
+        "bell"
+      ],
+      "spoiler": true
+    }
+  ],
+  "skills": [
+    {
+      "id": "plant",
+      "name": "Trồng và tháo cây",
+      "role": "Điều khiển",
+      "howTo": "Chọn thẻ, chọn ô có bóng xem trước. Thẻ cho biết chi phí và hồi chiêu.",
+      "tip": "Tháo nhầm cây hoàn một phần Ánh Hạt. Dùng Tháo cây rồi chọn ô có cây.",
+      "related": [
+        "fern"
+      ]
+    },
+    {
+      "id": "collect",
+      "name": "Thu Ánh Hạt",
+      "role": "Kinh tế",
+      "howTo": "Chạm hoặc bấm hạt để nhận ngay. Bấm Thu hạt hoặc S để thu các hạt hiện có.",
+      "tip": "Nếu chưa thu, hạt vẫn tự cộng. Đầu tư Bình Hứng sớm để có tiền gia cố lúc địch đông.",
+      "related": [
+        "pitcher"
+      ]
+    },
+    {
+      "id": "water",
+      "name": "Điều dòng nước",
+      "role": "Hầm Bơm và Đài Chớp",
+      "howTo": "Chọn van ở đầu luống. Luống có nước tăng chuỗi Lan Sét và giúp Rêu hồi.",
+      "tip": "Nếu van bị khóa, xem cờ và đếm ngược rồi chuyển luống khác. Sân Mưa chơi không cần van.",
+      "related": [
+        "orchid",
+        "moss",
+        "keeper"
+      ]
+    },
+    {
+      "id": "bell",
+      "name": "Chuông Gốm",
+      "role": "Cứu nguy",
+      "howTo": "Chuông tự dùng khi một quái thường đầu tiên vượt hàng thủ.",
+      "tip": "Một lần mỗi trận. Nó cản một con và làm chững quái ở luống đó. Boss vượt qua vẫn gây thua.",
+      "related": [
+        "walker",
+        "keeper"
+      ]
+    },
+    {
+      "id": "waves",
+      "name": "Đọc đợt địch",
+      "role": "Chiến thuật",
+      "howTo": "Cờ mép sân báo luống có địch sắp đến, thanh đợt cho biết tiến độ trận.",
+      "tip": "Chừa Ánh Hạt cho luống yếu. Đổi loại cây nếu có Áo Mưa hoặc Chậu Giáp.",
+      "related": [
+        "raincoat",
+        "porter",
+        "courier"
+      ]
+    }
+  ]
+}

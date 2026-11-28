@@ -1,13 +1,13 @@
 import type { Cue } from './simulation.js';
 import type { Settings } from './save.js';
 
-type Bed = 'off' | 'brief' | 'watch' | 'storm';
-type Track = 'ambient-rain' | 'music-watch' | 'music-storm';
+type Bed = 'off' | 'watch' | 'storm';
+type Track = 'retro/courtyard' | 'retro/rush';
 type Voice = { source: AudioBufferSourceNode; cue: Cue };
 type Loop = { source: AudioBufferSourceNode; gain: GainNode };
 
-const priority: Partial<Record<Cue, number>> = { breach: 2, warning: 1, "valve-lock": 2, victory: 3, defeat: 3 };
-const tracks: Track[] = ['ambient-rain', 'music-watch', 'music-storm'];
+const priority: Partial<Record<Cue, number>> = { breach: 2, warning: 2, bell: 3, unlock: 2, "valve-lock": 2, victory: 3, defeat: 3 };
+const tracks: Track[] = ['retro/courtyard', 'retro/rush'];
 
 export class Sound {
   private context?: AudioContext;
@@ -48,7 +48,7 @@ export class Sound {
 
   setScene(scene: Bed) {
     if (this.scene === scene) return;
-    const resting = this.scene === 'off' || this.scene === 'brief';
+    const resting = this.scene === 'off';
     this.scene = scene;
     this.blendStart = performance.now();
     this.blendFrom = resting ? 0 : this.blend;
@@ -89,19 +89,18 @@ export class Sound {
   }
 
   private wantsLoop(name: Track) {
-    return this.scene !== 'off' && (name === 'ambient-rain' || this.scene !== 'brief');
+    return this.scene !== 'off' && (name === 'retro/courtyard' || this.scene === 'storm');
   }
 
   private loopGain(name: Track) {
-    if (name === 'ambient-rain') return this.scene === 'brief' ? 0.21 : 0.37;
-    return name === 'music-watch' ? (1 - this.blend) * 0.77 : this.blend * 0.75;
+    return name === 'retro/courtyard' ? (1 - this.blend) * 0.72 : this.blend * 0.68;
   }
 
   private async startLoop(name: Track, context: AudioContext, bus: GainNode) {
     this.pendingLoops.add(name);
     const buffer = await this.load(name, context);
-    if (!buffer) return;
     this.pendingLoops.delete(name);
+    if (!buffer) return;
     if (this.paused || !this.wantsLoop(name)) return;
     const source = context.createBufferSource();
     const gain = context.createGain();
@@ -139,7 +138,8 @@ export class Sound {
     if (now - (this.last.get(cue) ?? -Infinity) < 90) return;
     this.last.set(cue, now);
     const generation = this.voiceGeneration;
-    const buffer = await this.load(cue, context);
+    const retro = cue === 'collect' || cue === 'bell' || cue === 'unlock' || cue === 'shield-chip';
+    const buffer = await this.load(retro ? 'retro/' + cue : cue, context);
     if (!buffer || generation !== this.voiceGeneration || this.paused || this.settings.mute) return;
     if (this.voices.size >= 8) {
       const interrupted = [...this.voices].find((voice) => (priority[voice.cue] ?? 0) < (priority[cue] ?? 0));

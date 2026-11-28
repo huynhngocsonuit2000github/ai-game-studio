@@ -5,7 +5,8 @@ export type Settings = { master: number; music: number; sfx: number; mute: boole
 type Win = { stars: number; fastest: number };
 const prefix = 'midnight-greenhouse.';
 const settingsKey = prefix + 'settings.v1';
-const progressKey = prefix + 'progress.v1';
+const legacyKey = prefix + 'progress.v1';
+const progressKey = prefix + 'retro.progress.v1';
 
 function read(key: string): unknown {
   const value = localStorage.getItem(key);
@@ -16,10 +17,20 @@ const isObject = (value: unknown): value is { [key: string]: unknown } =>
 const volume = (value: unknown, fallback: number) =>
   typeof value === 'number' && value >= 0 && value <= 1 ? value : fallback;
 
+function parseWin(source: unknown, id: LevelId): Win | undefined {
+  if (!isObject(source) || source.version !== 1) return;
+  const value = source[id];
+  if (!isObject(value)) return;
+  const { stars, fastest } = value;
+  if (typeof stars === 'number' && Number.isInteger(stars) && stars >= 1 && stars <= 3
+    && typeof fastest === 'number' && Number.isFinite(fastest) && fastest > 0) return { stars, fastest };
+}
+
 export class Save {
   readonly settings: Settings = { master: 0.7, music: 0.35, sfx: 0.65, mute: false,
     reduced: matchMedia('(prefers-reduced-motion: reduce)').matches };
   private readonly wins: Partial<Record<LevelId, Win>> = {};
+  private readonly oldWins: Partial<Record<LevelId, Win>> = {};
   unavailable = false;
 
   constructor() {
@@ -30,16 +41,14 @@ export class Save {
         if (typeof settings.mute === 'boolean') this.settings.mute = settings.mute;
         if (typeof settings.reduced === 'boolean') this.settings.reduced = settings.reduced;
       }
-      const progress = read(progressKey);
-      if (isObject(progress) && progress.version === 1) {
-        for (const id of levels) {
-          const value = progress[id];
-          if (!isObject(value)) break;
-          const { stars, fastest } = value;
-          if (typeof stars !== 'number' || !Number.isInteger(stars) || stars < 1 || stars > 3
-            || typeof fastest !== 'number' || !Number.isFinite(fastest) || fastest <= 0) break;
-          this.wins[id] = { stars, fastest };
-        }
+      const legacy = read(legacyKey);
+      const retro = read(progressKey);
+      for (const id of levels) {
+        const oldWin = parseWin(legacy, id);
+        const newWin = parseWin(retro, id);
+        if (!this.unlocked(id)) break;
+        if (oldWin && (id === levels[0] || this.oldWins[levels[levels.indexOf(id) - 1]])) this.oldWins[id] = oldWin;
+        if (newWin) this.wins[id] = newWin;
       }
     } catch {
       this.unavailable = true;
@@ -60,8 +69,10 @@ export class Save {
 
   record(id: LevelId) { return this.wins[id]; }
 
+  legacy(id: LevelId) { return this.oldWins[id]; }
+
   unlocked(id: LevelId) {
-    return levels.slice(0, levels.indexOf(id)).every((prior) => Boolean(this.wins[prior]));
+    return levels.slice(0, levels.indexOf(id)).every((prior) => Boolean(this.wins[prior] || this.oldWins[prior]));
   }
 
   win(id: LevelId, stars: number, time: number) {

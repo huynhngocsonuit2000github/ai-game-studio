@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "gameId": "midnight-greenhouse",
-  "baselineCommit": "2fef3a8e97ae219767bad273bd67ea6724408306",
+  "baselineCommit": "e25dbe3c78a4ef45105bb444e9c55fc088f079f6",
   "records": [
     {
       "id": "raincourt",
@@ -10,9 +10,21 @@
       "implementation": "implemented",
       "publicAvailability": "private",
       "acceptance": "pending",
-      "evidence": ["tests/simulation.test.mjs", "tests/pages.spec.ts", "reports/QA_REPORT.md"],
+      "evidence": [
+        "tests/simulation.test.mjs",
+        "tests/pages.spec.ts",
+        "reports/QA_REPORT.md",
+        "reports/RETRO_QA.md"
+      ],
       "acceptanceEvidence": [],
-      "artifactCheck": { "target": "private-fixture", "result": "PASS", "evidence": ["reports/QA_REPORT.md", "tests/pages.spec.ts"] }
+      "artifactCheck": {
+        "target": "private-fixture",
+        "result": "PASS",
+        "evidence": [
+          "reports/QA_REPORT.md",
+          "tests/pages.spec.ts"
+        ]
+      }
     },
     {
       "id": "pump-gallery",
@@ -25,7 +37,8 @@
         "tests/simulation.test.mjs",
         "tests/pages.spec.ts",
         "tests/playtest.mjs",
-        "reports/QA_REPORT.md"
+        "reports/QA_REPORT.md",
+        "reports/RETRO_QA.md"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
@@ -48,7 +61,8 @@
         "tests/simulation.test.mjs",
         "tests/pages.spec.ts",
         "tests/playtest.mjs",
-        "reports/QA_REPORT.md"
+        "reports/QA_REPORT.md",
+        "reports/RETRO_QA.md"
       ],
       "acceptanceEvidence": [],
       "artifactCheck": {
@@ -61,17 +75,46 @@
       }
     }
   ],
-  "knownGaps": ["Physical phones, Firefox, Safari, assistive technology and human mix review pending", "reports/QA_REPORT.md"],
-  "save": { "schema": "midnight-greenhouse.progress", "version": 1, "evidence": ["src/save.ts"] },
-  "publication": { "rights": "cleared", "preview": "pending", "release": "blocked", "evidence": ["production/DECISIONS.md"] },
+  "knownGaps": [
+    "Physical phone, Firefox, Safari, assistive technology, human audio mix and Producer playtest pending",
+    "Candidate live deployment awaits manual merge. Cloud HTTP request for the baseline Pages marker was blocked",
+    "reports/RETRO_QA.md"
+  ],
+  "save": {
+    "schema": "midnight-greenhouse.retro.progress",
+    "version": 1,
+    "evidence": [
+      "src/save.ts",
+      "tests/simulation.test.mjs",
+      "design/retro/FEATURE.md"
+    ]
+  },
+  "publication": {
+    "rights": "cleared",
+    "preview": "approved",
+    "release": "blocked",
+    "evidence": [
+      "production/DECISIONS.md",
+      "production/ASSET_MANIFEST.csv"
+    ]
+  },
   "deployment": {
     "deployedCommit": null,
     "url": null,
     "observedAt": null,
     "checks": {
-      "revision": { "result": "NOT_RUN", "evidence": [] },
-      "http": { "result": "NOT_RUN", "evidence": [] },
-      "gameplay": { "result": "NOT_RUN", "evidence": [] }
+      "revision": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "http": {
+        "result": "NOT_RUN",
+        "evidence": []
+      },
+      "gameplay": {
+        "result": "NOT_RUN",
+        "evidence": []
+      }
     }
   }
 }
