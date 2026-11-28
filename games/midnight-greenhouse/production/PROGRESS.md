@@ -65,3 +65,11 @@ Producer feedback from the deployed Đài Chớp battle asked for noticeably mor
 The candidate uses the original pose sheets with stronger upright-body deformation, attack anticipation and follow-through, distinct enemy strides and event-driven contact effects. Four deterministic clears matched the deployed baseline on every tick for HP, positions, stock, cooldowns, projectiles, and the final result. [QA and combat comparison](../reports/QA_REPORT.md#gh-stage-motion-02)
 
 **Candidate ready.** The assembled-stage combat clips, 16 simulation checks and all 11 game browser cases passed locally. The 1280×720 late-wave frame-time run stayed within the desktop budget. The clip and recorded bench include the full-HD scene. Manual merge and candidate Pages verification remain pending.
+
+## GH-STAGE-MOTION-03
+
+The Producer asked for at least five times the visible animation detail, including clear foot contacts and individual hit reactions, using Chậu Giáp and Áo Mưa as pose references. Trusted main was `a2cd2603653d45dd6933f43ec49781da6be13533`, the merge of PR #39. GitHub Pages reported the exact marker and HTTP 200 for the game at 18:16 ICT on 28 November 2026. [Baseline Pages verification](https://github.com/huynhngocsonuit2000github/ai-game-studio/actions/runs/46138300772/job/140960706623)
+
+The source art produces a 12-character library of registered foot, shield, crown, windup, hit, and recovery poses. The first 65 action sequences were expanded, and 73 character-specific sequences were added. Combat uses these poses on the same simulation ticks as damage, movement, and recovery. Sổ tay previews the expanded library. [QA and visual evidence](../reports/QA_REPORT.md#gh-stage-motion-03)
+
+**Candidate ready.** The clip shows both referenced enemies before and after plus actual plant shots, bites, blocks and phase changes. The library has 2,149 distinct visible frames, 5.73 times the baseline count. All 17 game simulation checks and 11 assembled browser cases passed locally. Manual merge and candidate Pages verification are pending.

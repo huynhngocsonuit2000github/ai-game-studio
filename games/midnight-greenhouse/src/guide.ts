@@ -12,7 +12,10 @@ const names: Record<string, string> = {
   fire: 'Bắn', lash: 'Quất gai', charge: 'Tích điện', spark: 'Phóng sét', brace: 'Trụ vững', mend: 'Hồi sức',
   arm: 'Nạp', armed: 'Sẵn sàng', burst: 'Nổ', bite: 'Ra đòn', heal: 'Chữa đồng đội',
   insulated: 'Chặn điện', restrained: 'Bị giữ chân', signal: 'Báo khóa van', phase: 'Chuyển pha',
-  hurt: 'Nhận đòn', fall: 'Rút lui',
+  hurt: 'Nhận đòn', fall: 'Gục ngã', enter: 'Xuất hiện', recover: 'Lấy lại thăng bằng',
+  hitHeavy: 'Nhận đòn mạnh', wilt: 'Héo khi yếu', biteWindup: 'Lấy đà vồ',
+  biteRecovery: 'Thu thế sau khi vồ', blocked: 'Dừng trước vật cản', stunned: 'Bị choáng',
+  limp: 'Bước khập khiễng', phaseWalk: 'Bước ở pha hai',
 };
 
 export function guideRoute() {

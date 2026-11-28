@@ -1,4 +1,5 @@
 import { execFileSync } from 'node:child_process';
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath, URL } from 'node:url';
@@ -341,54 +342,64 @@ test('unsupported fullscreen explains the windowed fallback while combat stays u
   expect(errors).toEqual([]);
 });
 
-test('a planted Fern uses changing live atlas poses, and reduced motion still shows its attack pose', async ({ browser }) => {
+test('live Fern and Walker use expanded frames and keep fixed reduced-motion poses', async ({ browser }) => {
+  test.setTimeout(50_000);
+  type Clip = { firstFrame: number; frameCount: number; reducedFrame: number };
+  type Unit = { columns: number; clips: Record<string, Clip> };
+  const { units } = JSON.parse(readFileSync(new URL('../assets/runtime/art/retro/motion-library/atlas.json', import.meta.url), 'utf8')) as {
+    units: Record<'fern' | 'walker', Unit>;
+  };
+  const observed = { fern: units.fern, walker: units.walker };
   for (const reducedMotion of ['no-preference', 'reduce'] as const) {
     const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, reducedMotion });
     try {
       const page = await context.newPage();
       const errors = clientErrors(page);
-      await page.addInitScript(() => {
-        const frames = new Set<string>();
-        const bodyAngles = { idle: [0, 0], windup: 0, fire: 0 };
-        Object.defineProperty(window, '__fernProbe', { get: () => ({ frames: [...frames], bodyAngles }) });
+      await page.addInitScript((actors) => {
+        const frames = new Map<string, Set<number>>();
+        Object.defineProperty(window, '__poseProbe', { get: () => Object.fromEntries(
+          [...frames].map(([action, values]) => [action, [...values]])) });
+        const entries = Object.entries(actors);
         const draw = CanvasRenderingContext2D.prototype.drawImage;
         CanvasRenderingContext2D.prototype.drawImage = function (this: CanvasRenderingContext2D, image: CanvasImageSource, ...args: number[]) {
-          if (this.canvas.closest('#board') && image instanceof HTMLImageElement
-            && image.src.endsWith('/fern-motion.webp') && args.length === 8 && this.globalAlpha > 0.99) {
-            const row = args[1] / args[3];
-            frames.add(`${row}:${args[0] / args[2]}`);
-            const matrix = this.getTransform();
-            const lean = matrix.c === 0 ? 0 : -matrix.c / matrix.a;
-            if (row === 0) {
-              bodyAngles.idle[0] = Math.min(bodyAngles.idle[0], lean);
-              bodyAngles.idle[1] = Math.max(bodyAngles.idle[1], lean);
-            } else if (row === 1) bodyAngles.windup = Math.min(bodyAngles.windup, lean);
-            else if (row === 2) bodyAngles.fire = Math.max(bodyAngles.fire, lean);
+          if (this.canvas.closest('#board') && image instanceof HTMLImageElement && args.length === 8 && this.globalAlpha > .97) {
+            const actor = entries.find(([id]) => image.src.endsWith('/' + id + '-motion.webp'));
+            if (actor) {
+              const [id, unit] = actor;
+              const index = args[1] / args[3] * unit.columns + args[0] / args[2];
+              const clip = Object.entries(unit.clips).find(([, data]) =>
+                index >= data.firstFrame && index < data.firstFrame + data.frameCount);
+              if (clip) {
+                const key = id + '/' + clip[0];
+                const seen = frames.get(key) ?? new Set<number>();
+                seen.add(index - clip[1].firstFrame);
+                frames.set(key, seen);
+              }
+            }
           }
           Reflect.apply(draw, this, [image, ...args]);
         };
-      });
+      }, observed);
       await page.goto(game);
       await start(page);
       await page.locator('[data-card=fern]').click();
       await tile(page, 2, 4).click();
       await expect(tile(page, 2, 4)).toHaveAccessibleName(/Dương Xỉ Nảy/);
-      const probe = () => page.evaluate(() => (window as Window & {
-        __fernProbe: { frames: string[]; bodyAngles: { idle: number[]; windup: number; fire: number } };
-      }).__fernProbe);
-      const frames = async () => (await probe()).frames;
+      const frames = () => page.evaluate(() => (window as Window & { __poseProbe: Record<string, number[]> }).__poseProbe);
+      const count = async (clip: string) => (await frames())[clip]?.length ?? 0;
       if (reducedMotion === 'no-preference') {
-        await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('0:')).length).toBeGreaterThan(2);
-        await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('2:')).length,
-          { timeout: 15_000 }).toBeGreaterThan(1);
-        expect((await frames()).some((cell) => cell.startsWith('1:'))).toBe(true);
-        const { bodyAngles } = await probe();
-        expect(bodyAngles.idle[1] - bodyAngles.idle[0]).toBeGreaterThan(.25);
-        expect(bodyAngles.windup).toBeLessThan(-.2);
-        expect(bodyAngles.fire).toBeGreaterThan(.35);
+        await expect.poll(() => count('fern/idle')).toBeGreaterThan(8);
+        await expect.poll(() => count('fern/fire'), { timeout: 17_000 }).toBeGreaterThan(5);
+        await expect.poll(() => count('walker/walk')).toBeGreaterThan(6);
+        await expect.poll(() => count('walker/hurt')).toBeGreaterThan(3);
+        expect(await count('fern/windup')).toBeGreaterThan(5);
       } else {
-        await expect.poll(frames, { timeout: 15_000 }).toEqual(['0:2', '1:2', '2:2']);
-        expect((await probe()).bodyAngles).toEqual({ idle: [0, 0], windup: 0, fire: 0 });
+        await expect.poll(() => count('fern/fire'), { timeout: 17_000 }).toBe(1);
+        await expect.poll(() => count('walker/hurt')).toBe(1);
+        const actual = await frames();
+        for (const [actor, actions] of [['fern', ['enter', 'idle', 'windup', 'fire']], ['walker', ['enter', 'walk', 'hurt']]] as const) {
+          for (const action of actions) expect(actual[actor + '/' + action]).toEqual([observed[actor].clips[action].reducedFrame]);
+        }
       }
       expect(errors).toEqual([]);
     } finally { await context.close(); }

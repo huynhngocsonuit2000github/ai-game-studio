@@ -5,18 +5,22 @@ import type { Garden, Effect } from './simulation.js';
 import { bodyMotion, drawPose, enemyPose, loadImage, loadMotion, plantPose } from './motion.js';
 import type { Motion, Pose } from './motion.js';
 
+const groundGaits = new Set(['walk', 'limp', 'phaseWalk']);
+
 export async function loadArena(content: Content) {
   const images = new Map<string, HTMLImageElement>();
   const motion = new Map<string, Motion>();
   const [board] = await Promise.all([
     loadImage('./art/' + content.arena.boardAsset),
     ...Object.entries(content.sprites).map(async ([id, sprite]) => {
-      const [still, animation] = await Promise.allSettled([
-        loadImage('./art/' + sprite.asset), loadMotion(id as CardId | EnemyId),
-      ]);
-      if (still.status === 'fulfilled') images.set(id, still.value);
-      if (animation.status === 'fulfilled' && animation.value) motion.set(id, animation.value);
-      else console.warn('Greenhouse animation unavailable:', id);
+      const animation = await loadMotion(id as CardId | EnemyId).catch(() => undefined);
+      if (animation) {
+        motion.set(id, animation);
+        return;
+      }
+      console.warn('Greenhouse animation unavailable:', id);
+      const still = await loadImage('./art/' + sprite.asset).catch(() => undefined);
+      if (still) images.set(id, still);
     }),
   ]);
   return { board, images, motion };
@@ -107,12 +111,26 @@ export class Painter {
     context.save();
     context.translate(this.x(x), this.feet[lane]);
     context.scale(this.visualAspect, 1);
-    const movement = reduced ? undefined : bodyMotion(id, pose);
+    const movement = reduced || frames ? undefined : bodyMotion(id, pose);
     const lift = -(movement?.y ?? 0);
     context.fillStyle = lift > .08 ? '#2c251932' : '#2c25194b';
     context.beginPath();
     context.ellipse(0, 0, sprite.size[0] * scale * (.36 - lift * .5), 7 - lift * 12, 0, 0, Math.PI * 2);
     context.fill();
+    if (!reduced && frames?.unit.feet && groundGaits.has(pose.clip)) {
+      const halfStep = pose.age / frames.unit.clips[pose.clip].durationTicks % 1 * 2;
+      const age = halfStep % 1;
+      if (age < .28) {
+        const foot = frames.unit.feet[Math.floor(halfStep)] * height / frames.unit.cell[1];
+        context.save();
+        context.globalAlpha = .56 * (1 - age / .28);
+        context.fillStyle = '#68543d';
+        context.beginPath();
+        context.ellipse(foot - age * 29, 1, 5 + age * 13, 2.4, 0, 0, Math.PI * 2);
+        context.fill();
+        context.restore();
+      }
+    }
     if (pose.clip === 'fall') context.globalAlpha = Math.min(1, (45 - pose.age) / 13);
     if (movement) {
       const { x, y, lean, stretch } = movement;

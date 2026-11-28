@@ -16,12 +16,12 @@ export type Effect = {
 };
 export type Plant = {
   card: Card; lane: number; col: number; x: number; hp: number;
-  ready: number; acted: number; hurt: number; placed: number;
+  ready: number; acted: number; hurt: number; placed: number; lastDamage?: number;
   windup?: { at: number; fires: number }; mossHealing: boolean;
 };
 export type Enemy = {
   id: number; spec: Hostile; lane: number; x: number; hp: number;
-  previousX?: number;
+  previousX?: number; spawnedAt?: number; lastDamage?: number;
   rootedUntil: number; biteAt: number; acted: number; hurt: number;
   healAt?: number; healed: number; slowedUntil?: number; stunnedUntil: number;
   gait: number; moving: boolean; braced: number; insulated: number;
@@ -279,7 +279,7 @@ export class Garden {
         this.effect('warning', lane, 8.45);
       }
       this.enemies.push({ id: this.nextEnemyId++, spec, lane, x: 8.45, hp: spec.hp,
-        rootedUntil: 0, biteAt: 0, acted: -HZ, hurt: -HZ, healed: -HZ, braced: -HZ,
+        spawnedAt: this.now, rootedUntil: 0, biteAt: 0, acted: -HZ, hurt: -HZ, healed: -HZ, braced: -HZ,
         insulated: -HZ, stunnedUntil: 0, gait: 0, moving: false });
     }
   }
@@ -315,7 +315,8 @@ export class Garden {
     enemy.biteAt = this.now + ticks(enemy.spec.biteSeconds);
     enemy.acted = this.now;
     blocker.hurt = this.now;
-    blocker.hp -= enemy.spec.biteDamage * (phaseTwo ? 1.25 : 1);
+    blocker.lastDamage = enemy.spec.biteDamage * (phaseTwo ? 1.25 : 1);
+    blocker.hp -= blocker.lastDamage;
     this.effect('bite', enemy.lane, enemy.x, [blocker.x]);
   }
 
@@ -337,6 +338,7 @@ export class Garden {
     const applied = Math.min(target.hp, amount);
     target.hp -= amount;
     target.hurt = this.now;
+    target.lastDamage = amount;
     this.effect('impact', target.lane, target.x, undefined, applied);
     if (frontal && target.spec.id === 'porter') {
       target.braced = this.now;
