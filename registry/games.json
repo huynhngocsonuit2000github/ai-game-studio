@@ -49,6 +49,23 @@
         "Arcade"
       ],
       "milestone": "S02 · Bãi Vàng Đầu Ca"
+    },
+    {
+      "id": "midnight-greenhouse",
+      "title": "Nhà Kính Sau Nửa Đêm",
+      "description": "Chăm cây, chuyển dòng nước và giữ bốn luống nhà kính đến rạng sáng.",
+      "engine": "other",
+      "status": "development",
+      "visibility": "public",
+      "entry": "games/midnight-greenhouse/index.html",
+      "cover": "games/midnight-greenhouse/cover.webp",
+      "version": "0.1.0",
+      "dimension": "2D",
+      "categories": [
+        "Strategy",
+        "Lane Defense"
+      ],
+      "milestone": "S05 · Three-level campaign"
     }
   ]
 }
