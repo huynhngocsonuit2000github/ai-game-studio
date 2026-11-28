@@ -64,10 +64,17 @@ test('touch lands on outer tiles and valves, and settings survive reload', async
     await page.getByRole('button', { name: 'Chơi', exact: true }).tap();
     const board = await page.locator('#board').boundingBox();
     expect(board!.y + board!.height).toBeLessThan(391);
-    for (const lane of [1, 4]) {
-      const bounds = (await tile(page, lane, 8).boundingBox())!;
-      expect(bounds.width).toBeGreaterThanOrEqual(44);
-      expect(bounds.height).toBeGreaterThanOrEqual(44);
+    for (const lane of [1, 2, 3, 4]) {
+      for (const column of [1, 8]) {
+        const edge = tile(page, lane, column);
+        const bounds = (await edge.boundingBox())!;
+        expect(bounds.width).toBeGreaterThanOrEqual(44);
+        expect(bounds.height).toBeGreaterThanOrEqual(44);
+        expect(await edge.evaluate((node) => {
+          const { x, y, width, height } = node.getBoundingClientRect();
+          return document.elementFromPoint(x + width / 2, y + height * 0.8) === node;
+        })).toBe(true);
+      }
     }
     await page.locator('[data-card=pitcher]').tap();
     await tile(page, 1, 8).tap();
@@ -77,6 +84,7 @@ test('touch lands on outer tiles and valves, and settings survive reload', async
     await expect(page.locator('#stock strong')).toHaveText('102');
     await page.setViewportSize({ width: 390, height: 844 });
     await expect(page.getByText(/Xoay ngang màn hình/)).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
     await page.getByRole('button', { name: 'Cài đặt' }).tap();
     await page.getByLabel('Tắt tiếng').check();
     await page.getByLabel('Giảm chuyển động').check();
@@ -267,4 +275,105 @@ test.afterAll(async () => {
     'games/midnight-greenhouse/test-results/pages-browser/midnight-greenhouse-campaign.zip');
   execFileSync(process.execPath, [resolve(gameDirectory, 'tests/playtest-artifact.mjs'),
     gameBuild, artifact, GITHUB_EVENT_PATH], { cwd: gameDirectory, stdio: 'inherit' });
+});
+
+test('the battlefield fills desktop viewports and preserves combat through fullscreen, resize and DPR changes', async ({ page }) => {
+  const errors = clientErrors(page);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto(game);
+  await start(page);
+  const board = page.locator('#board');
+  const canvas = board.locator('canvas');
+  async function checkLayout(width: number, height: number) {
+    const bounds = (await board.boundingBox())!;
+    expect(bounds.width).toBeGreaterThanOrEqual(width === 1920 ? 1480 : width * 0.77);
+    expect(bounds.height).toBeGreaterThanOrEqual(height === 1080 ? 850 : height * 0.79);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(height);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBe(width);
+    const edges = await board.locator('.tiles').evaluateAll((rows) => rows.flatMap((row) =>
+      [row.firstElementChild!, row.lastElementChild!].map((cell) => {
+        const { x, y, width, height } = cell.getBoundingClientRect();
+        return document.elementFromPoint(x + width / 2, y + height * 0.8) === cell;
+      })));
+    expect(edges).toEqual(Array(8).fill(true));
+  }
+  await checkLayout(1920, 1080);
+  await page.keyboard.press('1');
+  const planted = tile(page, 2, 4);
+  await planted.click();
+  await expect(planted).toHaveAccessibleName(/Dương Xỉ Nảy/);
+  await expect(page.locator('#time')).toHaveText(/Ca trực/, { timeout: 10_000 });
+  expect(await page.evaluate(() => document.fullscreenEnabled)).toBe(true);
+  await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
+  await expect(page.getByRole('button', { name: 'Thoát toàn màn hình' })).toHaveAttribute('aria-pressed', 'true');
+  await expect.poll(() => page.evaluate(() => document.fullscreenElement === document.documentElement)).toBe(true);
+  await page.getByRole('button', { name: 'Thoát toàn màn hình' }).click();
+  await expect(page.getByRole('button', { name: 'Toàn màn hình', exact: true })).toHaveAttribute('aria-pressed', 'false');
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await checkLayout(1280, 720);
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setDeviceMetricsOverride', { width: 2560, height: 1440, deviceScaleFactor: 3, mobile: false });
+  await checkLayout(2560, 1440);
+  await expect.poll(() => canvas.evaluate((node: HTMLCanvasElement) => ({
+    dpr: devicePixelRatio, scaled: node.width > node.clientWidth, capped: node.width * node.height <= 6_000_000,
+  }))).toEqual({ dpr: 3, scaled: true, capped: true });
+  await page.locator('[data-card=pitcher]').click();
+  await tile(page, 4, 8).click();
+  await expect(tile(page, 4, 8)).toHaveAccessibleName(/Bình Hứng Mưa/);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await checkLayout(1920, 1080);
+  await expect(planted).toHaveAccessibleName(/Dương Xỉ Nảy/);
+  await expect(tile(page, 4, 8)).toHaveAccessibleName(/Bình Hứng Mưa/);
+  await expect(page.locator('#time')).toHaveText(/Ca trực/);
+  expect(errors).toEqual([]);
+});
+
+test('unsupported fullscreen explains the windowed fallback while combat stays usable', async ({ page }) => {
+  const errors = clientErrors(page);
+  await page.addInitScript(() => Object.defineProperty(document, 'fullscreenEnabled', { value: false }));
+  await page.goto(game);
+  await start(page);
+  await page.getByRole('button', { name: 'Toàn màn hình', exact: true }).click();
+  await expect(page.locator('#fullscreen-status')).toHaveText(/vừa cửa sổ/);
+  await page.locator('[data-card=fern]').click();
+  await tile(page, 2, 4).click();
+  await expect(tile(page, 2, 4)).toHaveAccessibleName(/Dương Xỉ Nảy/);
+  expect(errors).toEqual([]);
+});
+
+test('a planted Fern uses changing live atlas poses, and reduced motion still shows its attack pose', async ({ browser }) => {
+  for (const reducedMotion of ['no-preference', 'reduce'] as const) {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 720 }, reducedMotion });
+    try {
+      const page = await context.newPage();
+      const errors = clientErrors(page);
+      await page.addInitScript(() => {
+        const frames = new Set<string>();
+        Object.defineProperty(window, '__fernProbe', { get: () => [...frames] });
+        const draw = CanvasRenderingContext2D.prototype.drawImage;
+        CanvasRenderingContext2D.prototype.drawImage = function (this: CanvasRenderingContext2D, image: CanvasImageSource, ...args: number[]) {
+          if (this.canvas.closest('#board') && image instanceof HTMLImageElement
+            && image.src.endsWith('/fern-motion.webp') && args.length === 8 && this.globalAlpha > 0.99) {
+            frames.add(`${args[1] / args[3]}:${args[0] / args[2]}`);
+          }
+          Reflect.apply(draw, this, [image, ...args]);
+        };
+      });
+      await page.goto(game);
+      await start(page);
+      await page.locator('[data-card=fern]').click();
+      await tile(page, 2, 4).click();
+      await expect(tile(page, 2, 4)).toHaveAccessibleName(/Dương Xỉ Nảy/);
+      const frames = () => page.evaluate(() => (window as Window & { __fernProbe: string[] }).__fernProbe);
+      if (reducedMotion === 'no-preference') {
+        await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('0:')).length).toBeGreaterThan(2);
+        await expect.poll(async () => (await frames()).filter((cell) => cell.startsWith('2:')).length,
+          { timeout: 15_000 }).toBeGreaterThan(1);
+        expect((await frames()).some((cell) => cell.startsWith('1:'))).toBe(true);
+      } else {
+        await expect.poll(frames, { timeout: 15_000 }).toEqual(['0:2', '1:2', '2:2']);
+      }
+      expect(errors).toEqual([]);
+    } finally { await context.close(); }
+  }
 });

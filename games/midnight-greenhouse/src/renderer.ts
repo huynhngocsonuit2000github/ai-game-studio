@@ -6,14 +6,19 @@ import { drawPose, enemyPose, loadImage, loadMotion, plantPose } from './motion.
 import type { Motion, Pose } from './motion.js';
 
 export async function loadArena(content: Content) {
-  const board = await loadImage('./art/' + content.arena.boardAsset);
   const images = new Map<string, HTMLImageElement>();
-  // Decode the board first and let character media load while the player plans their opening.
   const motion = new Map<string, Motion>();
-  for (const [id, sprite] of Object.entries(content.sprites)) {
-    void loadImage('./art/' + sprite.asset).then((image) => images.set(id, image)).catch(() => {});
-    void loadMotion(id as CardId | EnemyId).then((asset) => { if (asset) motion.set(id, asset); });
-  }
+  const [board] = await Promise.all([
+    loadImage('./art/' + content.arena.boardAsset),
+    ...Object.entries(content.sprites).map(async ([id, sprite]) => {
+      const [still, animation] = await Promise.allSettled([
+        loadImage('./art/' + sprite.asset), loadMotion(id as CardId | EnemyId),
+      ]);
+      if (still.status === 'fulfilled') images.set(id, still.value);
+      if (animation.status === 'fulfilled' && animation.value) motion.set(id, animation.value);
+      else console.warn('Greenhouse animation unavailable:', id);
+    }),
+  ]);
   return { board, images, motion };
 }
 
@@ -25,19 +30,63 @@ export class Painter {
   private tile: number;
   private edges: number[];
   private feet: number[];
+  private canvas: HTMLCanvasElement;
+  private observer: ResizeObserver;
+  private visualAspect = 1;
+  private boxWidth = 0;
+  private boxHeight = 0;
+  private dprQuery?: MediaQueryList;
+  private lastDraw?: () => void;
 
   constructor(canvas: HTMLCanvasElement, private content: Content, private art: Awaited<ReturnType<typeof loadArena>>) {
     const { artSize, xPlantSpan, visualRowEdges, feetY } = content.arena;
     [this.width, this.height] = artSize;
-    canvas.width = this.width;
-    canvas.height = this.height;
+    this.canvas = canvas;
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('Canvas 2D unavailable');
     this.ctx = ctx;
+    ctx.setTransform(canvas.width / this.width, 0, 0, canvas.height / this.height, 0, 0);
     this.left = xPlantSpan[0] * this.width;
     this.tile = (xPlantSpan[1] - xPlantSpan[0]) * this.width / COLUMNS;
     this.edges = visualRowEdges.map((edge) => edge * this.height);
     this.feet = feetY.map((foot) => foot * this.height);
+    this.observer = new ResizeObserver(([entry]) => {
+      if (!(entry.contentRect.width > 0 && entry.contentRect.height > 0)) return;
+      this.boxWidth = entry.contentRect.width;
+      this.boxHeight = entry.contentRect.height;
+      this.lastDraw?.();
+    });
+    this.observer.observe(canvas);
+    this.watchDpr();
+  }
+
+  private watchDpr = () => {
+    this.dprQuery?.removeEventListener('change', this.watchDpr);
+    this.dprQuery = window.matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+    this.dprQuery.addEventListener('change', this.watchDpr);
+    this.lastDraw?.();
+  };
+
+  dispose() {
+    this.observer.disconnect();
+    this.dprQuery?.removeEventListener('change', this.watchDpr);
+    this.lastDraw = undefined;
+  }
+
+  private fitCanvas() {
+    const width = this.boxWidth || this.canvas.clientWidth || this.width;
+    const height = this.boxHeight || this.canvas.clientHeight || this.height;
+    const dpr = window.devicePixelRatio || 1;
+    const budget = Math.sqrt(6_000_000 / (width * height));
+    const pixelRatio = Math.min(dpr, 2, budget);
+    const targetWidth = Math.max(1, Math.floor(width * pixelRatio));
+    const targetHeight = Math.max(1, Math.floor(height * pixelRatio));
+    if (this.canvas.width !== targetWidth || this.canvas.height !== targetHeight) {
+      this.canvas.width = targetWidth;
+      this.canvas.height = targetHeight;
+      this.ctx.setTransform(targetWidth / this.width, 0, 0, targetHeight / this.height, 0, 0);
+    }
+    this.visualAspect = (height / this.height) / (width / this.width);
   }
 
   private x(tile: number) { return this.left + tile * this.tile; }
@@ -48,16 +97,47 @@ export class Painter {
     const image = this.art.images.get(id);
     const frames = this.art.motion.get(id);
     if (!sprite || (!image && !frames)) return;
-    const height = (this.edges[lane + 1] - this.edges[lane]) * (id === 'keeper' ? 1.55 : hostile ? 1.14 : 1.09);
-    const scale = height * 0.78 / sprite.size[1];
+    const row = this.edges[lane + 1] - this.edges[lane];
+    const size = id === 'keeper' ? 1.03 : hostile ? 0.9 : 0.85;
+    const rowHeight = row * size;
+    const largest = Math.max(1, sprite.size[0] / sprite.size[1]);
+    const visibleHeight = Math.min(rowHeight, this.tile * (id === 'keeper' ? 1.28 : 0.96) / (this.visualAspect * largest));
+    const height = visibleHeight / (id === 'keeper' ? 0.64 : 0.67);
+    const scale = visibleHeight / sprite.size[1];
     context.save();
     context.translate(this.x(x), this.feet[lane]);
+    context.scale(this.visualAspect, 1);
     context.fillStyle = '#2c25194b';
     context.beginPath();
     context.ellipse(0, 0, sprite.size[0] * scale * 0.36, 7, 0, 0, Math.PI * 2);
     context.fill();
     if (pose.clip === 'fall') context.globalAlpha = Math.min(1, (45 - pose.age) / 13);
-    if ((reduced || !frames || !drawPose(context, frames, pose, height)) && image) {
+    const peak = Math.sin(Math.PI * Math.min(1, pose.age / 18));
+    if (!reduced) {
+      if (pose.clip === 'walk') {
+        const step = Math.sin(pose.age * Math.PI / (id === 'courier' ? 7.5 : id === 'keeper' ? 18 : 12));
+        const lift = id === 'courier' ? 0.085 : id === 'porter' ? 0.027 : 0.048;
+        context.translate(0, -row * lift * Math.abs(step));
+        context.rotate(step * (id === 'courier' ? 0.085 : 0.04));
+      } else if (pose.clip === 'bite') {
+        context.translate(-row * 0.12 * peak, 0);
+        context.rotate(-0.12 * peak);
+      } else if (pose.clip === 'fire' || pose.clip === 'lash' || pose.clip === 'spark') {
+        context.rotate(0.095 * peak);
+        context.scale(1 + 0.075 * peak, 1 - 0.058 * peak);
+      } else if (pose.clip === 'hurt') {
+        context.translate((hostile ? 1 : -1) * row * 0.075 * peak, 0);
+        context.rotate((hostile ? 1 : -1) * 0.10 * peak);
+      } else if (pose.clip === 'fall') {
+        const progress = Math.min(1, pose.age / 33);
+        context.rotate((hostile ? -1 : 1) * progress * 0.28);
+      } else if (pose.clip === 'idle') {
+        const breath = Math.sin(pose.age * (id === 'orchid' ? 0.19 : 0.13));
+        context.rotate(breath * (id === 'moss' ? 0.019 : 0.037));
+        context.scale(1 - 0.032 * breath, 1 + 0.045 * breath);
+      }
+    }
+    if ((!frames || !drawPose(context, frames, pose, height, reduced)) && image) {
       context.drawImage(image, -sprite.anchorPx[0] * scale, -sprite.anchorPx[1] * scale,
         sprite.size[0] * scale, sprite.size[1] * scale);
     }
@@ -175,7 +255,9 @@ export class Painter {
     }
   }
 
-  draw(game: Garden, reduced: boolean, aftermath = 0, ghost?: { id: CardId; lane: number; col: number }) {
+  draw(game: Garden, reduced: boolean, aftermath = 0, ghost?: { id: CardId; lane: number; col: number }, fraction = 0) {
+    this.lastDraw = () => this.draw(game, reduced, aftermath, ghost, fraction);
+    this.fitCanvas();
     const ctx = this.ctx;
     const motion = !reduced;
     ctx.drawImage(this.art.board, 0, 0, this.width, this.height);
@@ -251,7 +333,8 @@ export class Painter {
         ctx.restore();
       }
       for (const unit of units) {
-        this.sprite(unit.id, unit.x, lane, unit.pose, reduced, unit.hostile);
+        const pose = unit.pose.clip === 'restrained' ? unit.pose : { ...unit.pose, age: unit.pose.age + fraction };
+        this.sprite(unit.id, unit.x, lane, pose, reduced, unit.hostile);
         const x = this.x(unit.x), y = this.feet[lane];
         if (unit.held) this.line([[x - 22, y], [x + 22, y]], '#efe9a2', 5);
         if (unit.id !== 'keeper') this.health(unit.x, lane, unit.ratio, unit.hostile, unit.id === 'raincoat');

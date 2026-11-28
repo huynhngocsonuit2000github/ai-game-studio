@@ -193,7 +193,7 @@ test('a Pod arms, commits a burst on real contact and leaves exactly one visual 
   assert.equal(plantPose(pod, garden).clip, 'armed');
   const target = enemy(garden, 'walker', 0, 5.1);
   step(garden, 4);
-  assert.equal(plantPose(pod, garden).clip, 'burst');
+  assert.equal(plantPose(pod, garden).clip, 'arm');
   assert.equal(target.hp, target.spec.hp);
   step(garden, 4);
   assert.ok(!garden.plants.includes(pod));

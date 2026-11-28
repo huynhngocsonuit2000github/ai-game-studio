@@ -121,10 +121,35 @@ window.addEventListener('hashchange', () => {
 function head() { app.querySelector<HTMLElement>('h1')?.focus(); }
 function storageMessage() { return save.unavailable ? 'Trình duyệt đang chặn lưu. Tiến độ chỉ giữ trong phiên này.' : ''; }
 
+function syncFullscreen() {
+  const button = document.querySelector<HTMLButtonElement>('#fullscreen');
+  if (!button) return;
+  const isFullscreen = document.fullscreenElement === document.documentElement;
+  renderText(button, isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình');
+  button.setAttribute('aria-pressed', String(isFullscreen));
+  if (isFullscreen) renderText(byId('fullscreen-status'), '');
+}
+
+async function toggleFullscreen() {
+  const status = byId('fullscreen-status');
+  renderText(status, '');
+  try {
+    if (document.fullscreenElement === document.documentElement) await document.exitFullscreen();
+    else if (!document.fullscreenEnabled || !document.documentElement.requestFullscreen) {
+      renderText(status, 'Trình duyệt đang dùng chế độ vừa cửa sổ.');
+    } else await document.documentElement.requestFullscreen();
+  } catch {
+    renderText(status, 'Không bật được toàn màn hình. Sân vẫn vừa cửa sổ.');
+  }
+}
+
+document.addEventListener('fullscreenchange', syncFullscreen);
+
 function leaveBoard() {
   cancelAnimationFrame(animation);
   cancelAnimationFrame(endingFrame);
   garden = undefined;
+  painter?.dispose();
   painter = undefined;
   paused = false;
   tokenNodes.clear();
@@ -193,7 +218,10 @@ function getArena(stage: Content) {
   const id = stage.level.id;
   let promise = arenaPromises.get(id);
   if (!promise) {
-    promise = loadArena(stage).catch((error: unknown) => {
+    promise = loadArena(stage).then((media) => {
+      if (media.motion.size < Object.keys(stage.sprites).length) arenaPromises.delete(id);
+      return media;
+    }, (error: unknown) => {
       arenaPromises.delete(id);
       throw error;
     });
@@ -260,6 +288,7 @@ function settings() {
       `<label class="slider">${label}<input id="mix-${key}" type="range" min="0" max="100" value="${Math.round(save.settings[key] * 100)}"></label>`).join('')}
     <label class="toggle"><input id="mix-mute" type="checkbox" ${save.settings.mute ? 'checked' : ''}>Tắt tiếng</label>
     <label class="toggle"><input id="mix-reduced" type="checkbox" ${save.settings.reduced ? 'checked' : ''}>Giảm chuyển động</label>
+    <p>Giữ tư thế ra đòn và phản ứng, giảm chuyển động trang trí.</p>
     <p id="save-status">${storageMessage()}</p>
     <div class="actions"><button id="settings-done" class="primary">Xong</button></div></div>`, () => {
     const changed = () => {
@@ -369,7 +398,9 @@ async function start() {
     app.innerHTML = `<section class="game" data-arena="${id}" aria-label="${title}">
       <header class="game-header"><h1 tabindex="-1">${title}</h1>
       <div class="badges"><button id="compact-help" class="plain">Sổ tay</button><div id="core" class="badge">${icon('heart')} Hạt Tim <strong></strong></div>
-      <div id="time" class="badge"></div></div></header>
+      <div id="time" class="badge"></div>
+      <button id="fullscreen" class="secondary" type="button" aria-pressed="false">Toàn màn hình</button></div>
+      <p id="fullscreen-status" role="status"></p></header>
       <p class="rotate">Xoay ngang màn hình để dễ chạm các ô trồng.</p>
       <div class="playfield"><aside class="deck" aria-label="Hạt giống và công cụ">
         <div class="notebook-head"><div id="stock" class="badge">${icon('seed')} <span>Ánh Hạt</span> <strong></strong><small id="stock-credit"></small></div>
@@ -399,6 +430,8 @@ async function start() {
       </div></div>
     </section>`;
     painter = new Painter(app.querySelector('canvas')!, content, media);
+    byId('fullscreen').onclick = () => { void toggleFullscreen(); };
+    syncFullscreen();
     cardNodes = [...app.querySelectorAll<HTMLButtonElement>('.seed-card')];
     valveNodes = [...app.querySelectorAll<HTMLButtonElement>('.valve')];
     tileNodes = [...app.querySelectorAll<HTMLButtonElement>('.tile')];
@@ -708,7 +741,7 @@ function frame(timestamp: number) {
     }
     sound.setScene(game.wave >= 5 ? 'storm' : 'watch');
     sound.sync();
-    painter.draw(game, save.settings.reduced, 0, ghost(game));
+    painter.draw(game, save.settings.reduced, 0, ghost(game), accumulated / interval);
   }
   lastFrame = timestamp;
   if (game.result) {
@@ -722,6 +755,7 @@ document.addEventListener('keydown', () => sound.unlock(), { once: true });
 document.addEventListener('keydown', (event) => {
   if (dialog.open || !garden || garden.result || paused || event.altKey || event.ctrlKey || event.metaKey) return;
   if (event.key === 'Escape') {
+    if (document.fullscreenElement) return;
     if (selection) { selection = null; updateSelection(); }
     else pauseMenu();
     event.preventDefault();
